@@ -3,6 +3,8 @@ package UnitSystem.demo.Controllers;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -73,5 +75,13 @@ public class StudentController {
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get student details with enrolled courses and academic standing")
+    @GetMapping("/details/{id}")
+    public ResponseEntity<StudentDetailsResponse> getStudentDetails(@PathVariable Long id) {
+        UserDetailsRequest request = UserDetailsRequest.builder().userId(id).build();
+        StudentDetailsResponse details = studentService.getStudentDetails(request);
+        return ResponseEntity.ok(details);
     }
 }

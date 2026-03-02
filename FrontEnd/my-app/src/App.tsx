@@ -6,6 +6,9 @@ import RegisterFrom from "./components/Auth/RegisterFrom";
 import ErrorPage from"./components/common/ErrorPage";
 import RootLayOut from "./pages/RootLayOut";
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./pages/DashboardLayout";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -19,11 +22,23 @@ const router = createBrowserRouter([
       {
         path: "home",
         element: <Home />,
-      }
+      },
     
     ],
   },
-
+  {
+    path: "dashboard",
+    element: <DashboardLayout />,
+    errorElement:<ErrorPage />,
+    children: [
+      {
+        index: true,
+        element: <ProtectedRoute>
+          <Dashboard />
+          </ProtectedRoute>,
+      },
+    ],
+  },
   {
     path: "/auth",
     element: <Auth />,
@@ -47,7 +62,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router} />
+      <RouterProvider router={router} />
   );
 }
 

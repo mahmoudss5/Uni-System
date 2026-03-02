@@ -3,6 +3,9 @@ export default function RegisterFrom() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const email = (e.target as HTMLFormElement).email.value;
+        const password = (e.target as HTMLFormElement).password.value;
+        const username = (e.target as HTMLFormElement).username.value;
     };
     
     return (

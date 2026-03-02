@@ -71,4 +71,11 @@ public class CourseController {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "get most popular courses")
+    @GetMapping("/popular")
+    public ResponseEntity<List<CourseResponse>> getMostPopularCourses() {
+        List<CourseResponse> courses = courseService.getMostPopularCourses(4);
+        return ResponseEntity.ok(courses);
+    }
 }

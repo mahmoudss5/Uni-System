@@ -3,8 +3,12 @@ package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
@@ -186,6 +190,11 @@ public class UserServiceImp implements UserService {
         log.info("Saving user entity: {}", user.getUserName());
         return userRepository.save(user);
     }
+
+
+
+
+
 
     @Override
     public List<UserResponse> getAllUsers() {

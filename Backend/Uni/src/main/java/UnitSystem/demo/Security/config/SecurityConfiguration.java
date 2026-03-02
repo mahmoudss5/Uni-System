@@ -32,6 +32,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req -> req
                                 .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/courses/popular").permitAll()
+                                .requestMatchers("api/departments/all").permitAll()
                                 .requestMatchers("/api/v1/auth/**",
                                         "/v2/api-docs",
                                         "/v3/api-docs",

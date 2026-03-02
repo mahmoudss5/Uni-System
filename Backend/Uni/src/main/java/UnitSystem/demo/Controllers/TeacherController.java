@@ -3,6 +3,8 @@ package UnitSystem.demo.Controllers;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -73,5 +75,13 @@ public class TeacherController {
     public ResponseEntity<Void> deleteTeacher(@PathVariable Long id) {
         teacherService.deleteTeacher(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get teacher details with courses")
+    @GetMapping("/details/{id}")
+    public ResponseEntity<TeacherDetailsResponse> getTeacherDetails(@PathVariable Long id) {
+        UserDetailsRequest request = UserDetailsRequest.builder().userId(id).build();
+        TeacherDetailsResponse details = teacherService.getTeacherDetails(request);
+        return ResponseEntity.ok(details);
     }
 }

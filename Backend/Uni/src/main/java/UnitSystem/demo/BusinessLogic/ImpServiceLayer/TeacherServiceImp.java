@@ -1,8 +1,12 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
+import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
+import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
@@ -11,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -112,5 +117,43 @@ public class TeacherServiceImp implements TeacherService {
     @Override
     public void deleteTeacher(Long teacherId) {
         teacherRepository.deleteById(teacherId);
+    }
+
+    private CourseResponse mapToCourseResponse(Course course) {
+        return CourseResponse.builder()
+                .id(course.getId())
+                .name(course.getName())
+                .description(course.getDescription())
+                .departmentName(course.getDepartment() != null ? course.getDepartment().getName() : null)
+                .teacherUserName(course.getTeacher() != null ? course.getTeacher().getUserName() : null)
+                .creditHours(course.getCredits())
+                .maxStudents(course.getCapacity())
+                .enrolledStudents(course.getCourseEnrollments() != null ? course.getCourseEnrollments().size() : 0)
+                .build();
+    }
+
+    @Override
+    public TeacherDetailsResponse getTeacherDetails(UserDetailsRequest userDetailsRequest) {
+        Teacher teacher = teacherRepository.findById(userDetailsRequest.getUserId())
+                .orElseThrow(
+                        () -> new RuntimeException("Teacher not found with ID: " + userDetailsRequest.getUserId()));
+
+        Set<CourseResponse> courses = teacher.getCourses() != null
+                ? teacher.getCourses().stream()
+                        .map(this::mapToCourseResponse)
+                        .collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        return TeacherDetailsResponse.builder()
+                .teacherId(teacher.getId())
+                .name(teacher.getUserName())
+                .email(teacher.getEmail())
+                .salary(teacher.getSalary())
+                .roles(teacher.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toSet()))
+                .courses(courses)
+                .coursesCount(courses.size())
+                .build();
     }
 }

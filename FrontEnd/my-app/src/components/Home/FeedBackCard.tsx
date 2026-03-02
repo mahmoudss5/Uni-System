@@ -8,9 +8,9 @@ interface FeedBackCardProps {
 
 export default function FeedBackCard({ name, description, role }: FeedBackCardProps) {
     const colors: string[] = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#33A1FF', '#A133FF', '#FF3388', '#8833FF', '#3388FF', '#FF8833'];
-    
+
     function getRandomColor(): string {
-        return colors[Math.floor(Math.random() * colors.length)   ] as string;
+        return colors[Math.floor(Math.random() * colors.length)] as string;
     }
     function getFirstTwoLetters(name: string): string {
         console.log(name);
@@ -39,14 +39,14 @@ export default function FeedBackCard({ name, description, role }: FeedBackCardPr
                         <h3 className="text-lg font-bold">{name}</h3>
                         <p className="text-sm text-gray-500">{role}</p>
                     </div>
-                    
+
                 </div>
                 <div className='flex items-center  justify-start text-yellow-300'>
                     <p className='text-3xl font-bold '>
-                    &rdquo;
+                        &rdquo;
                     </p>
                     <p className='text-3xl font-bold'>
-                    &rdquo;
+                        &rdquo;
                     </p>
                 </div>
                 <div>

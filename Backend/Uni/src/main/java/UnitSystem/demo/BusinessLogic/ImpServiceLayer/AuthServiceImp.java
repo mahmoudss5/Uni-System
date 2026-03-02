@@ -90,7 +90,7 @@ public class AuthServiceImp implements AuthService {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + request.getEmail()));
-
+       log.info("User {} authenticated successfully", user.getEmail());
 
         return mapToAuthResponse(user);
     }

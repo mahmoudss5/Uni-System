@@ -2,6 +2,8 @@ package UnitSystem.demo.BusinessLogic.InterfaceServiceLayer;
 
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 
 import java.util.List;
 
@@ -17,4 +19,6 @@ public interface StudentService {
     StudentResponse updateStudent(Long studentId, StudentRequest studentRequest);
 
     void deleteStudent(Long studentId);
+
+    StudentDetailsResponse getStudentDetails(UserDetailsRequest userDetailsRequest);
 }

@@ -1,7 +1,12 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
+
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
+import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
+import UnitSystem.demo.DataAccessLayer.Entities.EnrolledCourse;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
@@ -9,6 +14,9 @@ import UnitSystem.demo.DataAccessLayer.Repositories.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -113,5 +121,56 @@ public class StudentServiceImp implements StudentService {
     @Override
     public void deleteStudent(Long studentId) {
         studentRepository.deleteById(studentId);
+    }
+
+    private EnrolledCourseResponse mapToEnrolledCourseResponse(EnrolledCourse enrolledCourse) {
+        return EnrolledCourseResponse.builder()
+                .id(enrolledCourse.getId())
+                .studentId(enrolledCourse.getStudent().getId())
+                .studentName(enrolledCourse.getStudent() instanceof Student s ? s.getUserName() : "")
+                .courseId(enrolledCourse.getCourse().getId())
+                .courseName(enrolledCourse.getCourse().getName())
+                .enrollmentDate(enrolledCourse.getEnrollmentDate())
+                .build();
+    }
+
+    private String calculateAcademicStanding(BigDecimal gpa) {
+        if (gpa == null)
+            return "N/A";
+        double g = gpa.doubleValue();
+        if (g >= 3.5)
+            return "Excellent";
+        if (g >= 3.0)
+            return "Very Good";
+        if (g >= 2.5)
+            return "Good";
+        if (g >= 2.0)
+            return "Satisfactory";
+        return "Probation";
+    }
+
+    @Override
+    public StudentDetailsResponse getStudentDetails(UserDetailsRequest userDetailsRequest) {
+        Student student = studentRepository.findById(userDetailsRequest.getUserId())
+                .orElseThrow(
+                        () -> new RuntimeException("Student not found with ID: " + userDetailsRequest.getUserId()));
+
+        Set<EnrolledCourseResponse> enrolledCourses = student.getEnrolledCourses() != null
+                ? student.getEnrolledCourses().stream()
+                        .map(this::mapToEnrolledCourseResponse)
+                        .collect(Collectors.toSet())
+                : Collections.emptySet();
+
+        return StudentDetailsResponse.builder()
+                .id(student.getId())
+                .username(student.getUserName())
+                .email(student.getEmail())
+                .gpa(student.getGpa())
+                .enrollmentYear(student.getEnrollmentYear())
+                .totalCredits((long) student.getTotalCredits())
+                .enrolledCourses(enrolledCourses)
+                .enrolledCoursesCount(enrolledCourses.size())
+                .academicStanding(calculateAcademicStanding(student.getGpa()))
+                .build();
     }
 }

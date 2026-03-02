@@ -4,21 +4,30 @@ import PopularCourses from "../components/Home/PopularCourses";
 import Departments from "../components/Home/Departments";
 import FeedBacks from "../components/Home/FeedBacks";
 import FinalSecion from "../components/Home/FinalSecion";
-import {useRef} from "react";
+import { useOutletContext } from "react-router-dom";
+import type { HomeScrollRefs } from "./RootLayOut";
+
 export default function Home() {
+    const { scrollRefToCourses, scrollRefToDepartments, scrollRefToFeedBacks } =
+        useOutletContext<HomeScrollRefs>();
 
-    const scrollRef = useRef<HTMLDivElement | null>(null);
-
-    const executeScroll = () => {
-        scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const executeScrollToCourses = () => {
+        scrollRefToCourses.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
     return (
         <>
-            <Welcome scrollToSection={executeScroll} />
+            <Welcome scrollToSection={executeScrollToCourses} />
             <Indicator />
-            <PopularCourses ref={scrollRef} />
-            <Departments />
-            <FeedBacks />
+            <div ref={scrollRefToCourses}>
+                <PopularCourses />
+            </div>
+            <div ref={scrollRefToDepartments}>
+                <Departments />
+            </div>
+            <div ref={scrollRefToFeedBacks}>
+                <FeedBacks />
+            </div>
             <FinalSecion />
         </>
     );

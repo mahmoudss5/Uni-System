@@ -3,6 +3,9 @@ import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 
@@ -29,5 +32,6 @@ public interface UserService {
     void save(UserRequest userRequest);
     Optional<User> findByEmail(String email);
     User save(User user);
+
 
 }

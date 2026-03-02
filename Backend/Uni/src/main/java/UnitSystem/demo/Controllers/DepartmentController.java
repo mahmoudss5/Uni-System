@@ -22,7 +22,7 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @Operation(summary = "Get all departments")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
         List<DepartmentResponse> departments = departmentService.getAllDepartments();
         return ResponseEntity.ok(departments);

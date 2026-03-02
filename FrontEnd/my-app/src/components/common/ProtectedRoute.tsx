@@ -1,13 +1,13 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../ContextsProviders/AuthContext";
 interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-    const { user, loading } = useAuth();
+    const { user, isLoading, isError } = useAuth();
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-[#242424] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">

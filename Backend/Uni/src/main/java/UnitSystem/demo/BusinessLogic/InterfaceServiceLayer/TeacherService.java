@@ -2,6 +2,8 @@ package UnitSystem.demo.BusinessLogic.InterfaceServiceLayer;
 
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 
 import java.util.List;
 
@@ -17,4 +19,6 @@ public interface TeacherService {
     TeacherResponse updateTeacher(Long teacherId, TeacherRequest teacherRequest);
 
     void deleteTeacher(Long teacherId);
+
+    TeacherDetailsResponse getTeacherDetails(UserDetailsRequest userDetailsRequest);
 }

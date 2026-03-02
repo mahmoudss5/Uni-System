@@ -16,6 +16,8 @@ public class EnrolledCourseResponse {
     private Long studentId;
     private String studentName;
     private Long courseId;
+    private Long credits;
     private String courseName;
+    private String teacherName;
     private LocalDateTime enrollmentDate;
 }
