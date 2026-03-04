@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -39,6 +40,16 @@ public class Course {
     @Column(name = "capacity", unique = true)
     private int Capacity;
 
+    @Column(name = "start_date")
+    private LocalDate StartDate;
+
+    @Column(name = "end_date")
+    private LocalDate EndDate;
+
+    @Column(name = "course_code", unique = true)
+    private String courseCode;
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
@@ -46,4 +57,10 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<EnrolledCourse> courseEnrollments ;
+
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Announcement>announcements = new HashSet<>();
+
+
 }

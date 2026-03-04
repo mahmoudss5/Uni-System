@@ -2,18 +2,17 @@ import { ApiUrl, Token, getHeaders } from "./config";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import type { QueryClient } from "@tanstack/react-query";
-import type { User } from "../Interfaces/user";
-
 import type {
     RegisterRequest,
     AuthRequest,
     MyTokenPayload,
+    AuthUser,
 } from "../Interfaces/Auth";
 
 export function setToken(token: string) {
     localStorage.setItem(Token, token);
 }
-export function setUserCache(queryClient: QueryClient, user: User) {
+export function setUserCache(queryClient: QueryClient, user: AuthUser) {
     queryClient.setQueryData(["user"], user);
 }
 export function removeUserCache(queryClient: QueryClient) {
@@ -23,16 +22,15 @@ export function removeToken() {
     localStorage.removeItem(Token);
 }
 
-export async function HandleRegister(
-    email: string,
-    password: string,
-    username: string,
-) {
+export async function HandleRegister( email: string, password: string, username: string,TeacherCode?: string,) {
     const request: RegisterRequest = {
         email,
         password,
         username,
+        TeacherCode: TeacherCode ?? undefined,
     };
+    console.log("request", request);
+    
     try {
         const response = await axios.post(`${ApiUrl}/api/auth/register`, request, {
             headers: getHeaders(),

@@ -1,22 +1,20 @@
 import { decodeToken } from "./authService";
+import { getTeacherDetails } from "./teacherService";
 import { getStudentInfo } from "./studentService";
-import { getTeacherInfo } from "./teacherService";
+import type { Student } from "../Interfaces/student";
+import type { Teacher } from "../Interfaces/teacher";
 
-export async function getUser(token: string) {
+export async function getUser(token: string): Promise<Student | Teacher> {
     const decoded = await decodeToken(token);
-    const user = {
-        id: decoded.userId.toString(),
-        email: decoded.sub,
-        username: decoded.userName,
-        isAdmin: decoded.roles.includes("Admin"),
-        isTeacher: decoded.roles.includes("Teacher"),
-        isStudent: decoded.roles.includes("Student"),
-    };
-    const userId = parseInt(user.id);
-    if(user.isTeacher){
-        return getTeacherInfo(userId);
+    const userId = decoded.userId;
+
+    if (decoded.roles.includes("Teacher")) {
+        const data = await getTeacherDetails(userId);
+        console.log("Teacher data:", data);
+        return { ...data, role: "teacher" } as Teacher;
     }
 
-    return getStudentInfo(userId);
-
+    const data = await getStudentInfo(userId);
+    console.log("Student data:", data);
+    return { ...data, role: "student" } as Student;
 }

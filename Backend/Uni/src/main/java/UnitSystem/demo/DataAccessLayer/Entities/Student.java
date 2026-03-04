@@ -11,7 +11,7 @@ import java.util.Set;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@PrimaryKeyJoinColumn(name = "user_id") // يربط الـ PK هنا بالـ ID في جدول users
+@PrimaryKeyJoinColumn(name = "user_id")
 @Getter
 @Setter
 @SuperBuilder
@@ -19,7 +19,7 @@ import java.util.Set;
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 
-public class Student extends  User{
+public class Student extends User{
 
     @Column(name = "gpa")
     private BigDecimal gpa;

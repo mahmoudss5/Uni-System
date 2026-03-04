@@ -1,71 +1,81 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import {
     HandleLogin, HandleRegister, setToken, setUserCache,
-    removeToken, removeUserCache
+    removeToken, removeUserCache,
 } from "../Services/authService";
 import { getUser } from "../Services/userService";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Token } from "../Services/config";
 import type { AuthContextType } from "../Interfaces/Auth";
 
+// ─── Context ────────────────────────────────────────────────────────────────
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// ─── Provider ────────────────────────────────────────────────────────────────
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-
+export function AuthProvider({ children }: { children: React.ReactNode }) {
     const queryClient = useQueryClient();
     const token = localStorage.getItem(Token);
 
     const { data: user, isLoading, isError } = useQuery({
         queryKey: ["user"],
-        queryFn: () => getUser(token ?? ""),
-        enabled: !!token
-    })
+        queryFn:  () => getUser(token ?? ""),
+        enabled:  !!token,
+    });
 
     const loginMutation = useMutation({
-        mutationFn: ({ email, password }: { email: string, password: string }) => HandleLogin(email, password),
+        mutationFn: ({ email, password }: { email: string; password: string }) =>
+            HandleLogin(email, password),
         onSuccess: async (data) => {
             const token = data.token || data;
             setToken(token);
             const user = await getUser(token);
             setUserCache(queryClient, user);
-        }
-    })
+        },
+    });
 
     const registerMutation = useMutation({
-        mutationFn: ({ email, password, username }: { email: string, password: string, username: string }) => HandleRegister(email, password, username),
+        mutationFn: ({
+            email, password, username, TeacherCode,
+        }: { email: string; password: string; username: string; TeacherCode?: string }) =>
+            HandleRegister(email, password, username, TeacherCode),
         onSuccess: async (data) => {
             const token = data.token || data;
             setToken(token);
             const user = await getUser(token);
             setUserCache(queryClient, user);
-        }
-    })
+        },
+    });
 
-    const register = async (email: string, password: string, username: string) => {
-        return registerMutation.mutateAsync({ email, password, username });
-    }
+    const login = (email: string, password: string) =>
+        loginMutation.mutateAsync({ email, password });
+
+    const register = (email: string, password: string, username: string, TeacherCode?: string) =>
+        registerMutation.mutateAsync({ email, password, username, TeacherCode });
+
     const logout = () => {
-        removeToken()
-        removeUserCache(queryClient)
-    }
+        removeToken();
+        removeUserCache(queryClient);
+    };
 
-    const login = async (email: string, password: string) => {
-        return loginMutation.mutateAsync({ email, password });
-    }
+    const value = useMemo<AuthContextType>(
+        () => ({ user: user ?? null, login, logout, isLoading, isError, register }),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [user, isLoading, isError],
+    );
 
     return (
-        <AuthContext.Provider value={{ user: user ?? null, login, logout, isLoading, isError, register }}>
+        <AuthContext.Provider value={value}>
             {children}
         </AuthContext.Provider>
-    )
+    );
 }
 
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
+// ─── Hook ────────────────────────────────────────────────────────────────────
+
+export function useAuth(): AuthContextType {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+    return ctx;
 }

@@ -1,10 +1,13 @@
-import type { User } from "./user";
+import type { Student } from "./student";
+import type { Teacher } from "./teacher";
+
+export type AuthUser = Student | Teacher;
 
 export interface AuthContextType {
-    user: User | null;
+    user: AuthUser | null;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
-    register: (email: string, password: string, username: string) => Promise<void>;
+    register: (email: string, password: string, username: string, TeacherCode?: string) => Promise<void>;
     isLoading: boolean;
     isError: boolean;
 }
@@ -21,6 +24,7 @@ export interface RegisterRequest {
     email: string;
     password: string;
     username: string;
+    TeacherCode?: string;
 }
 
 export interface AuthRequest {

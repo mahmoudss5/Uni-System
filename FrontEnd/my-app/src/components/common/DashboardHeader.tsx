@@ -4,23 +4,23 @@ import { useAuth } from "../../ContextsProviders/AuthContext";
 export default function DashboardHeader() {
     const { user } = useAuth();
 
-    const displayName = user?.username ?? "Student";
+    const displayName = user?.name || user?.email.split("@")[0] || "User";
+    console.log("DashboardHeader user:", user);
     const initial = displayName.charAt(0).toUpperCase();
-    const role = user?.isAdmin ? "Admin" : user?.isTeacher ? "Teacher" : "Student";
+    const role = user?.role === "teacher" ? "Teacher" : "Student";
 
     return (
         <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">
-            {/* Left: Welcome */}
             <div>
                 <h1 className="text-xl font-bold text-gray-800 italic">
                     Welcome back, {displayName}!
                 </h1>
-                <p className="text-md text-blue-500 mt-0.5 italic">Have a great day learning</p>
+                <p className="text-md text-blue-500 mt-0.5 italic">
+                    {user?.role === "teacher" ? "Have a great day teaching" : "Have a great day learning"}
+                </p>
             </div>
 
-            {/* Right: Search + Notifications + Avatar */}
             <div className="flex items-center gap-4">
-                {/* Search */}
                 <div className="relative hidden sm:block">
                     <Search
                         size={16}
@@ -33,13 +33,11 @@ export default function DashboardHeader() {
                     />
                 </div>
 
-                {/* Notification Bell */}
                 <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
                     <Bell size={20} className="text-gray-600" />
                     <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
                 </button>
 
-                {/* User Avatar */}
                 <div className="flex items-center gap-2 cursor-pointer">
                     <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm select-none">
                         {initial}

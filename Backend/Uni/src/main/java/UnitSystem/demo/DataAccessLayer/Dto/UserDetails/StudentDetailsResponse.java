@@ -1,10 +1,13 @@
 package UnitSystem.demo.DataAccessLayer.Dto.UserDetails;
 
+import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
 import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -20,4 +23,6 @@ public class StudentDetailsResponse {
     private int enrolledCoursesCount;
     private int enrollmentYear;
     private String academicStanding;
+    private List<AnnouncementResponse> announcements;
+    private List<UpcomingEventResponse> upcomingEvents;
 }

@@ -7,6 +7,7 @@ export default function LoginForm() {
     const { login } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+ 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -15,7 +16,7 @@ export default function LoginForm() {
         try {
             console.log(email, password);
             await login(email, password);
-            navigate("/dashboard");
+            navigate("/dashboard", { replace: true });
         } catch (error) {
             console.error(error);
             setIsSubmitting(false);

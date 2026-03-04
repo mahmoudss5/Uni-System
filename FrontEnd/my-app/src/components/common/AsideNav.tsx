@@ -46,11 +46,12 @@ export default function AsideNav() {
             <nav className="flex-1 px-3 py-4 space-y-1">
                 {navItems.map(({ label, icon: Icon, to }) => (
                     <motion.div
-                        whileHover={{ scale: 1.05 }}
+                    key={to}    
+                    whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
                     <NavLink
-                        key={to}
+                    
                         to={to}
                         end={to === "/dashboard"}
 

@@ -1,16 +1,23 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
+import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
+import UnitSystem.demo.DataAccessLayer.Entities.Announcement;
 import UnitSystem.demo.DataAccessLayer.Entities.EnrolledCourse;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
+import UnitSystem.demo.DataAccessLayer.Entities.UpcomingEvent;
+import UnitSystem.demo.DataAccessLayer.Entities.User;
+import UnitSystem.demo.DataAccessLayer.Repositories.AnnouncementRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.StudentRepository;
+import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,6 +35,8 @@ public class StudentServiceImp implements StudentService {
     private final StudentRepository studentRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AnnouncementRepository announcementRepository;
+    private final UpcomingEventRepository upcomingEventRepository;
 
     private StudentResponse mapToStudentResponse(Student student) {
         return StudentResponse.builder()
@@ -119,6 +128,12 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
+    public void saveUserAsStudent(User user) {
+        Student student = (Student) user;
+        studentRepository.save(student);
+    }
+
+    @Override
     public void deleteStudent(Long studentId) {
         studentRepository.deleteById(studentId);
     }
@@ -131,6 +146,29 @@ public class StudentServiceImp implements StudentService {
                 .courseId(enrolledCourse.getCourse().getId())
                 .courseName(enrolledCourse.getCourse().getName())
                 .enrollmentDate(enrolledCourse.getEnrollmentDate())
+                .build();
+    }
+
+    private AnnouncementResponse mapToAnnouncementResponse(Announcement announcement) {
+        return AnnouncementResponse.builder()
+                .id(announcement.getId())
+                .title(announcement.getTitle())
+                .content(announcement.getDescription())
+                .courseId(announcement.getCourse() != null ? announcement.getCourse().getId() : null)
+                .createdDate(announcement.getCreatedAt())
+                .build();
+    }
+
+    private UpcomingEventResponse mapToUpcomingEventResponse(UpcomingEvent event) {
+        return UpcomingEventResponse.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .subtitle(event.getSubtitle())
+                .eventDate(event.getEventDate())
+                .type(event.getType().name())
+                .userId(event.getUser() != null ? event.getUser().getId() : null)
+                .userName(event.getUser() != null ? event.getUser().getUserName() : null)
+                .createdAt(event.getCreatedAt())
                 .build();
     }
 
@@ -161,6 +199,20 @@ public class StudentServiceImp implements StudentService {
                         .collect(Collectors.toSet())
                 : Collections.emptySet();
 
+        // Get all announcements from student's enrolled courses
+        List<AnnouncementResponse> announcements = student.getEnrolledCourses() != null
+                ? student.getEnrolledCourses().stream()
+                        .flatMap(enrolledCourse -> announcementRepository.findByCourseId(enrolledCourse.getCourse().getId()).stream())
+                        .map(this::mapToAnnouncementResponse)
+                        .collect(Collectors.toList())
+                : Collections.emptyList();
+
+        // Get upcoming events for the student
+        List<UpcomingEventResponse> upcomingEvents = upcomingEventRepository.findByUserId(student.getId())
+                .stream()
+                .map(this::mapToUpcomingEventResponse)
+                .collect(Collectors.toList());
+
         return StudentDetailsResponse.builder()
                 .id(student.getId())
                 .username(student.getUserName())
@@ -171,6 +223,8 @@ public class StudentServiceImp implements StudentService {
                 .enrolledCourses(enrolledCourses)
                 .enrolledCoursesCount(enrolledCourses.size())
                 .academicStanding(calculateAcademicStanding(student.getGpa()))
+                .announcements(announcements)
+                .upcomingEvents(upcomingEvents)
                 .build();
     }
 }

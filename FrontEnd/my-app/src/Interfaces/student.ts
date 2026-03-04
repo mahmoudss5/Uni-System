@@ -1,4 +1,5 @@
-interface Student {
+export interface Student {
+    role: "student";
     id: number;
     name: string;
     email: string;
