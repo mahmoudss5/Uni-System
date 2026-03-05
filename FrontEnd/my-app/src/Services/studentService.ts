@@ -1,13 +1,13 @@
 import axios from "axios";
 import { ApiUrl, getAuthHeaders } from "./config";
 
-export async function getStudentInfo(id :number){
+export async function getStudentInfo(id: number) {
     try {
         const response = await axios.get(`${ApiUrl}/api/students/details/${id}`, {
             headers: getAuthHeaders(),
         });
         return response.data;
-    }catch (error) {
+    } catch (error) {
         if (axios.isAxiosError(error)) {
             if (error.response) {
                 console.log("error.response", error.response.data);
@@ -20,5 +20,4 @@ export async function getStudentInfo(id :number){
         }
         throw new Error("Student info failed. Please try again.");
     }
-    } 
-    
+}

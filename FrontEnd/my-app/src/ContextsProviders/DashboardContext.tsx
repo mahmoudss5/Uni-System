@@ -1,13 +1,13 @@
 import { createContext, useContext, useMemo } from "react";
-import { useAuth } from "./AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getToken } from "../Services/authService";
+import { getUserDashboardData } from "../Services/userService";
 import type { Student } from "../Interfaces/student";
 import type { Teacher, TeacherCourse } from "../Interfaces/teacher";
 import {
-    getStudentEnrolledCourses,
-    getStudentAnnouncements,
-    getStudentUpcomingEvents,
-    getTeacherAnnouncements,
-    getTeacherUpcomingEvents,
+    transformAnnouncements,
+    transformEvents,
+    transformEnrolledCourses,
     type DashboardCourse,
     type DashboardAnnouncement,
     type DashboardEvent,
@@ -23,23 +23,32 @@ export interface StudentDashboardContextType {
     courses: DashboardCourse[];
     announcements: DashboardAnnouncement[];
     events: DashboardEvent[];
+    isLoading: boolean;
+    isError: boolean;
 }
 
 const StudentDashboardContext = createContext<StudentDashboardContextType | undefined>(undefined);
 
 export function StudentDashboardProvider({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
-    const student = user?.role === "student" ? (user as Student) : null;
+    const { data: user, isLoading, isError } = useQuery({
+        queryKey: ["user"],
+        queryFn:  () => getUserDashboardData(getToken() ?? ""),
+        enabled:  !!getToken(),
+    });
+
+    const student = user?.role === "student" ? (user as Student) : undefined;
 
     const value = useMemo<StudentDashboardContextType>(() => ({
-        gpa:                  student?.gpa               ?? "0.00",
-        totalCredits:         student?.totalCredits       ?? 0,
+        gpa:                  student?.gpa                ?? "0.00",
+        totalCredits:         student?.totalCredits        ?? 0,
         enrolledCoursesCount: student?.enrolledCoursesCount ?? 0,
-        academicStanding:     student?.academicStanding   ?? "Excellent",
-        courses:              getStudentEnrolledCourses(),
-        announcements:        getStudentAnnouncements(),
-        events:               getStudentUpcomingEvents(),
-    }), [student]);
+        academicStanding:     student?.academicStanding    ?? "Excellent",
+        courses:              transformEnrolledCourses(student?.enrolledCourses ?? []),
+        announcements:        transformAnnouncements(student?.announcements ?? []),
+        events:               transformEvents(student?.upcomingEvents ?? []),
+        isLoading,
+        isError,
+    }), [student, isLoading, isError]);
 
     return (
         <StudentDashboardContext.Provider value={value}>
@@ -63,13 +72,20 @@ export interface TeacherDashboardContextType {
     courses: TeacherCourse[];
     announcements: DashboardAnnouncement[];
     events: DashboardEvent[];
+    isLoading: boolean;
+    isError: boolean;
 }
 
 const TeacherDashboardContext = createContext<TeacherDashboardContextType | undefined>(undefined);
 
 export function TeacherDashboardProvider({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth();
-    const teacher = user?.role === "teacher" ? (user as Teacher) : null;
+    const { data: user, isLoading, isError } = useQuery({
+        queryKey: ["user"],
+        queryFn:  () => getUserDashboardData(getToken() ?? ""),
+        enabled:  !!getToken(),
+    });
+
+    const teacher = user?.role === "teacher" ? (user as Teacher) : undefined;
 
     const normalizedCourses: TeacherCourse[] = useMemo(() => {
         if (!teacher?.courses) return [];
@@ -83,9 +99,11 @@ export function TeacherDashboardProvider({ children }: { children: React.ReactNo
         numberOfStudents: teacher?.numberOfStudents  ?? 0,
         department:       teacher?.department        ?? "—",
         courses:          normalizedCourses,
-        announcements:    getTeacherAnnouncements(),
-        events:           getTeacherUpcomingEvents(),
-    }), [teacher, normalizedCourses]);
+        announcements:    transformAnnouncements(teacher?.announcements ?? []),
+        events:           transformEvents(teacher?.upcomingEvents ?? []),
+        isLoading,
+        isError,
+    }), [teacher, normalizedCourses, isLoading, isError]);
 
     return (
         <TeacherDashboardContext.Provider value={value}>

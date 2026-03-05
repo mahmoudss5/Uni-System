@@ -4,8 +4,11 @@ import EnrolledCourses from "../components/Dashboard/EnrolledCourses";
 import RecentAnnouncements from "../components/Dashboard/RecentAnnouncements";
 import UpcomingEvents from "../components/Dashboard/UpcomingEvents";
 import TeacherDashboard from "./TeacherDashboard";
-import { useAuth } from "../ContextsProviders/AuthContext";
+import { jwtDecode } from "jwt-decode";
+import { getToken } from "../Services/authService";
+import type { MyTokenPayload } from "../Interfaces/Auth";
 import { StudentDashboardProvider, useStudentDashboard } from "../ContextsProviders/DashboardContext";
+import { getRole } from "../Services/userService";
 
 function StudentDashboardContent() {
     const { gpa, totalCredits, enrolledCoursesCount, academicStanding, courses, announcements, events } = useStudentDashboard();
@@ -66,9 +69,7 @@ function StudentDashboardContent() {
 }
 
 export default function Dashboard() {
-    const { user } = useAuth();
-
-    if (user?.role === "teacher") {
+    if (getRole() === "teacher") {
         return <TeacherDashboard />;
     }
 

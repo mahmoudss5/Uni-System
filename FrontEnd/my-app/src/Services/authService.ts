@@ -9,8 +9,12 @@ import type {
     AuthUser,
 } from "../Interfaces/Auth";
 
+
 export function setToken(token: string) {
     localStorage.setItem(Token, token);
+}
+export function getToken() {
+    return localStorage.getItem(Token);
 }
 export function setUserCache(queryClient: QueryClient, user: AuthUser) {
     queryClient.setQueryData(["user"], user);

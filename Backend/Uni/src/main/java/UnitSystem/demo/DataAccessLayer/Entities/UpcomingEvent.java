@@ -34,7 +34,7 @@ public class UpcomingEvent {
     @Column(name = "type", nullable = false, length = 20)
     private EventType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

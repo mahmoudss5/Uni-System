@@ -58,3 +58,5 @@ export function getCourseEnrollButtonStyle(enrolledStudents: number, maxStudents
     }
     return "bg-blue-500  cursor-pointer";
 }
+
+

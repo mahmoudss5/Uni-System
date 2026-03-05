@@ -3,9 +3,8 @@ import {
     HandleLogin, HandleRegister, setToken, setUserCache,
     removeToken, removeUserCache,
 } from "../Services/authService";
-import { getUser } from "../Services/userService";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Token } from "../Services/config";
+import { getUserDashboardData } from "../Services/userService";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AuthContextType } from "../Interfaces/Auth";
 
 // ─── Context ────────────────────────────────────────────────────────────────
@@ -16,13 +15,6 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const queryClient = useQueryClient();
-    const token = localStorage.getItem(Token);
-
-    const { data: user, isLoading, isError } = useQuery({
-        queryKey: ["user"],
-        queryFn:  () => getUser(token ?? ""),
-        enabled:  !!token,
-    });
 
     const loginMutation = useMutation({
         mutationFn: ({ email, password }: { email: string; password: string }) =>
@@ -30,7 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onSuccess: async (data) => {
             const token = data.token || data;
             setToken(token);
-            const user = await getUser(token);
+            const user = await getUserDashboardData(token);
             setUserCache(queryClient, user);
         },
     });
@@ -43,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onSuccess: async (data) => {
             const token = data.token || data;
             setToken(token);
-            const user = await getUser(token);
+            const user = await getUserDashboardData(token);
             setUserCache(queryClient, user);
         },
     });
@@ -60,9 +52,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const value = useMemo<AuthContextType>(
-        () => ({ user: user ?? null, login, logout, isLoading, isError, register }),
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [user, isLoading, isError],
+        () => ({ login, logout, register }),
+    
+        [],
     );
 
     return (

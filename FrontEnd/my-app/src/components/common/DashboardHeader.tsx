@@ -1,11 +1,23 @@
 import { Bell, Search } from "lucide-react";
-import { useAuth } from "../../ContextsProviders/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getToken } from "../../Services/authService";
+import { getUserDashboardData } from "../../Services/userService";
+import type { Student } from "../../Interfaces/student";
+import type { Teacher } from "../../Interfaces/teacher";
 
 export default function DashboardHeader() {
-    const { user } = useAuth();
+    const { data: user } = useQuery({
+        queryKey: ["user"],
+        queryFn:  () => getUserDashboardData(getToken() ?? ""),
+        enabled:  !!getToken(),
+    });
 
-    const displayName = user?.name || user?.email.split("@")[0] || "User";
-    console.log("DashboardHeader user:", user);
+    const displayName = user?.role === "teacher"
+        ? (user as Teacher).name
+        : (user as Student | undefined)?.username
+          ?? user?.email.split("@")[0]
+          ?? "User";
+
     const initial = displayName.charAt(0).toUpperCase();
     const role = user?.role === "teacher" ? "Teacher" : "Student";
 

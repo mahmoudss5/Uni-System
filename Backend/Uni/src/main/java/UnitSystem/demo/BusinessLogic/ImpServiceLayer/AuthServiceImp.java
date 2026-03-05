@@ -3,6 +3,7 @@ package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.AuthService;
+import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
@@ -31,8 +32,9 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImp implements AuthService {
-
+//TODO: there is an error happen while register as  teacher the theacher code recive null and the user registed as stuendet and throw an error
     private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
@@ -60,6 +62,7 @@ public class AuthServiceImp implements AuthService {
         User user = isTeacher ? buildAndSaveTeacher(userRequest, role)
                 : buildAndSaveStudent(userRequest, role);
 
+        userService.createUser(userRequest);
         return mapToAuthResponse(user);
     }
 

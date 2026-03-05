@@ -1,3 +1,6 @@
+import type { AnnouncementResponse } from "./announcement";
+import type { UpcomingEventResponse } from "./upComingEvent";
+
 export interface TeacherCourse {
     id: number;
     name: string;
@@ -16,7 +19,10 @@ export interface Teacher {
     email: string;
     salary: number;
     department: string;
+    roles: string[];
+    courses: TeacherCourse[];
+    announcements: AnnouncementResponse[];
+    upcomingEvents: UpcomingEventResponse[];
     coursesCount: number;
     numberOfStudents: number;
-    courses: TeacherCourse[];
 }

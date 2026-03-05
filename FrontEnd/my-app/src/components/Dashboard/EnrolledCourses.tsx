@@ -15,14 +15,10 @@ interface EnrolledCoursesProps {
 export default function EnrolledCourses({ courses, semester = "Spring 2026" }: EnrolledCoursesProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "In Progress":
-                return "bg-green-100 text-green-700";
-            case "Pending":
-                return "bg-yellow-100 text-yellow-700";
-            case "Completed":
-                return "bg-blue-100 text-blue-700";
-            default:
-                return "bg-gray-100 text-gray-700";
+            case "In Progress": return "bg-green-100 text-green-700 ring-1 ring-green-200";
+            case "Pending":     return "bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200";
+            case "Completed":   return "bg-blue-100 text-blue-700 ring-1 ring-blue-200";
+            default:            return "bg-gray-100 text-gray-600 ring-1 ring-gray-200";
         }
     };
 
@@ -30,41 +26,77 @@ export default function EnrolledCourses({ courses, semester = "Spring 2026" }: E
         <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-lg font-bold text-gray-800">Currently Enrolled Courses</h2>
-                <span className="text-md text-blue-500 border border-blue-200 rounded-full px-4 py-1">{semester}</span>
+                <span className="text-sm text-blue-500 border border-blue-200 rounded-full px-4 py-1 font-medium">
+                    {semester}
+                </span>
             </div>
-            
-            <div className="overflow-x-auto">
-                <table className="w-full">
+
+            <div className="overflow-x-auto rounded-lg border border-gray-100">
+                <table className="w-full text-sm">
                     <thead>
-                        <tr className="border-b text-left">
-                            <th className="pb-3 text-md font-semibold text-gray-500 uppercase tracking-wider">COURSE NAME</th>
-                            <th className="pb-3 text-md font-semibold text-gray-500 uppercase tracking-wider">INSTRUCTOR</th>
-                            <th className="pb-3 text-md font-semibold text-gray-500 uppercase tracking-wider text-center">CREDITS</th>
-                            <th className="pb-3 text-md font-semibold text-gray-500 uppercase tracking-wider text-center">STATUS</th>
-                            <th className="pb-3 text-md font-semibold text-gray-500 uppercase tracking-wider">ACTION</th>
+                        <tr className="bg-gray-50 text-left">
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                Course Code
+                            </th>
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Course Name
+                            </th>
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Instructor
+                            </th>
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center whitespace-nowrap">
+                                Credits
+                            </th>
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">
+                                Status
+                            </th>
+                            <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">
+                                Action
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {courses.map((course, index) => (
-                            <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
-                                <td className="py-4 text-sm text-gray-700">{course.courseName}</td>
-                                <td className="py-4 text-sm text-gray-700">{course.instructor}</td>
-                                <td className="py-4 text-sm text-gray-700 text-center">{course.credits}</td>
-                                <td className="py-4 text-center">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(course.status)}`}>
-                                        {course.status}
-                                    </span>
-                                </td>
-                                <td className="py-4">
-                                    <button className="text-blue-500 text-sm font-medium hover:underline">
-                                        View Materials
-                                    </button>
+                    <tbody className="divide-y divide-gray-100">
+                        {courses.length === 0 ? (
+                            <tr>
+                                <td colSpan={6} className="py-10 text-center text-sm text-gray-400">
+                                    No enrolled courses found.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            courses.map((course, index) => (
+                                <tr
+                                    key={index}
+                                    className="hover:bg-blue-50/40 transition-colors duration-150"
+                                >
+                                    <td className="py-3.5 px-4 font-mono text-xs text-blue-600 font-semibold whitespace-nowrap">
+                                        {course.courseCode}
+                                    </td>
+                                    <td className="py-3.5 px-4 text-gray-800 font-medium">
+                                        {course.courseName}
+                                    </td>
+                                    <td className="py-3.5 px-4 text-gray-600">
+                                        {course.instructor}
+                                    </td>
+                                    <td className="py-3.5 px-4 text-center">
+                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 text-xs font-bold">
+                                            {course.credits}
+                                        </span>
+                                    </td>
+                                    <td className="py-3.5 px-4 text-center">
+                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(course.status)}`}>
+                                            {course.status}
+                                        </span>
+                                    </td>
+                                    <td className="py-3.5 px-4 text-center">
+                                        <button className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+                                            View Materials
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
-
             </div>
         </div>
     );
