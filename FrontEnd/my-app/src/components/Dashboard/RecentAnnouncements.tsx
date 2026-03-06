@@ -1,3 +1,4 @@
+import { a } from "framer-motion/client";
 import { Clock, DollarSign, Briefcase, BookOpen } from "lucide-react";
 
 interface Announcement {
@@ -49,9 +50,17 @@ export default function RecentAnnouncements({ announcements }: RecentAnnouncemen
                 })}
             </div>
             
-            <button className="w-full mt-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition font-medium">
-                View All Announcements
-            </button>
+            {announcements.length === 0 && (
+                <div className="text-center text-gray-500 mt-10 text-xl font-medium">
+                    No announcements at the moment.
+                </div>
+            )
+            }
+            {announcements.length > 0 && (
+                <button className="w-full mt-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 rounded-lg border border-gray-200 transition font-medium">
+                    View All Announcements
+                </button>
+            )}
         </div>
     );
 }

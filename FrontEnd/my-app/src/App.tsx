@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./pages/DashboardLayout";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import { CoursesDashboard } from "./pages/Courses/CoursesDashboard";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -35,6 +36,12 @@ const router = createBrowserRouter([
         index: true,
         element: <ProtectedRoute>
           <Dashboard />
+          </ProtectedRoute>,
+      },
+      {
+        path: "Courses",
+        element: <ProtectedRoute>
+          <CoursesDashboard />
           </ProtectedRoute>,
       },
     ],

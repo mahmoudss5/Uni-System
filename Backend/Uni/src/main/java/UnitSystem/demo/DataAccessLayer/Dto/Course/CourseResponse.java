@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,6 +17,9 @@ public class CourseResponse {
     private String description;
     private String departmentName;
     private String teacherUserName;
+    private String courseCode;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private int creditHours;
     private int maxStudents;
     private int enrolledStudents;

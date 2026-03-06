@@ -10,10 +10,12 @@ import UnitSystem.demo.DataAccessLayer.Repositories.DepartmentRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.TeacherRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CourseServiceImp implements CourseService {
@@ -29,6 +31,10 @@ public class CourseServiceImp implements CourseService {
                 .id(course.getId())
                 .name(course.getName())
                 .creditHours(course.getCredits())
+                .description(course.getDescription())
+                .courseCode(course.getCourseCode())
+                .startDate(course.getStartDate())
+                .endDate(course.getEndDate())
                 .enrolledStudents(course.getCourseEnrollments().size())
                 .maxStudents(course.getCapacity())
                 .departmentName(course.getDepartment().getName())
@@ -40,6 +46,9 @@ public class CourseServiceImp implements CourseService {
         return Course.builder()
                 .name(courseRequest.getName())
                 .description(courseRequest.getDescription())
+                .courseCode(courseRequest.getCourseCode())
+                .StartDate(courseRequest.getStartDate())
+                .EndDate(courseRequest.getEndDate())
                 .Credits(courseRequest.getCreditHours())
                 .Capacity(courseRequest.getMaxStudents())
                 .department(departmentRepository.findByName(courseRequest.getDepartmentName()))
@@ -72,16 +81,18 @@ public class CourseServiceImp implements CourseService {
 
     @Override
     public CourseResponse createCourse(CourseRequest courseRequest) {
+        log.info("Creating course " + courseRequest);
        Course course = mapToCourse(courseRequest);
         courseRepository.save(course);
        return mapToCourseResponse(course);
     }
 
     @Override
-    public CourseResponse updateCourse( CourseRequest courseRequest) {
+    public CourseResponse updateCourse( CourseRequest courseRequest, Long courseId) {
+       log.info("Updating course " + courseRequest);
        Course course = mapToCourse(courseRequest);
+        course.setId(courseId);
         courseRepository.save(course);
-
         return mapToCourseResponse(course);
     }
 
@@ -89,5 +100,20 @@ public class CourseServiceImp implements CourseService {
     public void deleteCourse(Long courseId) {
         courseRepository.deleteById(courseId);
         
+    }
+
+    @Override
+    public List<CourseResponse> getCoursesByDepartment(String departmentName) {
+       Department department = departmentRepository.findByName(departmentName);
+        return courseRepository.findByDepartment(department).stream()
+                .map(this::mapToCourseResponse)
+                .toList();
+    }
+
+    @Override
+    public List<CourseResponse> getCoursesByTeacherId(Long teacherId) {
+        return courseRepository.findByTeacherId(teacherId).stream()
+                .map(this::mapToCourseResponse)
+                .toList();
     }
 }

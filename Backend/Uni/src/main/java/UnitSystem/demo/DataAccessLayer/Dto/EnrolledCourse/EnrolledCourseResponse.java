@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,8 +17,11 @@ public class EnrolledCourseResponse {
     private Long studentId;
     private String studentName;
     private Long courseId;
-    private Long credits;
+    private String courseCode;
     private String courseName;
     private String teacherName;
+    private Long credits;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private LocalDateTime enrollmentDate;
 }

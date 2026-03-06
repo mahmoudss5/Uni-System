@@ -4,9 +4,10 @@ import type { Teacher } from "./teacher";
 export type AuthUser = Student | Teacher;
 
 export interface AuthContextType {
+    isError: string | undefined;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
-    register: (email: string, password: string, username: string, TeacherCode?: string) => Promise<void>;
+    register: (email: string, password: string, username: string, teacherCode?: string) => Promise<void>;
 }
 export interface MyTokenPayload {
     roles: string[];
@@ -21,7 +22,7 @@ export interface RegisterRequest {
     email: string;
     password: string;
     username: string;
-    TeacherCode?: string;
+    teacherCode?: string;
 }
 
 export interface AuthRequest {

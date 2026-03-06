@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 type Role = "student" | "teacher";
 
 export default function RegisterFrom() {
-    const {register} = useAuth();
+    const { register, isError } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [role, setRole] = useState<Role>("student");
@@ -28,6 +28,7 @@ export default function RegisterFrom() {
 
         setLoading(true);
         try {
+            console.log("Registering with:", { email, username, password, role, teacherCode });
             await register(email, password, username, teacherCode);
             navigate("/dashboard", { replace: true });
         } catch (error) {
@@ -190,11 +191,18 @@ export default function RegisterFrom() {
                     </label>
                 </div>
 
+                {isError && (
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                        {isError}
+                    </p>
+                )}
+
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] text-sm"
+                    disabled={loading}
+                    className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98] text-sm disabled:opacity-60"
                 >
-                    {role === "teacher" ? "Register as Teacher" : "Register as Student"}
+                    {loading ? "Registering..." : role === "teacher" ? "Register as Teacher" : "Register as Student"}
                 </button>
 
                 <div className="text-center flex items-center justify-center gap-1">

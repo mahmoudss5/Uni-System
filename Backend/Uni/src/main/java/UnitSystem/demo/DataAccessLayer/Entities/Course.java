@@ -56,10 +56,12 @@ public class Course {
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<EnrolledCourse> courseEnrollments ;
+    @Builder.Default
+    private Set<EnrolledCourse> courseEnrollments = new HashSet<>();
 
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Announcement>announcements = new HashSet<>();
 
 

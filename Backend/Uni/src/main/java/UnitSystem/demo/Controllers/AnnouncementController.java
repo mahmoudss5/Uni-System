@@ -37,7 +37,7 @@ public class AnnouncementController {
     }
 
     @Operation(summary = "Get an announcement by ID")
-    @PostMapping("/get/{id}")
+    @PostMapping("/getAllByCourseID/{id}")
     public ResponseEntity<AnnouncementResponse> getById(@RequestBody Long id) {
         AnnouncementResponse announcementResponse = announcementService.getAnnouncementById(id);
         return ResponseEntity.ok(announcementResponse);

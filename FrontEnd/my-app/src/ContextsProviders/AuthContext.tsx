@@ -40,21 +40,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
     });
 
-    const login = (email: string, password: string) =>
-        loginMutation.mutateAsync({ email, password });
-
-    const register = (email: string, password: string, username: string, TeacherCode?: string) =>
-        registerMutation.mutateAsync({ email, password, username, TeacherCode });
-
-    const logout = () => {
-        removeToken();
-        removeUserCache(queryClient);
-    };
-
     const value = useMemo<AuthContextType>(
-        () => ({ login, logout, register }),
-    
-        [],
+        () => ({
+            login: (email, password) => loginMutation.mutateAsync({ email, password }),
+            register: (email, password, username, TeacherCode) =>
+                registerMutation.mutateAsync({ email, password, username, TeacherCode }),
+            logout: () => {
+                removeToken();
+                removeUserCache(queryClient);
+            },
+            isError: loginMutation.error?.message || registerMutation.error?.message,
+        }),
+        [loginMutation, registerMutation, queryClient],
     );
 
     return (

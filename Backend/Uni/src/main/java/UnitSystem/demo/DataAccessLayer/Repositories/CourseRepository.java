@@ -20,6 +20,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     List<Course> findByTeacherUserName(String userName);
 
+    List<Course> findByTeacherId(Long teacherId);
+
     @Query("SELECT e.student FROM EnrolledCourse e WHERE e.course.id = :courseId")
     List<Student> findStudentsByCourseId(@Param("courseId") Long courseId);
 
@@ -27,5 +29,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT c FROM Course c LEFT JOIN c.courseEnrollments e GROUP BY c ORDER BY COUNT(e) DESC")
     List<Course> findTopPopularCourses();
+
 
 }

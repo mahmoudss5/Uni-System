@@ -17,4 +17,5 @@ public interface DepartmentService {
     DepartmentResponse updateDepartment(Long departmentId, DepartmentRequest departmentRequest);
 
     void deleteDepartment(Long departmentId);
+    Boolean existsByName(String name);
 }

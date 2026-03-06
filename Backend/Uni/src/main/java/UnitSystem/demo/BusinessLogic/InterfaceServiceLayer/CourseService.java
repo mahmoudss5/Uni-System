@@ -10,8 +10,10 @@ public interface CourseService {
     List<CourseResponse> getMostPopularCourses(int topN);
     CourseResponse getCourseById(Long courseId);
     CourseResponse createCourse(CourseRequest courseRequest);
-    CourseResponse updateCourse( CourseRequest courseRequest);
+    CourseResponse updateCourse( CourseRequest courseRequest, Long courseId);
     void deleteCourse(Long courseId);
+    List<CourseResponse>getCoursesByDepartment(String departmentName);
+     List<CourseResponse> getCoursesByTeacherId(Long teacherId);
 
 
 }

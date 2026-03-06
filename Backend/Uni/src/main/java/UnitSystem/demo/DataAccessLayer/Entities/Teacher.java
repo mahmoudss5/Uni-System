@@ -29,6 +29,7 @@ public class Teacher extends User{
 
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<Course> courses = new HashSet<>();
 
 

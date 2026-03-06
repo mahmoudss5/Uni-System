@@ -31,6 +31,7 @@ public class Student extends User{
     private int totalCredits;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private Set<EnrolledCourse> enrolledCourses = new HashSet<>();
 
 }

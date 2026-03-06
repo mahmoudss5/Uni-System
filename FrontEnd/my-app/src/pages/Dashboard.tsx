@@ -4,9 +4,6 @@ import EnrolledCourses from "../components/Dashboard/EnrolledCourses";
 import RecentAnnouncements from "../components/Dashboard/RecentAnnouncements";
 import UpcomingEvents from "../components/Dashboard/UpcomingEvents";
 import TeacherDashboard from "./TeacherDashboard";
-import { jwtDecode } from "jwt-decode";
-import { getToken } from "../Services/authService";
-import type { MyTokenPayload } from "../Interfaces/Auth";
 import { StudentDashboardProvider, useStudentDashboard } from "../ContextsProviders/DashboardContext";
 import { getRole } from "../Services/userService";
 

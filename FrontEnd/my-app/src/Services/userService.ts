@@ -19,7 +19,7 @@ export function getRole(): "teacher" | "student" {
 export async function getUserDashboardData(token: string): Promise<Student | Teacher> {
     const decoded = await decodeToken(token);
     const userId = decoded.userId;
-
+     console.log("Decoded token:", decoded);
     if (decoded.roles.includes("Teacher")) {
         const data = await getTeacherDetails(userId);
         console.log("Teacher data:", data);

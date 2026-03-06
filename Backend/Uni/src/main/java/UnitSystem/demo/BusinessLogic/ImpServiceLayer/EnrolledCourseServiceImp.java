@@ -24,12 +24,18 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     private final CourseRepository courseRepository;
 
     private EnrolledCourseResponse mapToEnrolledCourseResponse(EnrolledCourse enrolledCourse) {
+        Course course = enrolledCourse.getCourse();
         return EnrolledCourseResponse.builder()
                 .id(enrolledCourse.getId())
                 .studentId(enrolledCourse.getStudent().getId())
                 .studentName(enrolledCourse.getStudent().getUserName())
-                .courseId(enrolledCourse.getCourse().getId())
-                .courseName(enrolledCourse.getCourse().getName())
+                .courseId(course.getId())
+                .courseCode(course.getCourseCode())
+                .courseName(course.getName())
+                .teacherName(course.getTeacher() != null ? course.getTeacher().getUserName() : null)
+                .credits((long) course.getCredits())
+                .startDate(course.getStartDate())
+                .endDate(course.getEndDate())
                 .enrollmentDate(enrolledCourse.getEnrollmentDate())
                 .build();
     }

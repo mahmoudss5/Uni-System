@@ -32,7 +32,6 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImp implements AuthService {
-//TODO: there is an error happen while register as  teacher the theacher code recive null and the user registed as stuendet and throw an error
     private final UserRepository userRepository;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -58,11 +57,13 @@ public class AuthServiceImp implements AuthService {
         validateUniqueCredentials(userRequest);
 
         boolean isTeacher = userRequest.getTeacherCode() != null;
+
         Role role = resolveRole(isTeacher);
+
         User user = isTeacher ? buildAndSaveTeacher(userRequest, role)
                 : buildAndSaveStudent(userRequest, role);
 
-        userService.createUser(userRequest);
+
         return mapToAuthResponse(user);
     }
 

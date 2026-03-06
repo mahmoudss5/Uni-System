@@ -56,8 +56,8 @@ public class CourseController {
     @Operation(summary = "Update an existing course")
     @PutMapping("/{id}")
     public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long id,
-            @Valid @RequestBody CourseRequest courseRequest) {
-        CourseResponse course = courseService.updateCourse(courseRequest);
+                                                       @Valid @RequestBody CourseRequest courseRequest) {
+        CourseResponse course = courseService.updateCourse(courseRequest, id);
         if (course != null) {
             return ResponseEntity.ok(course);
         }
@@ -76,6 +76,20 @@ public class CourseController {
     @GetMapping("/popular")
     public ResponseEntity<List<CourseResponse>> getMostPopularCourses() {
         List<CourseResponse> courses = courseService.getMostPopularCourses(4);
+        return ResponseEntity.ok(courses);
+    }
+
+    @Operation(summary = "Get courses by department name")
+    @GetMapping("/department/{departmentName}")
+    public ResponseEntity<List<CourseResponse>> getCoursesByDepartment(@PathVariable String departmentName) {
+        List<CourseResponse> courses = courseService.getCoursesByDepartment(departmentName);
+        return ResponseEntity.ok(courses);
+    }
+
+    @Operation(summary = "Get courses by teacher ID")
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<CourseResponse>> getCoursesByTeacherId(@PathVariable Long teacherId) {
+        List<CourseResponse> courses = courseService.getCoursesByTeacherId(teacherId);
         return ResponseEntity.ok(courses);
     }
 }

@@ -5,3 +5,14 @@ export interface AnnouncementResponse {
     createdAt: string;
     type?: "info" | "warning" | "success" | "default";
 }
+
+export interface AnnouncementContextType{
+    announcements: AnnouncementResponse[];
+    setAnnouncements: (announcements: AnnouncementResponse[]) => void;
+    createAnnouncement: (Announcement: AnnouncementResponse) => void;
+    updateAnnouncement: (Announcement: AnnouncementResponse) => void;
+    deleteAnnouncement: (announcementId: number) => void;
+    getAnnouncementById: (announcementId: number) => AnnouncementResponse | null;
+    isLoading: boolean;
+    error: string | null;
+}

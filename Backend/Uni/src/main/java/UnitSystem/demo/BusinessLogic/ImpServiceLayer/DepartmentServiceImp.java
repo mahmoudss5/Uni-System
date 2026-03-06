@@ -70,4 +70,9 @@ public class DepartmentServiceImp implements DepartmentService {
     public void deleteDepartment(Long departmentId) {
         departmentRepository.deleteById(departmentId);
     }
+
+    @Override
+    public Boolean existsByName(String name) {
+        return departmentRepository.existsByName(name);
+    }
 }

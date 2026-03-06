@@ -11,9 +11,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../ContextsProviders/AuthContext";
 import { motion } from "framer-motion";
+import {getRole} from "../../Services/userService";
 const navItems = [
     { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
-    { label: "My Courses", icon: BookOpen, to: "/dashboard/courses" },
+    { label: "My Courses", icon: BookOpen, to: "/dashboard/Courses" },
     { label: "Registration", icon: ClipboardList, to: "/dashboard/registration" },
     { label: "Grades & Transcript", icon: FileText, to: "/dashboard/grades" },
     { label: "Schedule", icon: Calendar, to: "/dashboard/schedule" },
@@ -23,7 +24,7 @@ const navItems = [
 export default function AsideNav() {
     const { logout } = useAuth();
     const navigate = useNavigate();
-
+    const role = getRole();
     const handleLogout = () => {
         logout();
         navigate("/auth/login");

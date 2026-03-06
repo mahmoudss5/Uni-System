@@ -10,6 +10,17 @@ import type {
 } from "../Interfaces/Auth";
 
 
+export function getUserId(): number {
+    const token = getToken();
+    if (!token) throw new Error("No token found");
+    return jwtDecode<MyTokenPayload>(token).userId;
+}
+
+export function getUserName(): string {
+    const token = getToken();
+    if (!token) throw new Error("No token found");
+    return jwtDecode<MyTokenPayload>(token).userName;
+}
 export function setToken(token: string) {
     localStorage.setItem(Token, token);
 }
@@ -26,12 +37,12 @@ export function removeToken() {
     localStorage.removeItem(Token);
 }
 
-export async function HandleRegister( email: string, password: string, username: string,TeacherCode?: string,) {
+export async function HandleRegister( email: string, password: string, username: string,teacherCode?: string,) {
     const request: RegisterRequest = {
         email,
         password,
         username,
-        TeacherCode: TeacherCode ?? undefined,
+        teacherCode: teacherCode ?? undefined,
     };
     console.log("request", request);
     

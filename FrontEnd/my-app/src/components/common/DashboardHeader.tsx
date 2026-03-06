@@ -11,15 +11,13 @@ export default function DashboardHeader() {
         queryFn:  () => getUserDashboardData(getToken() ?? ""),
         enabled:  !!getToken(),
     });
-
     const displayName = user?.role === "teacher"
         ? (user as Teacher).name
-        : (user as Student | undefined)?.username
-          ?? user?.email.split("@")[0]
-          ?? "User";
+        : (user as Student)?.username ?? "";
+    const role = user?.role;
 
-    const initial = displayName.charAt(0).toUpperCase();
-    const role = user?.role === "teacher" ? "Teacher" : "Student";
+    const initial = displayName ? displayName.charAt(0).toUpperCase() : "";
+    
 
     return (
         <header className="w-full bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between shrink-0">

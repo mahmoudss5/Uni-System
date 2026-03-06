@@ -4,7 +4,7 @@ import { useAuth } from "../../ContextsProviders/AuthContext";
 import { useNavigate } from "react-router-dom";
 export default function LoginForm() {
 
-    const { login } = useAuth();
+    const { login, isError } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
  
@@ -93,6 +93,12 @@ export default function LoginForm() {
                         Remember me
                     </label>
                 </div>
+
+                {isError && (
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">
+                        {isError}
+                    </p>
+                )}
 
                 <button
                     disabled={isSubmitting}

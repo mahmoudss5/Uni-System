@@ -10,5 +10,5 @@ import java.util.List;
 public interface DepartmentRepository extends JpaRepository<Department,Long> {
 
     Department findByName(String name);
-
+   Boolean existsByName(String name);
 }

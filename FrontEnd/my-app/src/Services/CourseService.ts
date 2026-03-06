@@ -1,3 +1,7 @@
+import axios from "axios";
+import { getAuthHeaders } from "./config";
+import { ApiUrl } from "./config";
+import type { CourseRequest } from "../Interfaces/course";
 export function getBackgroundColor(department: string) {
     switch (department) {
         case "Computer Science":
@@ -60,3 +64,137 @@ export function getCourseEnrollButtonStyle(enrolledStudents: number, maxStudents
 }
 
 
+export  async function getAllCourses() {
+    try {
+        const response = await axios.get(`${ApiUrl}/api/courses`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error fetching courses");
+        
+    }
+    throw new Error("Error fetching courses");
+}
+
+export async function getCourseById(courseId: number) {
+    try {
+        const response = await axios.get(`${ApiUrl}/api/courses/${courseId}`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error fetching course");
+    }
+}
+
+
+
+export async function createCourse(course: CourseRequest) {
+    try {
+        const response = await axios.post(`${ApiUrl}/api/courses`, course, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }   
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error creating course");
+    }
+}
+export async function updateCourse(id:number, course: CourseRequest) {
+    try {
+        console.log("Updating course with id:", id, "and data:", course);
+        const response = await axios.put(`${ApiUrl}/api/courses/${id}`, course, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error updating course");
+    }
+}
+
+export async function deleteCourse(id:number) {
+    try {
+        const response = await axios.delete(`${ApiUrl}/api/courses/${id}`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error deleting course");
+    }
+}
+export async function getAllCoursesByTeacherId(teacherId: number) {
+    try {
+        const response = await axios.get(`${ApiUrl}/api/courses/teacher/${teacherId}`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }      
+    throw new Error("Error fetching teacher courses");
+    }
+}
+export async function getAllStudentsByCourseId(courseId: number) {
+    try {
+        const response = await axios.get(`${ApiUrl}/api/enrolled-courses/course/${courseId}`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error fetching students by course id");
+    }
+}
