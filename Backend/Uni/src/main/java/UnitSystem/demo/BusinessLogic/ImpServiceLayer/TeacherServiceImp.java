@@ -19,6 +19,8 @@ import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.TeacherRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -78,6 +80,7 @@ public class TeacherServiceImp implements TeacherService {
         }
 
         @Override
+        @Cacheable(value = "teachersCache", key = "'teacherById:' + #teacherId")
         public TeacherResponse getTeacherById(Long teacherId) {
                 return teacherRepository.findById(teacherId)
                                 .map(this::mapToTeacherResponse)
@@ -85,12 +88,14 @@ public class TeacherServiceImp implements TeacherService {
         }
 
         @Override
+        @Cacheable(value = "teachersCache", key = "'teacherByUserName:' + #userName")
         public TeacherResponse getTeacherByUserName(String userName) {
                 Teacher teacher = teacherRepository.findByUserName(userName);
                 return teacher != null ? mapToTeacherResponse(teacher) : null;
         }
 
         @Override
+        @CacheEvict(value = "teachersCache", allEntries = true)
         public TeacherResponse createTeacher(TeacherRequest teacherRequest) {
                 Teacher teacher = mapToTeacher(teacherRequest);
                 teacherRepository.save(teacher);
@@ -98,6 +103,7 @@ public class TeacherServiceImp implements TeacherService {
         }
 
         @Override
+        @CacheEvict(value = "teachersCache", allEntries = true)
         public TeacherResponse updateTeacher(Long teacherId, TeacherRequest teacherRequest) {
                 Teacher existingTeacher = teacherRepository.findById(teacherId)
                                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
@@ -131,6 +137,7 @@ public class TeacherServiceImp implements TeacherService {
         }
 
         @Override
+        @CacheEvict(value = "teachersCache", allEntries = true)
         public void deleteTeacher(Long teacherId) {
                 teacherRepository.deleteById(teacherId);
         }
@@ -175,6 +182,7 @@ public class TeacherServiceImp implements TeacherService {
         }
 
         @Override
+        @Cacheable(value = "teachersCache", key = "'teacherDetails:' + #userDetailsRequest.userId")
         public TeacherDetailsResponse getTeacherDetails(UserDetailsRequest userDetailsRequest) {
                 Teacher teacher = teacherRepository.findById(userDetailsRequest.getUserId())
                                 .orElseThrow(

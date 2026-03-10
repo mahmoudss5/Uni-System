@@ -85,6 +85,7 @@ export async function getEnrolledCourseById(id: number) {
 }
 export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCourseRequest) {
     try {
+        console.log("Enrolling student in course:", enrolledCourseRequest);
         const response = await axios.post(`${ApiUrl}/api/enrolled-courses`, enrolledCourseRequest, {
             headers: getAuthHeaders(),
         });
@@ -104,6 +105,7 @@ export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCours
 export async function unenrollStudentFromCourse(id: number) {
     
     try {
+        console.log("Unenrolling student from course:", id);
         const response = await axios.delete(`${ApiUrl}/api/enrolled-courses/${id}`, {
             headers: getAuthHeaders(),
         });

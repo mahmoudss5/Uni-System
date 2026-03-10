@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { departments } from "../common/dummyData";
+import { useGetDepartments } from "../../CustomeHooks/Departments/UseGetDepartments";
 import DepartmentCard from "./DepartmentCard";
-import type { Department as DepartmentType } from "../common/dummyData";
+import type { department } from "../../Interfaces/department";
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -25,6 +25,7 @@ const itemVariants = {
 };
 
 export default function Departments() {
+    const { data: departments, error } = useGetDepartments() as { data: department[], error: Error | null };
     return (
         <section className="w-full bg-gradient-to-b from-white to-gray-50 py-20 min-h-[calc(100vh-5rem)] overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full overflow-hidden">
@@ -51,12 +52,12 @@ export default function Departments() {
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 w-full"
                         variants={containerVariants}
                     >
-                        {departments.map((department: DepartmentType) => (
+                        {departments?.map((department: department) => (
                             <motion.div key={department.id} variants={itemVariants}>
                                 <DepartmentCard 
                                     department={department.name} 
-                                    description={department.description} 
-                                    numberOfCourses={department.numberOfCourses}
+                                    description={ ""} 
+                                    numberOfCourses={ department.numberOfCourses }
                                 />
                             </motion.div>
                         ))}

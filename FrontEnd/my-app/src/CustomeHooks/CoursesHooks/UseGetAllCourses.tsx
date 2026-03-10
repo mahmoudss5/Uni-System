@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAllCourses } from "../../Services/CourseService";
-export function useGetAllCourses() {
+import type { course } from "../../Interfaces/course";
 
-    const { data, isLoading, error } = useQuery({
+export function useGetAllCourses() {
+    const { data, isLoading, error } = useQuery<course[], Error>({
         queryKey: ["allCourses"],
         queryFn: getAllCourses,
     });
-
     return {
         courses: data || [],
         isLoading,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : null,
     };
 }

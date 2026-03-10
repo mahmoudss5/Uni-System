@@ -1,7 +1,9 @@
-import { feedBacks } from "../common/dummyData";
 import FeedBackCard from "./FeedBackCard";
+import useGetRecentFeedBacks from "../../CustomeHooks/FeedBacks/UseGetRecentFeedBacks";
 
 export default function FeedBacks() {
+
+    const { data: feedbacks, isLoading, error } = useGetRecentFeedBacks();
 
     return (
         <section className="w-full bg-gray-100 py-20 min-h-[calc(100vh-50rem)] overflow-hidden">
@@ -13,10 +15,10 @@ export default function FeedBacks() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-10">
 
-                    {feedBacks.map((feedBack) => (
+                    {feedbacks.map((feedBack) => (
                         <FeedBackCard key={feedBack.id}
-                            name={feedBack.name}
-                            description={feedBack.description}
+                            name={feedBack.userName}
+                            description={feedBack.comment}
                             role={feedBack.role} />
                     ))}
                 </div>

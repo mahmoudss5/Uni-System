@@ -1,26 +1,7 @@
-
-interface Course {
-    courseCode: string;
-    courseName: string;
-    instructor: string;
-    credits: number;
-    status: "In Progress" | "Pending" | "Completed";
-}
-
-interface EnrolledCoursesProps {
-    courses: Course[];
-    semester?: string;
-}
+import type { EnrolledCoursesProps } from "../../Interfaces/dashboard";
+import { getEnrollmentStatusColor } from "../../utils/courseUtils";
 
 export default function EnrolledCourses({ courses, semester = "Spring 2026" }: EnrolledCoursesProps) {
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "In Progress": return "bg-green-100 text-green-700 ring-1 ring-green-200";
-            case "Pending":     return "bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200";
-            case "Completed":   return "bg-blue-100 text-blue-700 ring-1 ring-blue-200";
-            default:            return "bg-gray-100 text-gray-600 ring-1 ring-gray-200";
-        }
-    };
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-6">
@@ -83,7 +64,7 @@ export default function EnrolledCourses({ courses, semester = "Spring 2026" }: E
                                         </span>
                                     </td>
                                     <td className="py-3.5 px-4 text-center">
-                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(course.status)}`}>
+                                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${getEnrollmentStatusColor(course.status)}`}>
                                             {course.status}
                                         </span>
                                     </td>

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EnrolledCourseRepository extends JpaRepository<EnrolledCourse, Long> {
@@ -15,4 +16,5 @@ public interface EnrolledCourseRepository extends JpaRepository<EnrolledCourse, 
     List<EnrolledCourse> findByCourse(Course course);
 
     boolean existsByStudentAndCourse(User student, Course course);
+    Optional<EnrolledCourse> findById(Long id);
 }

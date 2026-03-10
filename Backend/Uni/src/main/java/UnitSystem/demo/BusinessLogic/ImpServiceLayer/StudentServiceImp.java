@@ -19,6 +19,8 @@ import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.StudentRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -74,13 +76,15 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
+    @Cacheable(value = "studentsCache", key = "'allStudents'")
     public List<StudentResponse> getAllStudents() {
         return studentRepository.findAll().stream()
                 .map(this::mapToStudentResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Cacheable(value = "studentsCache", key = "'studentById:' + #studentId")
     public StudentResponse getStudentById(Long studentId) {
         return studentRepository.findById(studentId)
                 .map(this::mapToStudentResponse)
@@ -88,12 +92,14 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
+    @Cacheable(value = "studentsCache", key = "'studentByUserName:' + #userName")
     public StudentResponse getStudentByUserName(String userName) {
         Student student = studentRepository.findByUserName(userName);
         return student != null ? mapToStudentResponse(student) : null;
     }
 
     @Override
+    @CacheEvict(value = "studentsCache", allEntries = true)
     public StudentResponse createStudent(StudentRequest studentRequest) {
         Student student = mapToStudent(studentRequest);
         studentRepository.save(student);
@@ -101,6 +107,7 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
+    @CacheEvict(value = "studentsCache", allEntries = true)
     public StudentResponse updateStudent(Long studentId, StudentRequest studentRequest) {
         Student existingStudent = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -134,6 +141,7 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
+    @CacheEvict(value = "studentsCache", allEntries = true)
     public void deleteStudent(Long studentId) {
         studentRepository.deleteById(studentId);
     }
@@ -188,6 +196,7 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
+    @Cacheable(value = "studentsCache", key = "'studentDetails:' + #userDetailsRequest.userId")
     public StudentDetailsResponse getStudentDetails(UserDetailsRequest userDetailsRequest) {
         Student student = studentRepository.findById(userDetailsRequest.getUserId())
                 .orElseThrow(

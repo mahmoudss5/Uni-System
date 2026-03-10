@@ -34,7 +34,9 @@ export function removeUserCache(queryClient: QueryClient) {
     queryClient.removeQueries({ queryKey: ["user"] });
 }
 export function removeToken() {
-    localStorage.removeItem(Token);
+    if(getToken()) {
+        localStorage.removeItem(Token);
+    }
 }
 
 export async function HandleRegister( email: string, password: string, username: string,teacherCode?: string,) {

@@ -4,26 +4,20 @@ import { ApiUrl } from "./config";
 import type { CourseRequest } from "../Interfaces/course";
 export function getBackgroundColor(department: string) {
     switch (department) {
-        case "Computer Science":
+        case "Computer_Science":
             return "bg-gradient-to-br from-blue-400 to-blue-600";
-        case "Mathematics":
+        case "Information_Systems":
             return "bg-gradient-to-br from-green-400 to-green-600";
-        case "Physics":
-            return "bg-gradient-to-br from-red-400 to-red-600";
-        case "Chemistry":
-            return "bg-gradient-to-br from-yellow-400 to-yellow-600";
-        case "Information Systems":
-            return "bg-gradient-to-br from-purple-400 to-purple-600";
-        case "Software Engineering":
+        case "Software_Engineering":
             return "bg-gradient-to-br from-orange-400 to-orange-600";
-        case "Artificial Intelligence":
+        case "Artificial_Intelligence":
             return "bg-gradient-to-br from-pink-400 to-pink-600";
-        case "Data Science":
+        case "Data_Science":
             return "bg-gradient-to-br from-teal-400 to-teal-600";
         case "Cybersecurity":
             return "bg-gradient-to-br from-indigo-400 to-indigo-600";
     }
-    return "bg-gradient-to-br from-gray-400 to-gray-600";
+    return "bg-gradient-to-br from-indigo-400 to-indigo-600";
 }
 
 export function getDepartmentIcon(department: string) {
@@ -36,15 +30,15 @@ export function getDepartmentIcon(department: string) {
             return "⚛️";
         case "Chemistry":
             return "🧪";
-        case "Computer Science":
+        case "Computer_Science":
             return "💻";
-        case "Information Systems":
+        case "Information_Systems":
             return "📱";
-        case "Software Engineering":
+        case "Software_Engineering":
             return "👨‍💻";
-        case "Artificial Intelligence":
+        case "Artificial_Intelligence":
             return "🤖";
-        case "Data Science":
+        case "Data_Science":
             return "💻";
         case "Cybersecurity":
             return "🛡️";
@@ -64,25 +58,25 @@ export function getCourseEnrollButtonStyle(enrolledStudents: number, maxStudents
 }
 
 
-export  async function getAllCourses() {
+export async function getAllCourses() {
     try {
-        const response = await axios.get(`${ApiUrl}/api/courses`, {
+        const response = await axios.get(`${ApiUrl}/api/courses/all`, {
             headers: getAuthHeaders(),
         });
-        return response.data;
-    }catch(error){
-        if(axios.isAxiosError(error)){
-            if(error.response){
-                throw new Error(error.response.data.message);
-            }
-            if(error.request){
-                throw new Error("No response from server");
-            }
+        // Backend returns a plain array with different field names — map to the course interface
+        return (response.data as any[]).map((c) => ({
+            ...c,
+            department:  c.departmentName,
+            teacherName: c.teacherUserName,
+            credits:     c.creditHours,
+        }));
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response) throw new Error(error.response.data.message);
+            if (error.request)  throw new Error("No response from server");
         }
         throw new Error("Error fetching courses");
-        
     }
-    throw new Error("Error fetching courses");
 }
 
 export async function getCourseById(courseId: number) {
@@ -123,6 +117,7 @@ export async function createCourse(course: CourseRequest) {
         }
         throw new Error("Error creating course");
     }
+
 }
 export async function updateCourse(id:number, course: CourseRequest) {
     try {
@@ -134,6 +129,7 @@ export async function updateCourse(id:number, course: CourseRequest) {
     }catch(error){
         if(axios.isAxiosError(error)){
             if(error.response){
+                console.error("Error response:", error.response.data);
                 throw new Error(error.response.data.message);
             }
             if(error.request){
@@ -197,4 +193,25 @@ export async function getAllStudentsByCourseId(courseId: number) {
         }
         throw new Error("Error fetching students by course id");
     }
+}
+
+export async function getMostPopularCourses() {
+    try {
+        const response = await axios.get(`${ApiUrl}/api/courses/popular`, { 
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                console.error("Error response:", error.response.data);
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                console.error("No response received:", error.request);
+                throw new Error("No response from server");
+            }
+        }
+        throw new Error("Error fetching popular courses");
+    }   
 }

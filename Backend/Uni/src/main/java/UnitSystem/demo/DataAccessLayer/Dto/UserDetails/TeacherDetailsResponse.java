@@ -3,15 +3,19 @@ package UnitSystem.demo.DataAccessLayer.Dto.UserDetails;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
-@Builder
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TeacherDetailsResponse {
     private Long teacherId;
     private String name;

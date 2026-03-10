@@ -10,7 +10,8 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "department")
-public class Department {
+public class
+Department {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;

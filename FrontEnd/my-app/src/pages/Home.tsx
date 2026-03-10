@@ -6,8 +6,12 @@ import FeedBacks from "../components/Home/FeedBacks";
 import FinalSecion from "../components/Home/FinalSecion";
 import { useOutletContext } from "react-router-dom";
 import type { HomeScrollRefs } from "./RootLayOut";
-
+import { removeToken } from "../Services/authService";
+import { useEffect } from "react";
 export default function Home() {
+    useEffect(() => {
+        removeToken();
+    }, []);
     const { scrollRefToCourses, scrollRefToDepartments, scrollRefToFeedBacks } =
         useOutletContext<HomeScrollRefs>();
 

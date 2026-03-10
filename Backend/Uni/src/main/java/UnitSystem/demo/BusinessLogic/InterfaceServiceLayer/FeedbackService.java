@@ -17,6 +17,6 @@ public interface FeedbackService {
     FeedbackResponse createFeedback(FeedbackRequest feedbackRequest);
 
     FeedbackResponse updateFeedback(Long feedbackId, FeedbackRequest feedbackRequest);
-
+    List<FeedbackResponse> getRecentFeedbacks();
     void deleteFeedback(Long feedbackId);
 }

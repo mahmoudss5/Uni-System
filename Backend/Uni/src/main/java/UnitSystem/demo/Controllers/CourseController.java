@@ -22,7 +22,7 @@ public class CourseController {
     private final CourseService courseService;
 
     @Operation(summary = "Get all courses")
-    @GetMapping
+    @GetMapping("all")
     public ResponseEntity<List<CourseResponse>> getAllCourses() {
         List<CourseResponse> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);

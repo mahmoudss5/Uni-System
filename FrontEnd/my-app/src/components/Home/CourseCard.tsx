@@ -1,20 +1,10 @@
 import { motion } from "framer-motion";
 import { Users, GraduationCap, BookOpen, Award } from "lucide-react";
 import { getBackgroundColor, getCourseEnrollButtonStyle, isCourseFull, getDepartmentIcon } from "../../Services/CourseService";
-
-interface Course {
-    id: number;
-    name: string;
-    description: string;
-    department: string;
-    Teacher: string;
-    enrolledStudents: number;
-    maxStudents: number;
-    credits: number;
-}
+import type { course } from "../../Interfaces/course";
 
 interface CourseCardProps {
-    course: Course;
+    course: course;
 }
 
 export default function CourseCard({ course }: CourseCardProps) {
@@ -43,7 +33,7 @@ export default function CourseCard({ course }: CourseCardProps) {
                 <div className="space-y-3 mb-6">
                     <div className="flex items-center text-gray-700">
                         <GraduationCap className="w-5 h-5 text-blue-500 mr-3 flex-shrink-0" />
-                        <span className="text-sm font-medium truncate">{course.Teacher}</span>
+                        <span className="text-sm font-medium truncate">{course.teacherName}</span>
                     </div>
 
                     <div className="flex items-center text-gray-700">

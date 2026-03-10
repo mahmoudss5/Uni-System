@@ -1,23 +1,15 @@
 import { motion } from 'framer-motion';
-interface FeedBackCardProps {
+import { getRandomColor, getAvatarInitials } from '../../utils/avatarUtils';
 
+interface FeedBackCardProps {
     name: string;
     description: string;
     role: string;
 }
 
 export default function FeedBackCard({ name, description, role }: FeedBackCardProps) {
-    const colors: string[] = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#33A1FF', '#A133FF', '#FF3388', '#8833FF', '#3388FF', '#FF8833'];
-
-    function getRandomColor(): string {
-        return colors[Math.floor(Math.random() * colors.length)] as string;
-    }
-    function getFirstTwoLetters(name: string): string {
-        console.log(name);
-        return name.slice(0, 2).toUpperCase();
-    }
     const randomColor = getRandomColor();
-    const nameImage = getFirstTwoLetters(name);
+    const nameImage = getAvatarInitials(name);
 
     return (
         <>

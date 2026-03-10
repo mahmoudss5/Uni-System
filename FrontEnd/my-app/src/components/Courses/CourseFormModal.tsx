@@ -1,21 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { course, CourseRequest } from "../../Interfaces/course";
-
-const DEPARTMENTS = [
-    "Computer_Science",
-    "Information_Systems",
-    "Software_Engineering",
-    "Artificial_Intelligence",
-    "Data_Science",
-    "Cybersecurity",
-    "Information_Technology",
-];
-
-function toInputDate(d: string | Date | undefined): string {
-    if (!d) return "";
-    return new Date(d).toISOString().split("T")[0];
-}
+import { DEPARTMENT_VALUES } from "../../constants/departments";
+import { toInputDate } from "../../utils/dateUtils";
 
 interface Props {
     isOpen: boolean;
@@ -142,7 +129,7 @@ export function CourseFormModal({ isOpen, onClose, onSubmit, isPending, editCour
                                     <label className={labelCls}>Department *</label>
                                     <select name="departmentName" required value={form.departmentName} onChange={handleChange} className={inputCls}>
                                         <option value="">Select department</option>
-                                        {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
+                                        {DEPARTMENT_VALUES.map(d => <option key={d} value={d}>{d}</option>)}
                                     </select>
                                 </div>
 

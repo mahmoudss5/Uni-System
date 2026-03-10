@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        String userEmail;
 
         // 1. Check if token is present
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -42,7 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. Extract token
         jwt = authHeader.substring(7); // Remove "Bearer " space
-        userEmail = jwtService.extractUsername(jwt);
+        try {
+            userEmail = jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 3. Check if user is not already authenticated
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {

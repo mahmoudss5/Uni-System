@@ -1,17 +1,7 @@
-import type { TeacherCourse } from "../../Interfaces/teacher";
-
-interface TeachingCoursesProps {
-    courses: TeacherCourse[];
-    semester?: string;
-}
+import type { TeachingCoursesProps } from "../../Interfaces/dashboard";
+import { getCapacityColor } from "../../utils/courseUtils";
 
 export default function TeachingCourses({ courses, semester = "Spring 2026" }: TeachingCoursesProps) {
-    const getCapacityColor = (enrolled: number, max: number) => {
-        const ratio = enrolled / max;
-        if (ratio >= 0.9) return "bg-red-100 text-red-700";
-        if (ratio >= 0.7) return "bg-yellow-100 text-yellow-700";
-        return "bg-green-100 text-green-700";
-    };
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-6">

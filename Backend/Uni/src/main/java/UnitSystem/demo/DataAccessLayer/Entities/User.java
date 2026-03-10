@@ -49,10 +49,15 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-  private Set<UpcomingEvent> upcomingEvents;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<UpcomingEvent> upcomingEvents;
 
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Notification> notifications = new HashSet<>();
 
-
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Message> sentMessages = new HashSet<>();
 
 }

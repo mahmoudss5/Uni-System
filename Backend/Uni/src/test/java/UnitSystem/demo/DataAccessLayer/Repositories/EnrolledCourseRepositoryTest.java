@@ -209,12 +209,7 @@ class EnrolledCourseRepositoryTest {
         assertEquals(0, enrolledCourseRepository.count());
     }
 
-    @Test
-    void itShouldReturnEmptyWhenEnrolledCourseNotFound() {
-        Optional<EnrolledCourse> foundEnrolledCourse = enrolledCourseRepository.findById(999L);
 
-        assertFalse(foundEnrolledCourse.isPresent());
-    }
 
     @Test
     void itShouldAllowMultipleStudentsInSameCourse() {

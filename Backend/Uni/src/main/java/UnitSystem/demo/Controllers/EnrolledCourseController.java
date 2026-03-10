@@ -55,8 +55,7 @@ public class EnrolledCourseController {
     @Operation(summary = "Enroll student in a course")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<EnrolledCourseResponse> enrollStudentInCourse(
-            @Valid @RequestBody EnrolledCourseRequest enrolledCourseRequest) {
+    public ResponseEntity<EnrolledCourseResponse> enrollStudentInCourse(@Valid @RequestBody EnrolledCourseRequest enrolledCourseRequest) {
         EnrolledCourseResponse enrolledCourse = enrolledCourseService.enrollStudentInCourse(enrolledCourseRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(enrolledCourse);
     }

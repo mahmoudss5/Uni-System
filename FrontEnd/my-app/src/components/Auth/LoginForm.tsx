@@ -7,7 +7,7 @@ export default function LoginForm() {
     const { login, isError } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
- 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -74,12 +74,7 @@ export default function LoginForm() {
                             required
                             className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-200 hover:border-gray-400 pr-12"
                         />
-                        <button
-                            type="button"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
-                        >
-                            Show Password
-                        </button>
+                    
                     </div>
                 </div>
 

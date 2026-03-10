@@ -22,7 +22,7 @@ public class FeedbackController {
     private final FeedbackService feedbackService;
 
     @Operation(summary = "Get all feedbacks")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<FeedbackResponse>> getAllFeedbacks() {
         List<FeedbackResponse> feedbacks = feedbackService.getAllFeedbacks();
         return ResponseEntity.ok(feedbacks);
@@ -77,5 +77,12 @@ public class FeedbackController {
     public ResponseEntity<Void> deleteFeedback(@PathVariable Long id) {
         feedbackService.deleteFeedback(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "gel Recent feedbacks")
+    @GetMapping("/recent")
+    public ResponseEntity<List<FeedbackResponse>> getRecentFeedbacks() {
+        List<FeedbackResponse> feedbacks = feedbackService.getRecentFeedbacks();
+        return ResponseEntity.ok(feedbacks);
     }
 }

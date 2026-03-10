@@ -3,6 +3,7 @@ package UnitSystem.demo.Controllers;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.DepartmentService;
 import UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentsDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,8 +24,8 @@ public class DepartmentController {
 
     @Operation(summary = "Get all departments")
     @GetMapping("/all")
-    public ResponseEntity<List<DepartmentResponse>> getAllDepartments() {
-        List<DepartmentResponse> departments = departmentService.getAllDepartments();
+    public ResponseEntity<List<DepartmentsDetails>> getAllDepartments() {
+        List<DepartmentsDetails> departments = departmentService.getAllDepartments();
         return ResponseEntity.ok(departments);
     }
 

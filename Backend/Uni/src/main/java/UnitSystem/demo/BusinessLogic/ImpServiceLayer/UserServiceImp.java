@@ -15,6 +15,8 @@ import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
 import UnitSystem.demo.Security.Util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +56,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserResponse createUser(UserRequest userRequest) {
         log.info("Creating user: {}", userRequest.getUsername());
 
@@ -83,6 +86,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserResponse updateUser(UserRequest userRequest) {
         log.info("Updating user: {}", userRequest.getUsername());
 
@@ -106,6 +110,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserResponse deleteUser(Long userId) {
         log.info("Deleting user with ID: {}", userId);
 
@@ -120,6 +125,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserResponse deActivateUser(Long userId) {
         log.info("Deactivating user with ID: {}", userId);
 
@@ -134,6 +140,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserResponse deActivateCurrentUser() {
         log.info("Deactivating current user");
 
@@ -146,6 +153,7 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @CacheEvict(value = "usersCache", allEntries = true)
     public void assignRoleToUser(Long userId, RoleType roleType) {
         log.info("Assigning role {} to user with ID: {}", roleType, userId);
 
@@ -191,17 +199,20 @@ public class UserServiceImp implements UserService {
         return userRepository.save(user);
     }
 
-
-
-
+    @Override
+    public User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+    }
 
 
     @Override
+    @Cacheable(value = "usersCache", key = "'allUsers'")
     public List<UserResponse> getAllUsers() {
         log.info("Retrieving all users");
         return userRepository.findAll().stream()
                 .map(this::mapToUserResponse)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     

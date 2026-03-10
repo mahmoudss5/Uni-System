@@ -10,14 +10,7 @@ import LoadingSpinner from "../../components/common/LodingSpinner";
 import { isCompleted } from "../../utils/courseUtils";
 import { getUserName } from "../../Services/authService";
 import type { course, CourseRequest } from "../../Interfaces/course";
-
-function getSemesterLabel(date: Date = new Date()): string {
-    const month = date.getMonth() + 1;
-    const year  = date.getFullYear();
-    if (month >= 1 && month <= 5) return `Spring ${year}`;
-    if (month >= 6 && month <= 8) return `Summer ${year}`;
-    return `Fall ${year}`;
-}
+import { getSemesterLabel } from "../../utils/dateUtils";
 export function TeacherCoursesDashboard() {
     const { teacherCourses, isLoading, error } = useGetAllTeacherCourses();
     const { createCourse, isPending: isCreating } = useCreateCourse();

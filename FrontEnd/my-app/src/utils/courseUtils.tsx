@@ -95,6 +95,26 @@ export function getCourseColor(courseCode: string): CoursePalette {
     return PALETTE_MAP[prefix] ?? DEFAULT_PALETTE;
 }
 
+/* ─── status / capacity helpers ────────────────────────────────── */
+
+/** Tailwind classes for an enrollment-status badge. */
+export function getEnrollmentStatusColor(status: string): string {
+    switch (status) {
+        case "In Progress": return "bg-green-100 text-green-700 ring-1 ring-green-200";
+        case "Pending":     return "bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200";
+        case "Completed":   return "bg-blue-100 text-blue-700 ring-1 ring-blue-200";
+        default:            return "bg-gray-100 text-gray-600 ring-1 ring-gray-200";
+    }
+}
+
+/** Tailwind classes for a course-capacity badge (enrolled / max). */
+export function getCapacityColor(enrolled: number, max: number): string {
+    const ratio = enrolled / max;
+    if (ratio >= 0.9) return "bg-red-100 text-red-700";
+    if (ratio >= 0.7) return "bg-yellow-100 text-yellow-700";
+    return "bg-green-100 text-green-700";
+}
+
 /* ─── date helpers ──────────────────────────────────────────────── */
 
 export function isCompleted(endDate: string): boolean {

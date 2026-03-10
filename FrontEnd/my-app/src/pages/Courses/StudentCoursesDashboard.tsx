@@ -5,14 +5,7 @@ import LoadingSpinner from "../../components/common/LodingSpinner";
 import type { EnrolledCourseResponse } from "../../Interfaces/enrolledCourse";
 import { EnrolledCourseCard } from "../../components/Courses/EnrolledCourseCard";
 import { isCompleted } from "../../utils/courseUtils";
-
-function getSemesterLabel(date: Date = new Date()): string {
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    if (month >= 1 && month <= 5) return `Spring ${year}`;
-    if (month >= 6 && month <= 8) return `Summer ${year}`;
-    return `Fall ${year}`;
-}
+import { getSemesterLabel } from "../../utils/dateUtils";
 
 export function StudentCoursesDashboard() {
     const { enrolledCourses, isLoading, error } = useGetAllEnrolledCourses();

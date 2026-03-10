@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./pages/DashboardLayout";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { CoursesDashboard } from "./pages/Courses/CoursesDashboard";
+import Registration from "./pages/Courses/Registration";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -44,6 +45,12 @@ const router = createBrowserRouter([
           <CoursesDashboard />
           </ProtectedRoute>,
       },
+      {
+        path:'registration',
+        element: <ProtectedRoute>
+          <Registration />
+          </ProtectedRoute>,
+      }
     ],
   },
   {

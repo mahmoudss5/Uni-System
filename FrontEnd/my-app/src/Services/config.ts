@@ -10,8 +10,10 @@ export const getHeaders = () => {
 }
 
 export const getAuthHeaders = () => {
-    return {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${getToken()}`
+    const token = getToken();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
     }
+    return headers;
 }

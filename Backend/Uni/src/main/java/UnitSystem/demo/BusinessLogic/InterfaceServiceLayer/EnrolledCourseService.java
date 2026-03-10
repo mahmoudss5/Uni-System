@@ -2,6 +2,7 @@ package UnitSystem.demo.BusinessLogic.InterfaceServiceLayer;
 
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
+import UnitSystem.demo.DataAccessLayer.Entities.EnrolledCourse;
 
 import java.util.List;
 
@@ -17,4 +18,5 @@ public interface EnrolledCourseService {
     EnrolledCourseResponse enrollStudentInCourse(EnrolledCourseRequest enrolledCourseRequest);
 
     void unenrollStudentFromCourse(Long enrolledCourseId);
+    EnrolledCourse findEnrolledCourseById(Long enrolledCourseId);
 }

@@ -9,6 +9,8 @@ import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -50,6 +52,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @Cacheable(value = "eventsCache", key = "'allEvents'")
     public List<UpcomingEventResponse> getAllEvents() {
         return upcomingEventRepository.findAll().stream()
                 .map(this::mapToResponse)
@@ -57,6 +60,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @Cacheable(value = "eventsCache", key = "'upcomingEvents'")
     public List<UpcomingEventResponse> getUpcomingEvents() {
         return upcomingEventRepository.findUpcomingFromDate(LocalDateTime.now()).stream()
                 .map(this::mapToResponse)
@@ -64,6 +68,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @Cacheable(value = "eventsCache", key = "'eventsByType:' + #type")
     public List<UpcomingEventResponse> getEventsByType(String type) {
         EventType eventType = EventType.valueOf(type.toUpperCase());
         return upcomingEventRepository.findByType(eventType).stream()
@@ -72,6 +77,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @Cacheable(value = "eventsCache", key = "'eventsByUser:' + #userId")
     public List<UpcomingEventResponse> getEventsByUser(Long userId) {
         return upcomingEventRepository.findByUserId(userId).stream()
                 .map(this::mapToResponse)
@@ -79,6 +85,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @Cacheable(value = "eventsCache", key = "'eventById:' + #id")
     public UpcomingEventResponse getEventById(Long id) {
         return upcomingEventRepository.findById(id)
                 .map(this::mapToResponse)
@@ -86,6 +93,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @CacheEvict(value = "eventsCache", allEntries = true)
     public UpcomingEventResponse createEvent(UpcomingEventRequest request) {
         UpcomingEvent event = mapToEntity(request);
         upcomingEventRepository.save(event);
@@ -93,6 +101,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @CacheEvict(value = "eventsCache", allEntries = true)
     public UpcomingEventResponse updateEvent(Long id, UpcomingEventRequest request) {
         UpcomingEvent existing = upcomingEventRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Upcoming event not found with ID: " + id));
@@ -111,6 +120,7 @@ public class UpcomingEventServiceImp implements UpcomingEventService {
     }
 
     @Override
+    @CacheEvict(value = "eventsCache", allEntries = true)
     public void deleteEvent(Long id) {
         upcomingEventRepository.deleteById(id);
     }
