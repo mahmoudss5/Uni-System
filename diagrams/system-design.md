@@ -11,170 +11,197 @@ graph TB
         ReactApp[React Application]
         Browser --> ReactApp
     end
-    
+
     subgraph "Presentation Layer"
-        Router[React Router]
-        Components[React Components]
-        StateManagement[State Management]
+        Router[React Router DOM]
+        Pages[Pages — Home · Auth · Dashboard · Courses]
+        Hooks[Custom Hooks — TanStack Query]
+        Services[Services — Axios / Fetch]
+        Contexts[Contexts — Auth · Dashboard]
+        Utils[Utils · Constants · Interfaces]
         ReactApp --> Router
-        Router --> Components
-        Components --> StateManagement
+        Router --> Pages
+        Pages --> Hooks
+        Hooks --> Services
+        Pages --> Contexts
+        Pages --> Utils
     end
-    
-    subgraph "API Gateway"
-        NGINX[NGINX/Load Balancer]
-    end
-    
+
     subgraph "Backend Layer - Spring Boot"
         Controllers[REST Controllers]
+        WSController[WebSocket Controller STOMP]
         SecurityFilter[Security Filter Chain]
         JWT[JWT Authentication]
-        
+        AOPLayer[AOP Layer @TeachersOnly · @CourseTeacherOnly · @AuditLog]
+
         subgraph "Business Logic Layer"
-            Services[Service Layer]
-            Validators[Data Validators]
+            Services2[Service Implementations]
         end
-        
+
         subgraph "Data Access Layer"
             Repositories[JPA Repositories]
             Entities[Entity Models]
         end
-        
-        subgraph "Cross-Cutting Concerns"
-            Auditing[Audit Logging]
-            Caching[Cache Management]
-            ExceptionHandler[Global Exception Handler]
-        end
     end
-    
+
     subgraph "Data Layer"
         MySQL[(MySQL Database)]
         Redis[(Redis Cache)]
-        Flyway[Flyway Migration]
+        Flyway[Flyway V1–V7]
     end
-    
-    subgraph "Monitoring & Documentation"
+
+    subgraph "Documentation & Monitoring"
+        Swagger[OpenAPI / Swagger UI]
         Actuator[Spring Actuator]
-        Swagger[OpenAPI/Swagger UI]
     end
-    
-    ReactApp --> NGINX
-    NGINX --> Controllers
+
+    ReactApp -->|HTTP REST| Controllers
+    ReactApp -->|STOMP WS| WSController
     Controllers --> SecurityFilter
+    WSController --> SecurityFilter
     SecurityFilter --> JWT
-    SecurityFilter --> Controllers
-    Controllers --> Services
-    Services --> Validators
-    Services --> Repositories
+    SecurityFilter --> AOPLayer
+    AOPLayer --> Services2
+    Controllers --> Services2
+    Services2 --> Repositories
     Repositories --> Entities
     Entities --> MySQL
-    Services --> Caching
-    Caching --> Redis
-    Services --> Auditing
-    Auditing --> MySQL
+    Services2 --> Redis
     Flyway --> MySQL
-    Controllers --> ExceptionHandler
-    Controllers --> Actuator
     Controllers --> Swagger
-    
-    style Browser fill:#e1f5ff
+    Controllers --> Actuator
+
     style ReactApp fill:#61dafb
     style Controllers fill:#6db33f
-    style Services fill:#6db33f
+    style AOPLayer fill:#ff9900
+    style Services2 fill:#6db33f
     style Repositories fill:#6db33f
     style MySQL fill:#00758f
     style Redis fill:#dc382d
 ```
 
-## 2. Detailed Component Architecture
+## 2. Detailed Frontend Architecture
 
 ```mermaid
 graph TB
-    subgraph "Frontend Architecture - React + Vite"
-        subgraph "Pages"
-            HomePage[Home Page]
-            AuthPage[Auth Page]
-            ErrorPage[Error Page]
-            RootLayout[Root Layout]
-        end
-        
-        subgraph "Components"
-            subgraph "Common Components"
-                Nav[Navigation Bar]
-                Footer[Footer]
-                Spinner[Loading Spinner]
-                ProtectedRoute[Protected Route]
-            end
-            
-            subgraph "Auth Components"
-                LoginForm[Login Form]
-                RegisterForm[Register Form]
-            end
-            
-            subgraph "Home Components"
-                Welcome[Welcome Section]
-                Departments[Departments Section]
-                DeptCard[Department Card]
-                PopularCourses[Popular Courses]
-                CourseCard[Course Card]
-                Feedbacks[Feedbacks Section]
-                FeedbackCard[Feedback Card]
-                FinalSection[Final Section]
-                Indicator[Indicator Component]
-            end
-        end
-        
-        subgraph "Services"
-            CourseService[Course Service]
-            AuthService[Auth Service]
-            APIClient[API Client]
-        end
-        
-        subgraph "Utilities"
-            DummyData[Dummy Data]
-            Helpers[Helper Functions]
-        end
-        
-        subgraph "Routing"
-            AppRouter[App Router]
-            RouteConfig[Route Configuration]
-        end
+    subgraph "Pages"
+        HomePage[Home Page]
+        AuthPage[Auth Page]
+        Dashboard[Student Dashboard]
+        TeacherDashboard[Teacher Dashboard]
+        DashboardLayout[Dashboard Layout]
+        RegPage[Registration Page]
+        StudentCoursesPage[Student Courses Dashboard]
+        TeacherCoursesPage[Teacher Courses Dashboard]
     end
-    
+
+    subgraph "Dashboard Components"
+        StatsCard[Stats Card]
+        EnrolledCourses[Enrolled Courses Table]
+        TeachingCourses[Teaching Courses Table]
+        RecentAnnouncements[Recent Announcements]
+        UpcomingEvents[Upcoming Events]
+    end
+
+    subgraph "Course Components"
+        AllCourses[All Courses Grid]
+        CourseCard[Course Card]
+        EnrolledCourseCard[Enrolled Course Card]
+        TeacherCourseCard[Teacher Course Card]
+        CourseFormModal[Course Form Modal]
+        StudentsModal[Students Modal]
+    end
+
+    subgraph "Home Components"
+        Welcome[Welcome Section]
+        Departments[Departments Section]
+        PopularCourses[Popular Courses]
+        FeedBacks[Feedbacks Section]
+    end
+
+    subgraph "Common Components"
+        Nav[Nav Bar]
+        AsideNav[Aside Nav]
+        Footer[Footer]
+        ProtectedRoute[Protected Route]
+        LoadingSpinner[Loading Spinner]
+    end
+
+    subgraph "Custom Hooks"
+        CourseHooks[Course Hooks]
+        EnrollHooks[Enrollment Hooks]
+        DeptHooks[Department Hooks]
+        FeedbackHooks[Feedback Hooks]
+    end
+
+    subgraph "Services"
+        AuthSvc[authService]
+        CourseSvc[courseService]
+        EnrollSvc[enrolledCourseService]
+        DeptSvc[departmentService]
+        DashSvc[dashboardService]
+    end
+
+    subgraph "Utils & Constants"
+        courseUtils[courseUtils — palette · icons · status]
+        dateUtils[dateUtils — semester · toInputDate]
+        annUtils[announcementUtils]
+        eventUtils[eventUtils]
+        avatarUtils[avatarUtils]
+        deptConst[constants/departments]
+    end
+
+    subgraph "Contexts"
+        AuthCtx[AuthContext]
+        DashCtx[DashboardContext]
+    end
+
+    DashboardLayout --> Dashboard
+    DashboardLayout --> TeacherDashboard
+    DashboardLayout --> RegPage
+    DashboardLayout --> StudentCoursesPage
+    DashboardLayout --> TeacherCoursesPage
+
+    Dashboard --> StatsCard
+    Dashboard --> EnrolledCourses
+    Dashboard --> RecentAnnouncements
+    Dashboard --> UpcomingEvents
+
+    TeacherDashboard --> StatsCard
+    TeacherDashboard --> TeachingCourses
+
+    RegPage --> AllCourses
+    AllCourses --> CourseCard
+    StudentCoursesPage --> EnrolledCourseCard
+    TeacherCoursesPage --> TeacherCourseCard
+    TeacherCoursesPage --> CourseFormModal
+
     HomePage --> Welcome
     HomePage --> Departments
     HomePage --> PopularCourses
-    HomePage --> Feedbacks
-    HomePage --> FinalSection
-    
-    Departments --> DeptCard
-    PopularCourses --> CourseCard
-    Feedbacks --> FeedbackCard
-    
-    AuthPage --> LoginForm
-    AuthPage --> RegisterForm
-    
-    RootLayout --> Nav
-    RootLayout --> Footer
-    
-    LoginForm --> AuthService
-    RegisterForm --> AuthService
-    PopularCourses --> CourseService
-    
-    CourseService --> APIClient
-    AuthService --> APIClient
-    
-    APIClient --> Helpers
-    
-    AppRouter --> RouteConfig
-    RouteConfig --> HomePage
-    RouteConfig --> AuthPage
-    RouteConfig --> ProtectedRoute
-    
-    style HomePage fill:#61dafb
-    style AuthPage fill:#61dafb
-    style CourseService fill:#ffa500
-    style APIClient fill:#ffa500
+    HomePage --> FeedBacks
+
+    CourseHooks --> CourseSvc
+    EnrollHooks --> EnrollSvc
+    DeptHooks --> DeptSvc
+    FeedbackHooks --> DashSvc
+
+    EnrolledCourses --> courseUtils
+    TeachingCourses --> courseUtils
+    TeacherCourseCard --> courseUtils
+    StudentCoursesPage --> dateUtils
+    TeacherCoursesPage --> dateUtils
+    CourseFormModal --> dateUtils
+    CourseFormModal --> deptConst
+    RegPage --> deptConst
+    RecentAnnouncements --> annUtils
+    UpcomingEvents --> eventUtils
+    FeedBacks --> avatarUtils
+
+    style AuthCtx fill:#f4a261
+    style DashCtx fill:#f4a261
+    style courseUtils fill:#a8dadc
+    style dateUtils fill:#a8dadc
 ```
 
 ## 3. Backend Layer Architecture
@@ -182,93 +209,103 @@ graph TB
 ```mermaid
 graph TB
     subgraph "Controller Layer"
-        AuthController[Auth Controller]
-        UserController[User Controller]
-        StudentController[Student Controller]
-        TeacherController[Teacher Controller]
-        CourseController[Course Controller]
-        EnrollController[Enrolled Course Controller]
-        DeptController[Department Controller]
-        FeedbackController[Feedback Controller]
-        AuditController[Audit Log Controller]
+        AuthCtrl[Auth Controller]
+        UserCtrl[User Controller]
+        StudentCtrl[Student Controller]
+        TeacherCtrl[Teacher Controller]
+        CourseCtrl[Course Controller]
+        EnrollCtrl[Enrolled Course Controller]
+        DeptCtrl[Department Controller]
+        FeedbackCtrl[Feedback Controller]
+        AuditCtrl[Audit Log Controller]
+        EventCtrl[Upcoming Event Controller]
+        MsgCtrl[Message Controller]
+        NotifCtrl[Notification Controller]
+        WSCtrl[WebSocket Controller]
     end
-    
+
+    subgraph "AOP Layer"
+        SecurityAspect[SecurityAspect @Before]
+        AuditAspect[AuditLogAspect @After]
+        TeachersOnly[@TeachersOnly]
+        CourseTeacherOnly[@CourseTeacherOnly]
+        AuditLog[@AuditLog]
+        SecurityAspect --> TeachersOnly
+        SecurityAspect --> CourseTeacherOnly
+        AuditAspect --> AuditLog
+    end
+
     subgraph "Service Layer"
-        subgraph "Service Interfaces"
-            IAuthService[Auth Service Interface]
-            IUserService[User Service Interface]
-            IStudentService[Student Service Interface]
-            ITeacherService[Teacher Service Interface]
-            ICourseService[Course Service Interface]
-            IEnrollService[Enrolled Course Service Interface]
-            IDeptService[Department Service Interface]
-            IFeedbackService[Feedback Service Interface]
-            IAuditService[Audit Log Service Interface]
-        end
-        
-        subgraph "Service Implementations"
-            AuthServiceImpl[Auth Service Impl]
-            UserServiceImpl[User Service Impl]
-            StudentServiceImpl[Student Service Impl]
-            TeacherServiceImpl[Teacher Service Impl]
-            CourseServiceImpl[Course Service Impl]
-            EnrollServiceImpl[Enrolled Course Service Impl]
-            DeptServiceImpl[Department Service Impl]
-            FeedbackServiceImpl[Feedback Service Impl]
-            AuditServiceImpl[Audit Log Service Impl]
-        end
+        AuthSvc[Auth Service]
+        UserSvc[User Service]
+        StudentSvc[Student Service]
+        TeacherSvc[Teacher Service]
+        CourseSvc[Course Service]
+        EnrollSvc[Enrolled Course Service]
+        DeptSvc[Department Service]
+        FeedbackSvc[Feedback Service]
+        AuditSvc[Audit Log Service]
+        EventSvc[Upcoming Event Service]
+        MsgSvc[Message Service]
+        NotifSvc[Notification Service]
     end
-    
+
     subgraph "Repository Layer"
-        UserRepo[User Repository]
-        StudentRepo[Student Repository]
-        TeacherRepo[Teacher Repository]
-        CourseRepo[Course Repository]
-        EnrollRepo[Enrolled Course Repository]
-        DeptRepo[Department Repository]
-        FeedbackRepo[Feedback Repository]
-        AuditRepo[Audit Log Repository]
-        RoleRepo[Role Repository]
+        UserRepo[User Repo]
+        StudentRepo[Student Repo]
+        TeacherRepo[Teacher Repo]
+        CourseRepo[Course Repo]
+        EnrollRepo[Enrolled Course Repo]
+        DeptRepo[Department Repo]
+        FeedbackRepo[Feedback Repo]
+        AuditRepo[Audit Log Repo]
+        EventRepo[Upcoming Event Repo]
+        MsgRepo[Message Repo]
+        NotifRepo[Notification Repo]
+        RoleRepo[Role Repo]
     end
-    
-    AuthController --> IAuthService
-    UserController --> IUserService
-    StudentController --> IStudentService
-    TeacherController --> ITeacherService
-    CourseController --> ICourseService
-    EnrollController --> IEnrollService
-    DeptController --> IDeptService
-    FeedbackController --> IFeedbackService
-    AuditController --> IAuditService
-    
-    IAuthService --> AuthServiceImpl
-    IUserService --> UserServiceImpl
-    IStudentService --> StudentServiceImpl
-    ITeacherService --> TeacherServiceImpl
-    ICourseService --> CourseServiceImpl
-    IEnrollService --> EnrollServiceImpl
-    IDeptService --> DeptServiceImpl
-    IFeedbackService --> FeedbackServiceImpl
-    IAuditService --> AuditServiceImpl
-    
-    AuthServiceImpl --> UserRepo
-    AuthServiceImpl --> RoleRepo
-    UserServiceImpl --> UserRepo
-    StudentServiceImpl --> StudentRepo
-    TeacherServiceImpl --> TeacherRepo
-    CourseServiceImpl --> CourseRepo
-    CourseServiceImpl --> DeptRepo
-    CourseServiceImpl --> TeacherRepo
-    EnrollServiceImpl --> EnrollRepo
-    EnrollServiceImpl --> StudentRepo
-    EnrollServiceImpl --> CourseRepo
-    DeptServiceImpl --> DeptRepo
-    FeedbackServiceImpl --> FeedbackRepo
-    AuditServiceImpl --> AuditRepo
-    
-    style AuthController fill:#6db33f
-    style AuthServiceImpl fill:#6db33f
-    style UserRepo fill:#00758f
+
+    AuthCtrl --> AuthSvc
+    UserCtrl --> UserSvc
+    StudentCtrl --> StudentSvc
+    TeacherCtrl --> TeacherSvc
+    CourseCtrl --> AOPLayer
+    EnrollCtrl --> AOPLayer
+    DeptCtrl --> DeptSvc
+    FeedbackCtrl --> FeedbackSvc
+    AuditCtrl --> AuditSvc
+    EventCtrl --> EventSvc
+    MsgCtrl --> MsgSvc
+    NotifCtrl --> NotifSvc
+    WSCtrl --> NotifSvc
+
+    AOPLayer[AOP Layer] --> CourseSvc
+    AOPLayer --> EnrollSvc
+
+    AuthSvc --> UserRepo
+    AuthSvc --> RoleRepo
+    UserSvc --> UserRepo
+    StudentSvc --> StudentRepo
+    TeacherSvc --> TeacherRepo
+    CourseSvc --> CourseRepo
+    CourseSvc --> DeptRepo
+    CourseSvc --> TeacherRepo
+    EnrollSvc --> EnrollRepo
+    EnrollSvc --> StudentRepo
+    EnrollSvc --> CourseRepo
+    DeptSvc --> DeptRepo
+    FeedbackSvc --> FeedbackRepo
+    AuditSvc --> AuditRepo
+    EventSvc --> EventRepo
+    MsgSvc --> MsgRepo
+    NotifSvc --> NotifRepo
+    NotifSvc --> UserRepo
+
+    style AuthCtrl fill:#6db33f
+    style AOPLayer fill:#ff9900
+    style MsgCtrl fill:#e63946
+    style NotifCtrl fill:#e63946
+    style WSCtrl fill:#e63946
 ```
 
 ## 4. Database Schema Architecture
@@ -280,12 +317,17 @@ erDiagram
     USERS ||--o| STUDENTS : extends
     USERS ||--o| TEACHERS : extends
     USERS ||--o{ FEEDBACKS : submits
+    USERS ||--o{ AUDIT_LOGS : logged_by
+    USERS ||--o{ UPCOMING_EVENTS : owns
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ MESSAGES : sends
     STUDENTS ||--o{ ENROLLED_COURSES : enrolls
     TEACHERS ||--o{ COURSES : teaches
     DEPARTMENT ||--o{ COURSES : contains
     COURSES ||--o{ ENROLLED_COURSES : has
-    USERS ||--o{ AUDIT_LOGS : logged_by
-    
+    COURSES ||--o{ ANNOUNCEMENTS : has
+    COURSES ||--o{ MESSAGES : contains
+
     USERS {
         bigint id PK
         varchar user_name UK
@@ -294,52 +336,63 @@ erDiagram
         boolean active
         timestamp created_at
     }
-    
+
     ROLES {
         bigint id PK
         varchar role_name UK
     }
-    
+
     USER_ROLES {
         bigint user_id FK
         bigint role_id FK
     }
-    
+
     STUDENTS {
         bigint user_id PK_FK
         decimal gpa
         int enrollment_year
         int total_credits
     }
-    
+
     TEACHERS {
         bigint user_id PK_FK
         varchar office_location
         decimal salary
     }
-    
+
     DEPARTMENT {
         bigint id PK
         varchar dep_name UK
     }
-    
+
     COURSES {
         bigint id PK
         varchar course_name UK
-        bigint course_dep FK
-        int credits
+        varchar course_code UK
         text course_description
-        int capacity
+        date start_date
+        date end_date
+        int max_students
+        int credits
+        bigint course_dep FK
         bigint teacher_id FK
     }
-    
+
     ENROLLED_COURSES {
         bigint id PK
         bigint student_id FK
         bigint course_id FK
         timestamp created_at
     }
-    
+
+    ANNOUNCEMENTS {
+        bigint id PK
+        bigint course_id FK
+        varchar title
+        text description
+        timestamp created_at
+    }
+
     FEEDBACKS {
         bigint id PK
         bigint user_id FK
@@ -348,7 +401,7 @@ erDiagram
         timestamp created_at
         timestamp updated_at
     }
-    
+
     AUDIT_LOGS {
         bigint id PK
         bigint user_id FK
@@ -356,6 +409,36 @@ erDiagram
         varchar entity_name
         text details
         timestamp created_at
+    }
+
+    UPCOMING_EVENTS {
+        bigint id PK
+        bigint user_id FK
+        varchar title
+        varchar subtitle
+        timestamp event_date
+        varchar type
+        timestamp created_at
+    }
+
+    NOTIFICATIONS {
+        bigint id PK
+        bigint user_id FK
+        varchar title
+        text message
+        varchar type
+        boolean is_read
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    MESSAGES {
+        bigint id PK
+        bigint course_id FK
+        bigint sender_id FK
+        text content
+        timestamp created_at
+        timestamp updated_at
     }
 ```
 
@@ -366,355 +449,237 @@ graph TB
     subgraph "Client Request Flow"
         Client[Client Request]
         HTTPRequest[HTTP Request with JWT]
+        WSRequest[WebSocket CONNECT with JWT]
     end
-    
+
     subgraph "Security Filter Chain"
         CorsFilter[CORS Filter]
         JWTFilter[JWT Authentication Filter]
-        AuthFilter[Authentication Filter]
-        AuthzFilter[Authorization Filter]
+        WSInterceptor[WebSocket Auth Interceptor]
     end
-    
-    subgraph "Authentication Layer"
+
+    subgraph "Authentication"
         JWTService[JWT Service]
         UserDetailsService[Custom UserDetails Service]
         PasswordEncoder[BCrypt Password Encoder]
     end
-    
-    subgraph "Authorization Layer"
-        RoleChecker[Role-Based Access Control]
-        PermissionChecker[Permission Checker]
+
+    subgraph "AOP Authorization"
+        SecurityAspect[SecurityAspect @Before]
+        TeachersOnly[@TeachersOnly — role check]
+        CourseTeacherOnly[@CourseTeacherOnly — ownership check]
     end
-    
+
     subgraph "Protected Resources"
         Controllers[REST Controllers]
-        SecuredEndpoints[Secured Endpoints]
+        WSEndpoint[STOMP WebSocket Endpoint]
     end
-    
+
     Client --> HTTPRequest
+    Client --> WSRequest
     HTTPRequest --> CorsFilter
     CorsFilter --> JWTFilter
     JWTFilter --> JWTService
-    JWTService --> |Valid Token| AuthFilter
-    JWTService --> |Invalid Token| Reject[401 Unauthorized]
-    AuthFilter --> UserDetailsService
-    UserDetailsService --> |Load User| AuthzFilter
-    AuthzFilter --> RoleChecker
-    RoleChecker --> PermissionChecker
-    PermissionChecker --> |Authorized| Controllers
-    PermissionChecker --> |Unauthorized| Reject2[403 Forbidden]
-    Controllers --> SecuredEndpoints
-    
-    subgraph "Security Configuration"
-        SecurityConfig[Security Configuration]
-        PublicEndpoints[Public Endpoints]
-        ProtectedEndpoints[Protected Endpoints]
+    JWTService --> |Valid| Controllers
+    JWTService --> |Invalid| Reject[401 Unauthorized]
+    Controllers --> SecurityAspect
+    SecurityAspect --> TeachersOnly
+    SecurityAspect --> CourseTeacherOnly
+    TeachersOnly --> |Denied| Reject2[403 Forbidden]
+    CourseTeacherOnly --> |Denied| Reject2
+
+    WSRequest --> WSInterceptor
+    WSInterceptor --> JWTService
+    JWTService --> |Valid WS| WSEndpoint
+    JWTService --> |Invalid WS| RejectWS[WS Connection Rejected]
+
+    subgraph "Public Endpoints"
+        PublicAPI[/api/auth/** · /api/courses/popular · /api/departments/all]
+        SwaggerUI[/swagger-ui/** · /v3/api-docs/**]
     end
-    
-    SecurityConfig --> PublicEndpoints
-    SecurityConfig --> ProtectedEndpoints
-    PublicEndpoints --> |/api/auth/**| AllowAccess[Allow Access]
-    ProtectedEndpoints --> |/api/**| AuthzFilter
-    
+
     style JWTFilter fill:#ff6b6b
-    style RoleChecker fill:#ff6b6b
+    style SecurityAspect fill:#ff9900
     style Reject fill:#ff0000
     style Reject2 fill:#ff0000
+    style RejectWS fill:#ff0000
 ```
 
-## 6. Caching Strategy Architecture
+## 6. Real-time Messaging Architecture (WebSocket)
+
+```mermaid
+sequenceDiagram
+    participant Client as React Client
+    participant WSInterceptor as WS Auth Interceptor
+    participant Broker as STOMP Message Broker
+    participant WSController as WebSocket Controller
+    participant NotifSvc as Notification Service
+    participant MsgSvc as Message Service
+    participant DB as MySQL
+
+    Note over Client,DB: WebSocket Connection
+    Client->>WSInterceptor: CONNECT (Authorization: Bearer JWT)
+    WSInterceptor->>WSInterceptor: Validate JWT
+    WSInterceptor-->>Client: CONNECTED
+
+    Note over Client,DB: Subscribe to Course Chat
+    Client->>Broker: SUBSCRIBE /topic/course/{courseId}
+
+    Note over Client,DB: Subscribe to Personal Notifications
+    Client->>Broker: SUBSCRIBE /user/{userId}/queue/notifications
+
+    Note over Client,DB: Send Chat Message (REST)
+    Client->>MsgSvc: POST /api/messages
+    MsgSvc->>DB: INSERT INTO messages
+    MsgSvc->>Broker: convertAndSend /topic/course/{courseId}
+    Broker-->>Client: MESSAGE (new chat message)
+
+    Note over Client,DB: Push Notification
+    WSController->>NotifSvc: sendNotificationToUser(userId, payload)
+    NotifSvc->>DB: INSERT INTO notifications
+    NotifSvc->>Broker: convertAndSendToUser /queue/notifications
+    Broker-->>Client: MESSAGE (notification)
+```
+
+## 7. Caching Strategy Architecture
 
 ```mermaid
 graph LR
     subgraph "Client Request"
         Request[HTTP Request]
     end
-    
+
     subgraph "Controller Layer"
         Controller[Controller]
     end
-    
+
     subgraph "Service Layer with Caching"
         Service[Service]
         CacheCheck{Cache Hit?}
     end
-    
+
     subgraph "Cache Layer"
         Redis[(Redis Cache)]
-        CacheKey[Cache Key Generator]
         TTL[TTL Manager]
     end
-    
+
     subgraph "Database Layer"
         Repository[Repository]
         DB[(MySQL Database)]
     end
-    
+
     Request --> Controller
     Controller --> Service
     Service --> CacheCheck
     CacheCheck --> |Yes| Redis
-    Redis --> |Return Cached Data| Service
+    Redis --> |Cached Data| Service
     CacheCheck --> |No| Repository
     Repository --> DB
     DB --> Repository
     Repository --> Service
-    Service --> CacheKey
-    CacheKey --> Redis
+    Service --> Redis
     Redis --> TTL
-    TTL --> Redis
     Service --> Controller
     Controller --> Response[HTTP Response]
-    
+
     subgraph "Cache Invalidation"
-        UpdateOperation[Update/Delete Operation]
-        InvalidateCache[Invalidate Cache]
+        Mutation[Create / Update / Delete]
+        Invalidate[Evict Cache Entry]
     end
-    
-    UpdateOperation --> InvalidateCache
-    InvalidateCache --> Redis
-    
+
+    Mutation --> Invalidate
+    Invalidate --> Redis
+
     style Redis fill:#dc382d
     style DB fill:#00758f
     style CacheCheck fill:#ffa500
 ```
 
-## 7. API Structure & Endpoints
+## 8. AOP Cross-Cutting Concerns
 
 ```mermaid
 graph TB
-    subgraph "Public Endpoints"
-        AuthAPI[/api/auth]
-        Login[POST /login]
-        Register[POST /register]
-        
-        AuthAPI --> Login
-        AuthAPI --> Register
+    subgraph "Security Annotations"
+        TA[@TeachersOnly]
+        CTA[@CourseTeacherOnly]
     end
-    
-    subgraph "User Management"
-        UserAPI[/api/users]
-        GetAllUsers[GET /]
-        GetUserById[GET /{id}]
-        CreateUser[POST /]
-        UpdateUser[PUT /{id}]
-        DeleteUser[DELETE /{id}]
-        
-        UserAPI --> GetAllUsers
-        UserAPI --> GetUserById
-        UserAPI --> CreateUser
-        UserAPI --> UpdateUser
-        UserAPI --> DeleteUser
+
+    subgraph "Audit Annotation"
+        AL[@AuditLog]
     end
-    
-    subgraph "Student Management"
-        StudentAPI[/api/students]
-        GetAllStudents[GET /]
-        GetStudentById[GET /{id}]
-        GetStudentByUsername[GET /username/{userName}]
-        CreateStudent[POST /]
-        UpdateStudent[PUT /{id}]
-        DeleteStudent[DELETE /{id}]
-        
-        StudentAPI --> GetAllStudents
-        StudentAPI --> GetStudentById
-        StudentAPI --> GetStudentByUsername
-        StudentAPI --> CreateStudent
-        StudentAPI --> UpdateStudent
-        StudentAPI --> DeleteStudent
+
+    subgraph "Aspects"
+        SA[SecurityAspect — @Before]
+        ALA[AuditLogAspect — @After]
     end
-    
-    subgraph "Teacher Management"
-        TeacherAPI[/api/teachers]
-        GetAllTeachers[GET /]
-        GetTeacherById[GET /{id}]
-        CreateTeacher[POST /]
-        UpdateTeacher[PUT /{id}]
-        DeleteTeacher[DELETE /{id}]
-        
-        TeacherAPI --> GetAllTeachers
-        TeacherAPI --> GetTeacherById
-        TeacherAPI --> CreateTeacher
-        TeacherAPI --> UpdateTeacher
-        TeacherAPI --> DeleteTeacher
+
+    subgraph "Enforcement"
+        RoleCheck[Check user has TEACHER role via SecurityContext]
+        OwnerCheck[Check user is teacher of the targeted course]
+        LogAction[Persist action details to audit_logs table]
     end
-    
-    subgraph "Course Management"
-        CourseAPI[/api/courses]
-        GetAllCourses[GET /]
-        GetPopularCourses[GET /popular/{topN}]
-        GetCourseById[GET /{id}]
-        CreateCourse[POST /]
-        UpdateCourse[PUT /{id}]
-        DeleteCourse[DELETE /{id}]
-        
-        CourseAPI --> GetAllCourses
-        CourseAPI --> GetPopularCourses
-        CourseAPI --> GetCourseById
-        CourseAPI --> CreateCourse
-        CourseAPI --> UpdateCourse
-        CourseAPI --> DeleteCourse
-    end
-    
-    subgraph "Enrollment Management"
-        EnrollAPI[/api/enrolled-courses]
-        GetAllEnrollments[GET /]
-        GetEnrollmentById[GET /{id}]
-        CreateEnrollment[POST /]
-        DeleteEnrollment[DELETE /{id}]
-        
-        EnrollAPI --> GetAllEnrollments
-        EnrollAPI --> GetEnrollmentById
-        EnrollAPI --> CreateEnrollment
-        EnrollAPI --> DeleteEnrollment
-    end
-    
-    subgraph "Department Management"
-        DeptAPI[/api/departments]
-        GetAllDepts[GET /]
-        GetDeptById[GET /{id}]
-        CreateDept[POST /]
-        UpdateDept[PUT /{id}]
-        DeleteDept[DELETE /{id}]
-        
-        DeptAPI --> GetAllDepts
-        DeptAPI --> GetDeptById
-        DeptAPI --> CreateDept
-        DeptAPI --> UpdateDept
-        DeptAPI --> DeleteDept
-    end
-    
-    subgraph "Feedback Management"
-        FeedbackAPI[/api/feedbacks]
-        GetAllFeedbacks[GET /]
-        GetFeedbackById[GET /{id}]
-        CreateFeedback[POST /]
-        UpdateFeedback[PUT /{id}]
-        DeleteFeedback[DELETE /{id}]
-        
-        FeedbackAPI --> GetAllFeedbacks
-        FeedbackAPI --> GetFeedbackById
-        FeedbackAPI --> CreateFeedback
-        FeedbackAPI --> UpdateFeedback
-        FeedbackAPI --> DeleteFeedback
-    end
-    
-    subgraph "Audit Management"
-        AuditAPI[/api/audit-logs]
-        GetAllAudits[GET /]
-        GetAuditById[GET /{id}]
-        
-        AuditAPI --> GetAllAudits
-        AuditAPI --> GetAuditById
-    end
+
+    TA --> SA
+    CTA --> SA
+    AL --> ALA
+    SA --> RoleCheck
+    SA --> OwnerCheck
+    ALA --> LogAction
+
+    RoleCheck --> |Fail| Err403[throw RuntimeException 403]
+    OwnerCheck --> |Fail| Err403
+    LogAction --> AuditRepo[(Audit Log Repository)]
+
+    style SA fill:#ff9900
+    style ALA fill:#ff9900
+    style Err403 fill:#ff0000
 ```
 
-## 8. Deployment Architecture
+## 9. API Structure & Endpoints
 
 ```mermaid
 graph TB
-    subgraph "Development Environment"
-        DevMachine[Developer Machine]
-        LocalDB[(Local MySQL)]
-        LocalRedis[(Local Redis)]
-        
-        DevMachine --> LocalDB
-        DevMachine --> LocalRedis
+    subgraph "Public"
+        AuthAPI[/api/auth] --> Login[POST /login]
+        AuthAPI --> Register[POST /register]
+        PopularAPI[GET /api/courses/popular]
+        DeptAllAPI[GET /api/departments/all]
     end
-    
-    subgraph "Version Control"
-        GitHub[GitHub Repository]
+
+    subgraph "User & Profile Management"
+        UserAPI[/api/users — CRUD + roles]
+        StudentAPI[/api/students — CRUD + details]
+        TeacherAPI[/api/teachers — CRUD + details]
     end
-    
-    subgraph "CI/CD Pipeline"
-        GitHubActions[GitHub Actions]
-        BuildProcess[Build Process]
-        TestSuite[Test Suite]
-        DockerBuild[Docker Build]
+
+    subgraph "Academic"
+        CourseAPI[/api/courses — CRUD + popular]
+        DeptAPI[/api/departments — CRUD]
+        EnrollAPI[/api/enrolled-courses — enroll / drop]
+        AnnAPI[/api/announcements — CRUD]
     end
-    
-    subgraph "Container Registry"
-        DockerHub[Docker Hub / Registry]
+
+    subgraph "Communication"
+        MsgAPI[/api/messages — course chat REST]
+        NotifAPI[/api/notifications — inbox CRUD + read]
+        WSEndpoint[ws://host/ws — STOMP broker]
     end
-    
-    subgraph "Production Environment"
-        subgraph "Load Balancer"
-            LB[NGINX Load Balancer]
-        end
-        
-        subgraph "Application Servers"
-            App1[Spring Boot Instance 1]
-            App2[Spring Boot Instance 2]
-            App3[Spring Boot Instance N]
-        end
-        
-        subgraph "Database Cluster"
-            MasterDB[(MySQL Master)]
-            SlaveDB1[(MySQL Slave 1)]
-            SlaveDB2[(MySQL Slave 2)]
-        end
-        
-        subgraph "Cache Cluster"
-            RedisCluster[(Redis Cluster)]
-        end
-        
-        subgraph "Static Assets"
-            CDN[CDN for React App]
-            S3[S3 / Static Storage]
-        end
-        
-        subgraph "Monitoring"
-            Prometheus[Prometheus]
-            Grafana[Grafana Dashboard]
-            Logs[Centralized Logging]
-        end
+
+    subgraph "Tracking"
+        EventAPI[/api/events — upcoming events CRUD]
+        FeedbackAPI[/api/feedbacks — CRUD]
+        AuditAPI[/api/audit-logs — read + filter]
     end
-    
-    DevMachine --> GitHub
-    GitHub --> GitHubActions
-    GitHubActions --> BuildProcess
-    BuildProcess --> TestSuite
-    TestSuite --> DockerBuild
-    DockerBuild --> DockerHub
-    DockerHub --> LB
-    
-    LB --> App1
-    LB --> App2
-    LB --> App3
-    
-    App1 --> MasterDB
-    App2 --> MasterDB
-    App3 --> MasterDB
-    
-    MasterDB --> SlaveDB1
-    MasterDB --> SlaveDB2
-    
-    App1 --> RedisCluster
-    App2 --> RedisCluster
-    App3 --> RedisCluster
-    
-    S3 --> CDN
-    
-    App1 --> Prometheus
-    App2 --> Prometheus
-    App3 --> Prometheus
-    Prometheus --> Grafana
-    
-    App1 --> Logs
-    App2 --> Logs
-    App3 --> Logs
-    
-    style GitHub fill:#181717
-    style DockerHub fill:#2496ed
-    style LB fill:#009639
-    style MasterDB fill:#00758f
-    style RedisCluster fill:#dc382d
-    style CDN fill:#ff9900
+
+    style MsgAPI fill:#e63946
+    style NotifAPI fill:#e63946
+    style WSEndpoint fill:#e63946
 ```
 
 ## Technology Stack Summary
 
 ### Frontend Technologies
+
 - **Framework**: React 19.2.0
 - **Build Tool**: Vite 7.3.1
 - **Language**: TypeScript 5.9.3
@@ -722,46 +687,43 @@ graph TB
 - **Styling**: TailwindCSS 4.2.0
 - **Animations**: Framer Motion 12.34.3
 - **Icons**: Lucide React 0.575.0
-- **HTTP Client**: Fetch API
+- **Data Fetching**: TanStack Query (custom hooks)
+- **HTTP Client**: Fetch API / Axios via service layer
 
 ### Backend Technologies
+
 - **Framework**: Spring Boot 3.4.2
 - **Language**: Java 21
 - **Build Tool**: Maven
 - **Web**: Spring Boot Starter Web
+- **WebSocket**: Spring Boot Starter WebSocket (STOMP)
 - **Security**: Spring Security + OAuth2 Client
 - **Authentication**: JWT (jjwt 0.11.5)
 - **ORM**: Spring Data JPA + Hibernate
-- **Database**: MySQL with Flyway Migration
+- **AOP**: Spring Boot Starter AOP
+- **Database**: MySQL with Flyway Migration (V1–V7)
 - **Cache**: Spring Data Redis
 - **Validation**: Jakarta Validation
-- **AOP**: Spring Boot Starter AOP
 - **Documentation**: SpringDoc OpenAPI 2.7.0
 - **Monitoring**: Spring Boot Actuator
 - **Utilities**: Lombok 1.18.32
 
 ### Infrastructure
+
 - **Containerization**: Docker + Docker Compose
-- **Reverse Proxy**: NGINX (recommended)
-- **Database**: MySQL
+- **Database**: MySQL 8.0
 - **Cache**: Redis
-- **Monitoring**: Spring Actuator + Prometheus + Grafana (optional)
+- **Monitoring**: Spring Actuator
 
-### Development Tools
-- **Version Control**: Git
-- **API Testing**: Swagger UI / Postman
-- **Database Migration**: Flyway
-- **Hot Reload**: Spring DevTools, Vite HMR
+### Design Patterns Used
 
-## Design Patterns Used
-
-1. **Layered Architecture**: Clear separation between Controller, Service, and Repository layers
-2. **Dependency Injection**: Spring's IoC container for loose coupling
-3. **Repository Pattern**: Data access abstraction through Spring Data JPA
-4. **DTO Pattern**: Data Transfer Objects for API communication
-5. **Builder Pattern**: Lombok @Builder for entity construction
-6. **Strategy Pattern**: Different authentication strategies
-7. **Proxy Pattern**: JPA lazy loading, Spring AOP
-8. **Singleton Pattern**: Spring beans as singletons by default
-9. **Template Method Pattern**: Spring's JdbcTemplate, RestTemplate patterns
-10. **Factory Pattern**: Entity and DTO creation
+1. **Layered Architecture**: Controller → AOP → Service → Repository
+2. **Aspect-Oriented Programming**: Cross-cutting security and audit concerns via Spring AOP
+3. **Dependency Injection**: Spring IoC container
+4. **Repository Pattern**: Spring Data JPA abstraction
+5. **DTO Pattern**: Request / Response DTOs for all API boundaries
+6. **Builder Pattern**: Lombok `@Builder` for entities
+7. **Observer / Pub-Sub Pattern**: STOMP message broker for real-time events
+8. **Custom Hook Pattern**: React data-fetching hooks wrapping TanStack Query
+9. **Strategy Pattern**: Pluggable authentication (JWT + OAuth2)
+10. **Singleton Pattern**: Spring beans as singletons by default
