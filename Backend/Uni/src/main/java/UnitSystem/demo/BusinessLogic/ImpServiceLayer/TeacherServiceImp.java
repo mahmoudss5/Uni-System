@@ -179,7 +179,8 @@ public class TeacherServiceImp implements TeacherService {
                                 .userName(event.getUser() != null ? event.getUser().getUserName() : null)
                                 .createdAt(event.getCreatedAt())
                                 .build();
-        }
+        } 
+
 
         @Override
         @Cacheable(value = "teachersCache", key = "'teacherDetails:' + #userDetailsRequest.userId")

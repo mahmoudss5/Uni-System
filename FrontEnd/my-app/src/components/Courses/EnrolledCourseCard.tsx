@@ -6,6 +6,7 @@ import {
     formatCourseDate,
     CourseIcon,
 } from "../../utils/courseUtils";
+import { Link } from "react-router-dom";
 
 export function EnrolledCourseCard({ course, index = 0 }: { course: EnrolledCourseResponse; index?: number }) {
     const completed  = isCompleted(course.endDate);
@@ -122,7 +123,7 @@ export function EnrolledCourseCard({ course, index = 0 }: { course: EnrolledCour
                     whileTap={{ scale: 0.97 }}
                     className={`w-full py-2.5 rounded-xl ${p.btn} ${p.btnHover} text-white text-sm font-semibold transition-colors`}
                 >
-                    Go to Course →
+                    <Link to={`/CourseDetails/${course.courseId}`}>Go to Course →</Link>
                 </motion.button>
             </div>
         </motion.div>

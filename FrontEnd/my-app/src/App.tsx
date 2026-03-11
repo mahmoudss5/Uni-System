@@ -11,6 +11,10 @@ import DashboardLayout from "./pages/DashboardLayout";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { CoursesDashboard } from "./pages/Courses/CoursesDashboard";
 import Registration from "./pages/Courses/Registration";
+import OAuth2Callback from "./pages/OAuth2Callback";
+import CourseDetails from "./pages/CourseDetails/CourseDetails";
+import Setting from "./pages/SettingPage/Setting";
+import { Toaster } from "sonner";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -50,6 +54,12 @@ const router = createBrowserRouter([
         element: <ProtectedRoute>
           <Registration />
           </ProtectedRoute>,
+      },
+      {
+        path: "settings",
+        element: <ProtectedRoute>
+          <Setting />
+          </ProtectedRoute>,
       }
     ],
   },
@@ -70,13 +80,34 @@ const router = createBrowserRouter([
         path: "register",
         element: <RegisterFrom />,
       },
+    
     ],
   },
+  {
+    path: "/oauth2/redirect",
+    element: <OAuth2Callback />,
+  },
+  {
+    path: "/CourseDetails/:id",
+    element: <CourseDetails />,
+  },
+
+  
 ]);
 
 function App() {
   return (
+    <>
       <RouterProvider router={router} />
+      <Toaster richColors position="top-right"  closeButton={true}
+      toastOptions={{
+        style: {
+         marginTop: '100px',
+         marginRight: '0px',
+        marginLeft:'auto',
+        }}}
+      />
+    </>
   );
 }
 

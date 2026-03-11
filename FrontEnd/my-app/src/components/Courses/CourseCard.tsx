@@ -4,6 +4,7 @@ import { DEPT_THEME, DEFAULT_THEME, DEPT_ICON, deptLabel, getCapacityPercent } f
 import type { course } from "../../Interfaces/course";
 import type { EnrolledCourseResponse } from "../../Interfaces/enrolledCourse";
 
+
 export interface CourseCardProps {
     course: course;
     enrollment: EnrolledCourseResponse | undefined;

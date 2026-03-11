@@ -82,6 +82,7 @@ public class CourseServiceImp implements CourseService {
     @Override
     @Cacheable(value = "coursesCache", key = "'courseById:' + #courseId")
     public CourseResponse getCourseById(Long courseId) {
+        log.info("Fetching course with ID: " + courseId);
         return courseRepository.findById(courseId)
                 .map(this::mapToCourseResponse)
                 .orElse(null);

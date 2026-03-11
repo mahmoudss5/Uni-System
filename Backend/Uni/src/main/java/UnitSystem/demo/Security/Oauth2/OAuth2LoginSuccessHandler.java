@@ -1,7 +1,13 @@
 package UnitSystem.demo.Security.Oauth2;
 
+import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
+import UnitSystem.demo.DataAccessLayer.Entities.Role;
+import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
+import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
+import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
 import UnitSystem.demo.Security.Jwt.JwtService;
 import UnitSystem.demo.Security.User.SecurityUser;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,81 +21,80 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-    private final UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService userService;
+
+    private final UserService userService;
+    private final StudentService studentService;
+    private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
     private final JwtService jwtService;
 
     @Value("${app.frontend-url}")
-    private String frontendUrl; // this is the frontend url to redirect after success login
+    private String frontendUrl;
 
     /**
-     * the GitHub OAuth2 provider may not provide email or name, so we handle nulls
-     * the GitHub will not provide a token for us, so we generate our own JWT token after user is created/found and redirect to frontend with that token
-     * we use login as username, email as email (or fabricate one), name split into first and last name
-     * we create a new user if email not found in our system to avoid duplicates and errors that may arise from missing email
-     * btw that's not an ai comments :) , that's  a human comments :) iam just explaining it for my self in the future
-     * github response example:
-     * {
-     *   "login": "AhmedAli",
-     *   "id": 12345678,
-     *   "node_id": "MDQ6VXNlcjEyMzQ1Njc4",
-     *   "avatar_url": "https://avatars.githubusercontent.com/u/12345678?v=4",
-     *   "name": "Ahmed Ali",
-     *   "email": "ahmed@example.com", //  it can be null and in this case we will fabricate one
-     *   "location": "Cairo, Egypt",
-     *   "bio": "Java Developer",
-     *   "created_at": "2020-01-01T00:00:00Z"
-     * }
-     *  there is no token as you can see so we generate our own JWT token and redirect to frontend with it
-     *  and sense frontend is not ready for take the token from url so we need to make  a new method in frontend to handle that
+     * GitHub OAuth2 success handler.
+     * On first login: creates the user as a Student (default role) with a fabricated
+     * email when GitHub doesn't expose one, then issues our own JWT.
+     * On subsequent logins: finds the existing user and re-issues the JWT.
+     *
+     * GitHub profile attributes we care about:
+     *   login  → used as userName (unique GitHub handle)
+     *   email  → may be null if the user keeps it private → fabricate as login@github.com
+     *   name   → display name, ignored for persistence
      */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
-        OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
-        OAuth2User oAuth2User = token.getPrincipal();
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2User oAuth2User = oauthToken.getPrincipal();
+        Map<String, Object> attributes = oAuth2User.getAttributes();
 
-
-        Map<String, Object> attributes = oAuth2User.getAttributes(); // this is the map containing github user info like login, email, name, etc.
-        // we received the attributes from GitHub response
-
-        String username = (String) attributes.get("login");
-        String email = (String) attributes.get("email");
-        String fullName = (String) attributes.get("name");
+        String githubLogin = (String) attributes.get("login");
+        String email       = (String) attributes.get("email");
 
         if (email == null) {
-            email = username + "@github.com";
+            email = githubLogin + "@github.com";
         }
 
-        if (fullName == null) {
-            fullName = username;
-        }
-
-        String[] names = fullName.split(" ");
-        String firstName = names[0];
-        String lastName = names.length > 1 ? names[names.length - 1] : "";
-
-        String finalEmail = email;
-        String finalFirstName = firstName;
-        String finalLastName = lastName;
-        String finalUsername = username;
+        final String finalEmail    = email;
+        final String finalUsername = githubLogin;
 
         User user = userService.findByEmail(finalEmail).orElseGet(() -> {
-            User newUser = new User();
-            newUser.setUserName(finalUsername);
-            newUser.setEmail(finalEmail);
-            newUser.setPassword("");
-            userService.save(newUser);
-            return newUser;
+            // Avoid username collision — append _gh suffix when the GitHub login is taken
+            String resolvedUsername = finalUsername;
+            if (userRepository.existsByUserName(resolvedUsername)) {
+                resolvedUsername = resolvedUsername + "_gh";
+            }
+
+            Role studentRole = roleRepository.findByName(RoleType.Student.name())
+                    .orElseGet(() -> roleRepository.save(
+                            Role.builder().name(RoleType.Student.name()).build()));
+
+            Student newStudent = Student.builder()
+                    .userName(resolvedUsername)
+                    .email(finalEmail)
+                    .password("")
+                    .active(true)
+                    .roles(Set.of(studentRole))
+                    .gpa(BigDecimal.ZERO)
+                    .enrollmentYear(0)
+                    .totalCredits(0)
+                    .build();
+
+            studentService.saveUserAsStudent(newStudent);
+            return newStudent;
         });
 
-
         String jwtToken = jwtService.generateToken(new SecurityUser(user));
-
         String targetUrl = frontendUrl + "/oauth2/redirect?token=" + jwtToken;
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

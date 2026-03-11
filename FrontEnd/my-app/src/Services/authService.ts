@@ -10,6 +10,11 @@ import type {
 } from "../Interfaces/Auth";
 
 
+export function isAuth(){
+    const token=getToken();
+    if(!token)return false;
+    return true;
+}
 export function getUserId(): number {
     const token = getToken();
     if (!token) throw new Error("No token found");

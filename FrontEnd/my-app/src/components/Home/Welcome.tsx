@@ -1,5 +1,16 @@
 import { motion } from "framer-motion";
+import {Link, useNavigate} from "react-router-dom"
+import { isAuth } from "../../Services/authService";
 export default function Welcome({scrollToSection}: {scrollToSection: () => void}) {
+    const navigate = useNavigate();
+        const isAuthenticated = isAuth();
+        const handleExploreCourses = () => {
+            if(isAuthenticated){
+                navigate("/dashboard/courses");
+            }else{
+                navigate("/auth/login");
+            }
+        }
     return (
         <section className="w-full bg-[#1e3a8a] py-20 min-h-[calc(100vh-5rem)] overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full overflow-hidden">
@@ -52,6 +63,7 @@ export default function Welcome({scrollToSection}: {scrollToSection: () => void}
                     }}
                     className="flex gap-4">
                     <motion.button
+                        onClick={handleExploreCourses}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
                         className=" mt-8 cursor-pointer text-2xl bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-md font-semibold transition-colors">

@@ -119,8 +119,13 @@ public class NotificationServiceImp implements NotificationService {
     @Override
     public void sendNotificationToUser(NotificationRequest notificationRequest) {
         log.info("Sending notification to user ID: {}", notificationRequest.getRecipientId());
-        NotificationResponse notificationResponse = createNotification(notificationRequest);
-        simpMessagingTemplate.convertAndSendToUser(notificationResponse.getRecipientName(), "/queue/notifications", notificationResponse);
+        Notification notification = mapToNotificationEntity(notificationRequest);
+        notificationRepository.save(notification);
+        NotificationResponse notificationResponse = mapToNotificationResponse(notification);
+        simpMessagingTemplate.convertAndSendToUser(
+                notification.getRecipient().getEmail(),
+                "/queue/notifications",
+                notificationResponse);
     }
 
     @Override
@@ -148,7 +153,7 @@ public class NotificationServiceImp implements NotificationService {
         notificationRepository.saveAll(notifications);
         notifications.forEach(notification ->
                 simpMessagingTemplate.convertAndSendToUser(
-                        notification.getRecipient().getUserName(),
+                        notification.getRecipient().getEmail(),
                         "/queue/notifications",
                         mapToNotificationResponse(notification)));
     }

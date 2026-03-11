@@ -1,6 +1,7 @@
 package UnitSystem.demo.Controllers;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.NotificationService;
+import UnitSystem.demo.DataAccessLayer.Dto.Notification.Course.NotificationCourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
@@ -103,5 +104,11 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Send a notification to all enrolled students in a course")
+    @PostMapping("/course")
+    public ResponseEntity<Void> sendNotificationToCourse(@Valid @RequestBody NotificationCourseRequest notificationRequest) {
+        notificationService.sendNotificationToCourse(notificationRequest);
+        return ResponseEntity.ok().build();
+    }
 
 }

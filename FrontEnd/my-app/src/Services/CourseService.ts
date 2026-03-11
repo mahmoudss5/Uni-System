@@ -81,6 +81,7 @@ export async function getAllCourses() {
 
 export async function getCourseById(courseId: number) {
     try {
+        console.log("Fetching course with id:", courseId);
         const response = await axios.get(`${ApiUrl}/api/courses/${courseId}`, {
             headers: getAuthHeaders(),
         });

@@ -19,6 +19,7 @@ import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.StudentRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.aspectj.runtime.internal.Conversions.longValue;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentServiceImp implements StudentService {
@@ -152,7 +156,12 @@ public class StudentServiceImp implements StudentService {
                 .studentId(enrolledCourse.getStudent().getId())
                 .studentName(enrolledCourse.getStudent() instanceof Student s ? s.getUserName() : "")
                 .courseId(enrolledCourse.getCourse().getId())
+                .courseCode(enrolledCourse.getCourse().getCourseCode())
+                .credits(longValue(enrolledCourse.getCourse().getCredits()))
+                .teacherName(enrolledCourse.getCourse().getTeacher().getUserName())
                 .courseName(enrolledCourse.getCourse().getName())
+                .startDate(enrolledCourse.getCourse().getStartDate())
+                .endDate(enrolledCourse.getCourse().getEndDate())
                 .enrollmentDate(enrolledCourse.getEnrollmentDate())
                 .build();
     }
@@ -207,6 +216,7 @@ public class StudentServiceImp implements StudentService {
                         .map(this::mapToEnrolledCourseResponse)
                         .collect(Collectors.toSet())
                 : Collections.emptySet();
+
 
         // Get all announcements from student's enrolled courses
         List<AnnouncementResponse> announcements = student.getEnrolledCourses() != null

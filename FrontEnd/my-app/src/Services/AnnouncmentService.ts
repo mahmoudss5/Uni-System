@@ -23,6 +23,7 @@ export async function getAllAnnouncements() {
     throw new Error("Error fetching announcements");
 }
 
+
 export async function getAnnouncementByCourseId(courseId: number) {
     try {
         const response = await axios.get(`${ApiUrl}/api/announcements/getAllByCourseId/${courseId}`, {
