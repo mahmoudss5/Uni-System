@@ -5,6 +5,14 @@ export interface AnnouncementResponse {
     createdAt: string;
     type?: "info" | "warning" | "success" | "default";
 }
+export interface AnnouncementCourseResponse {
+    id: number;
+    title: string;
+    content: string;
+    createdAt: string;
+    courseId: number;
+}
+
 
 export interface AnnouncementContextType{
     announcements: AnnouncementResponse[];

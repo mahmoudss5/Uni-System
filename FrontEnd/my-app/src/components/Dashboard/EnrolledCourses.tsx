@@ -12,8 +12,8 @@ export default function EnrolledCourses({ courses, semester = "Spring 2026" }: E
                 </span>
             </div>
 
-            <div className="overflow-x-auto rounded-lg border border-gray-100">
-                <table className="w-full text-sm">
+            <div className="overflow-x-auto rounded-lg border border-gray-100 py-16 px-4">
+                <table className="w-full text-sm h-full">
                     <thead>
                         <tr className="bg-gray-50 text-left">
                             <th className="py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
@@ -49,7 +49,7 @@ export default function EnrolledCourses({ courses, semester = "Spring 2026" }: E
                                     key={index}
                                     className="hover:bg-blue-50/40 transition-colors duration-150"
                                 >
-                                    <td className="py-3.5 px-4 font-mono text-xs text-blue-600 font-semibold whitespace-nowrap">
+                                    <td className="py-3.5 px-4 font-mono text-sm text-blue-600 font-semibold whitespace-nowrap">
                                         {course.courseCode}
                                     </td>
                                     <td className="py-3.5 px-4 text-gray-800 font-medium">

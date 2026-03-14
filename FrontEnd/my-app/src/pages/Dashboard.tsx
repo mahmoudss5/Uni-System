@@ -8,7 +8,7 @@ import { StudentDashboardProvider, useStudentDashboard } from "../ContextsProvid
 import { getRole } from "../Services/userService";
 
 function StudentDashboardContent() {
-    const { gpa, totalCredits, enrolledCoursesCount, academicStanding, courses, announcements, events } = useStudentDashboard();
+    const { gpa, totalCredits, enrolledCoursesCount, academicStanding, courses,  events } = useStudentDashboard();
 
     return (
         <main className="flex flex-col bg-gray-100 min-h-full py-8 px-8 gap-6">
@@ -56,7 +56,7 @@ function StudentDashboardContent() {
                     <EnrolledCourses courses={courses} semester="Spring 2026" />
                 </div>
                 <div className="col-span-1 bg-white rounded-lg shadow-md p-6">
-                    <RecentAnnouncements announcements={announcements} />
+                    <RecentAnnouncements  />
                 </div>
             </div>
 

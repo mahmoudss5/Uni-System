@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import type { NotificationMessage } from "../../Interfaces/Notification";
 import { getToken, getUserId } from "../../Services/authService";
-import { webSocketService } from "../../Services/WebSocket Service";
+import { webSocketService } from "../../Services/WebSocketService";
 import {
     getNotifications,
     markNotificationAsRead as markNotificationAsReadApi,
@@ -11,19 +11,19 @@ import {
 } from "../../Services/notifications";
 
 const TYPE_ICONS: Record<string, string> = {
-    ENROLLMENT:   "🎓",
+    ENROLLMENT: "🎓",
     ANNOUNCEMENT: "📢",
     COURSE_UPDATE: "📝",
-    GRADE:        "✅",
-    SYSTEM:       "🔔",
+    GRADE: "✅",
+    SYSTEM: "🔔",
 };
 
 export const useNotifications = () => {
     const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
-    const [unreadCount, setUnreadCount]     = useState(0);
-    const [connected, setConnected]         = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [connected, setConnected] = useState(false);
 
-    const token  = getToken();
+    const token = getToken();
     const userId = getUserId();
 
     const handleNewNotification = useCallback((notification: NotificationMessage) => {
@@ -36,18 +36,22 @@ export const useNotifications = () => {
             id: notification.id.toString(),
             duration: 4000,
             icon: TYPE_ICONS[notification.type] ?? "🔔",
+            /*style: {
+                backgroundColor: "rgb(12, 61, 126)", we can use this to customize the toast style for each notification type
+                color: "white",
+                border: "1px solid rgb(12, 61, 126)",
+                borderRadius: "8px",
+                padding: "10px",
+                margin: "10px 0",
+            },*/
             closeButton: true,
         });
-    }, []);
-
-    const handleCountUpdate = useCallback((count: number) => {
-        setUnreadCount(count);
     }, []);
 
     useEffect(() => {
         if (!token || !userId) return;
 
-        webSocketService.connect(userId, handleNewNotification, handleCountUpdate, () => setConnected(true));
+        webSocketService.connect(userId, handleNewNotification, () => setConnected(true));
 
         const fetchHistory = async () => {
             try {
@@ -66,12 +70,12 @@ export const useNotifications = () => {
             webSocketService.disconnect();
             setConnected(false);
         };
-    }, [userId, token, handleNewNotification, handleCountUpdate]);
+    }, [userId, token, handleNewNotification]);
 
     const markNotificationAsRead = async (id: number) => {
         if (!token) return;
 
- 
+
         setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
         setUnreadCount((prev) => Math.max(0, prev - 1));
 
@@ -79,7 +83,7 @@ export const useNotifications = () => {
             await markNotificationAsReadApi(id);
         } catch (err) {
             console.error("Failed to mark as read:", err);
-        
+
             setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: false } : n)));
             setUnreadCount((prev) => prev + 1);
         }
@@ -88,7 +92,7 @@ export const useNotifications = () => {
     const markAllNotificationsAsRead = async () => {
         if (!token || unreadCount === 0) return;
         toast.success("All notifications marked as read");
-    
+
         setUnreadCount(0);
         setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 

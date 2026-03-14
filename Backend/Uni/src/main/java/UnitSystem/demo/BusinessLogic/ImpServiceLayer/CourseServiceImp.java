@@ -146,4 +146,9 @@ public class CourseServiceImp implements CourseService {
         return courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
     }
+
+    @Override
+    public List<String> findStudentEmailsByCourseId(Long courseId) {
+        return courseRepository.findStudentEmailsByCourseId(courseId);
+    }
 }

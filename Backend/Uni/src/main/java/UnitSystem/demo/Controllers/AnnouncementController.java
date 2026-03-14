@@ -8,10 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/announcements")
@@ -51,10 +50,10 @@ public class AnnouncementController {
     }
 
     @Operation(summary = "Get all announcements")
-    @PostMapping("/getAll")
-    public ResponseEntity<AnnouncementResponse> getAll() {
-        AnnouncementResponse announcementResponse = announcementService.getAllAnnouncements().get(0);
-        return ResponseEntity.ok(announcementResponse);
+    @GetMapping("/getAll")
+    public ResponseEntity<List<AnnouncementResponse>> getAll() {
+        List<AnnouncementResponse> announcementResponses = announcementService.getAllAnnouncements();
+        return ResponseEntity.ok(announcementResponses);
     }
 
 }

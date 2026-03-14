@@ -95,6 +95,8 @@ const router = createBrowserRouter([
   
 ]);
 
+// we add the useAnnouncementsHook to the app to get the announcements from the server 
+//TODO:now handle it in the back end and use it in the front end
 function App() {
   return (
     <>
@@ -102,8 +104,8 @@ function App() {
       <Toaster richColors position="top-right"  closeButton={true}
       toastOptions={{
         style: {
-         marginTop: '100px',
-         marginRight: '0px',
+        marginTop: '100px',
+        marginRight: '0px',
         marginLeft:'auto',
         }}}
       />

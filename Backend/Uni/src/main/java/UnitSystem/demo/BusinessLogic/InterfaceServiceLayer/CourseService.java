@@ -17,7 +17,6 @@ public interface CourseService {
     List<CourseResponse>getCoursesByDepartment(String departmentName);
      List<CourseResponse> getCoursesByTeacherId(Long teacherId);
     Teacher findCourseTeacher(Long courseId);
-
     Course getCourseEntityById(Long courseId);
-
+  List<String> findStudentEmailsByCourseId(Long courseId);
 }

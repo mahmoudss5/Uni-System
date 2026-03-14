@@ -30,5 +30,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c LEFT JOIN c.courseEnrollments e GROUP BY c ORDER BY COUNT(e) DESC")
     List<Course> findTopPopularCourses();
 
+    @Query("SELECT s.email FROM Student s JOIN EnrolledCourse ec ON s.id = ec.student.id WHERE ec.course.id = :courseId")
+    List<String> findStudentEmailsByCourseId(@Param("courseId") Long courseId);
+
 
 }
