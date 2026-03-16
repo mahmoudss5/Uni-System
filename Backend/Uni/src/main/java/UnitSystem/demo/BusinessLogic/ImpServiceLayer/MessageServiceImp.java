@@ -1,8 +1,7 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
-import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.CourseService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.MessageService;
-import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
+import UnitSystem.demo.BusinessLogic.Mappers.MessageMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Message.MessageRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Message.MessageResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Message;
@@ -11,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,69 +22,55 @@ import java.util.stream.Collectors;
 public class MessageServiceImp implements MessageService {
 
     private final MessageRepository messageRepository;
-    private final UserService userService;
-    private final CourseService courseService;
-
-    private Message MapToMessageEntity(MessageRequest messageRequest) {
-        var user = userService.findUserById(messageRequest.getSenderId());
-        var course = courseService.getCourseEntityById(messageRequest.getCourseId());
-
-        return Message.builder()
-                .content(messageRequest.getContent())
-                .sender(user)
-                .course(course)
-                .build();
-    }
-
-    private MessageResponse MapToMessageResponse(Message message) {
-        return MessageResponse.builder()
-                .id(message.getId())
-                .courseId(message.getCourse().getId())
-                .courseName(message.getCourse().getName())
-                .senderId(message.getSender().getId())
-                .senderName(message.getSender().getUserName())
-                .content(message.getContent())
-                .createdAt(message.getCreatedAt())
-                .updatedAt(message.getUpdatedAt())
-                .build();
-    }
-
+    private final MessageMapper messageMapper;
+    private final SimpMessagingTemplate messagingTemplate;
     @Override
     @CacheEvict(value = "messagesCache", allEntries = true)
-    public void CreateMessage(MessageRequest messageRequest) {
+    public void createMessage(MessageRequest messageRequest) {
         log.info("Creating message for course ID: {}", messageRequest.getCourseId());
-        Message message = MapToMessageEntity(messageRequest);
+        Message message = messageMapper.mapToMessageEntity(messageRequest);
         messageRepository.save(message);
+        sendMessageToCourseChat(message);
+    }
+
+    private void sendMessageToCourseChat(Message message){
+        log.info("sending message to the topic  from user: "+message.getSender().getUserName()+" to course: "+message.getCourse().getName());
+        MessageResponse response=messageMapper.mapToMessageResponse(message);
+        // Logic to send the message to the course chat (e.g., via WebSocket)
+        messagingTemplate.convertAndSend(
+                "/topic/course/" + response.getCourseId(),
+                response
+        );
     }
 
     @Override
     @Cacheable(value = "messagesCache", key = "'messagesByCourse:' + #courseId")
-    public List<MessageResponse> GetMessagesByCourseId(Long courseId) {
+    public List<MessageResponse> getMessagesByCourseId(Long courseId) {
         log.info("Fetching messages for course ID: {}", courseId);
         return messageRepository.findByCourseIdOrderByCreatedAtAsc(courseId).stream()
-                .map(this::MapToMessageResponse)
+                .map(messageMapper::mapToMessageResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Cacheable(value = "messagesCache", key = "'messagesBySender:' + #senderId")
-    public List<MessageResponse> GetMessagesBySenderId(Long senderId) {
+    public List<MessageResponse> getMessagesBySenderId(Long senderId) {
         log.info("Fetching messages for sender ID: {}", senderId);
         return messageRepository.findBySenderIdOrderByCreatedAtDesc(senderId).stream()
-                .map(this::MapToMessageResponse)
+                .map(messageMapper::mapToMessageResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Cacheable(value = "messagesCache", key = "'countByCourse:' + #courseId")
-    public long CountMessagesByCourseId(Long courseId) {
+    public long countMessagesByCourseId(Long courseId) {
         log.info("Counting messages for course ID: {}", courseId);
         return messageRepository.countByCourseId(courseId);
     }
 
     @Override
     @CacheEvict(value = "messagesCache", allEntries = true)
-    public void DeleteMessageById(Long messageId) {
+    public void deleteMessageById(Long messageId) {
         log.info("Deleting message ID: {}", messageId);
         messageRepository.deleteById(messageId);
     }

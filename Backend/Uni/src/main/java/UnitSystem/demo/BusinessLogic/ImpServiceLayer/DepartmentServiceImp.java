@@ -1,6 +1,7 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.DepartmentService;
+import UnitSystem.demo.BusinessLogic.Mappers.DepartmentMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentsDetails;
@@ -19,19 +20,7 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImp implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
-
-    private DepartmentResponse mapToDepartmentResponse(Department department) {
-        return DepartmentResponse.builder()
-                .id(department.getId())
-                .name(department.getName())
-                .build();
-    }
-
-    private Department mapToDepartment(DepartmentRequest departmentRequest) {
-        Department department = new Department();
-        department.setName(departmentRequest.getName());
-        return department;
-    }
+    private final DepartmentMapper departmentMapper;
 
     @Override
     @Cacheable(value = "departmentsCache", key = "'allDepartments'")
@@ -43,7 +32,7 @@ public class DepartmentServiceImp implements DepartmentService {
     @Cacheable(value = "departmentsCache", key = "'departmentById:' + #departmentId")
     public DepartmentResponse getDepartmentById(Long departmentId) {
         return departmentRepository.findById(departmentId)
-                .map(this::mapToDepartmentResponse)
+                .map(departmentMapper::mapToDepartmentResponse)
                 .orElse(null);
     }
 
@@ -51,15 +40,15 @@ public class DepartmentServiceImp implements DepartmentService {
     @Cacheable(value = "departmentsCache", key = "'departmentByName:' + #name")
     public DepartmentResponse getDepartmentByName(String name) {
         Department department = departmentRepository.findByName(name);
-        return department != null ? mapToDepartmentResponse(department) : null;
+        return department != null ? departmentMapper.mapToDepartmentResponse(department) : null;
     }
 
     @Override
     @CacheEvict(value = "departmentsCache", allEntries = true)
     public DepartmentResponse createDepartment(DepartmentRequest departmentRequest) {
-        Department department = mapToDepartment(departmentRequest);
+        Department department = departmentMapper.mapToDepartment(departmentRequest);
         departmentRepository.save(department);
-        return mapToDepartmentResponse(department);
+        return departmentMapper.mapToDepartmentResponse(department);
     }
 
     @Override
@@ -70,7 +59,7 @@ public class DepartmentServiceImp implements DepartmentService {
 
         existingDepartment.setName(departmentRequest.getName());
         departmentRepository.save(existingDepartment);
-        return mapToDepartmentResponse(existingDepartment);
+        return departmentMapper.mapToDepartmentResponse(existingDepartment);
     }
 
     @Override

@@ -4,6 +4,7 @@ import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.AuthService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
+import UnitSystem.demo.BusinessLogic.Mappers.AuthMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
@@ -15,8 +16,6 @@ import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
 import UnitSystem.demo.ExcHandler.Entites.AuthError;
-import UnitSystem.demo.Security.Jwt.JwtService;
-import UnitSystem.demo.Security.User.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,18 +36,9 @@ public class AuthServiceImp implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
     private final TeacherService teacherService;
     private final StudentService studentService;
-
-    private AuthResponse mapToAuthResponse(User user) {
-        log.info("Mapping User to AuthResponse: {}", user);
-        return AuthResponse.builder()
-                .Username(user.getUserName())
-                .Token(jwtService.generateToken(new SecurityUser(user)))
-                .build();
-    }
-
+    private final AuthMapper authMapper;
 
     @Override
     public AuthResponse register(UserRequest userRequest) {
@@ -63,8 +53,7 @@ public class AuthServiceImp implements AuthService {
         User user = isTeacher ? buildAndSaveTeacher(userRequest, role)
                 : buildAndSaveStudent(userRequest, role);
 
-
-        return mapToAuthResponse(user);
+        return authMapper.mapToAuthResponse(user);
     }
 
     private void validateUniqueCredentials(UserRequest userRequest) {
@@ -130,6 +119,6 @@ public class AuthServiceImp implements AuthService {
 
         log.info("User {} authenticated successfully", user.getEmail());
 
-        return mapToAuthResponse(user);
+        return authMapper.mapToAuthResponse(user);
     }
 }

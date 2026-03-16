@@ -1,6 +1,8 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
+import UnitSystem.demo.BusinessLogic.Mappers.MappingUtils;
+import UnitSystem.demo.BusinessLogic.Mappers.TeacherMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
@@ -8,16 +10,10 @@ import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
-import UnitSystem.demo.DataAccessLayer.Entities.Announcement;
-import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
-import UnitSystem.demo.DataAccessLayer.Entities.UpcomingEvent;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
-import UnitSystem.demo.DataAccessLayer.Repositories.AnnouncementRepository;
-import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.TeacherRepository;
-import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,49 +29,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TeacherServiceImp implements TeacherService {
 
+        private final MappingUtils mappingUtils;
         private final TeacherRepository teacherRepository;
-        private final RoleRepository roleRepository;
         private final PasswordEncoder passwordEncoder;
-        private final AnnouncementRepository announcementRepository;
-        private final UpcomingEventRepository upcomingEventRepository;
-
-        private TeacherResponse mapToTeacherResponse(Teacher teacher) {
-                return TeacherResponse.builder()
-                                .id(teacher.getId())
-                                .userName(teacher.getUserName())
-                                .email(teacher.getEmail())
-                                .active(teacher.getActive())
-                                .createdAt(teacher.getCreatedAt())
-                                .officeLocation(teacher.getOfficeLocation())
-                                .salary(teacher.getSalary())
-                                .roles(teacher.getRoles().stream()
-                                                .map(Role::getName)
-                                                .collect(Collectors.toSet()))
-                                .coursesCount(teacher.getCourses() != null ? teacher.getCourses().size() : 0)
-                                .build();
-        }
-
-        private Teacher mapToTeacher(TeacherRequest teacherRequest) {
-                Set<Role> roles = teacherRequest.getRoles().stream()
-                                .map(roleName -> roleRepository.findByName(roleName)
-                                                .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
-                                .collect(Collectors.toSet());
-
-                return Teacher.builder()
-                                .userName(teacherRequest.getUserName())
-                                .email(teacherRequest.getEmail())
-                                .password(passwordEncoder.encode(teacherRequest.getPassword()))
-                                .active(teacherRequest.getActive() != null ? teacherRequest.getActive() : true)
-                                .officeLocation(teacherRequest.getOfficeLocation())
-                                .salary(teacherRequest.getSalary())
-                                .roles(roles)
-                                .build();
-        }
+        private final TeacherMapper teacherMapper;
 
         @Override
         public List<TeacherResponse> getAllTeachers() {
                 return teacherRepository.findAll().stream()
-                                .map(this::mapToTeacherResponse)
+                                .map(teacherMapper::mapToTeacherResponse)
                                 .toList();
         }
 
@@ -83,7 +45,7 @@ public class TeacherServiceImp implements TeacherService {
         @Cacheable(value = "teachersCache", key = "'teacherById:' + #teacherId")
         public TeacherResponse getTeacherById(Long teacherId) {
                 return teacherRepository.findById(teacherId)
-                                .map(this::mapToTeacherResponse)
+                                .map(teacherMapper::mapToTeacherResponse)
                                 .orElse(null);
         }
 
@@ -91,15 +53,15 @@ public class TeacherServiceImp implements TeacherService {
         @Cacheable(value = "teachersCache", key = "'teacherByUserName:' + #userName")
         public TeacherResponse getTeacherByUserName(String userName) {
                 Teacher teacher = teacherRepository.findByUserName(userName);
-                return teacher != null ? mapToTeacherResponse(teacher) : null;
+                return teacher != null ? teacherMapper.mapToTeacherResponse(teacher) : null;
         }
 
         @Override
         @CacheEvict(value = "teachersCache", allEntries = true)
         public TeacherResponse createTeacher(TeacherRequest teacherRequest) {
-                Teacher teacher = mapToTeacher(teacherRequest);
+                Teacher teacher = teacherMapper.mapToTeacher(teacherRequest);
                 teacherRepository.save(teacher);
-                return mapToTeacherResponse(teacher);
+                return teacherMapper.mapToTeacherResponse(teacher);
         }
 
         @Override
@@ -118,16 +80,11 @@ public class TeacherServiceImp implements TeacherService {
                 existingTeacher.setSalary(teacherRequest.getSalary());
 
                 if (teacherRequest.getRoles() != null) {
-                        Set<Role> roles = teacherRequest.getRoles().stream()
-                                        .map(roleName -> roleRepository.findByName(roleName)
-                                                        .orElseThrow(() -> new RuntimeException(
-                                                                        "Role not found: " + roleName)))
-                                        .collect(Collectors.toSet());
-                        existingTeacher.setRoles(roles);
+                        existingTeacher.setRoles(mappingUtils.mapRoleNamesToRoles(teacherRequest.getRoles()));
                 }
 
                 teacherRepository.save(existingTeacher);
-                return mapToTeacherResponse(existingTeacher);
+                return teacherMapper.mapToTeacherResponse(existingTeacher);
         }
 
         @Override
@@ -142,46 +99,6 @@ public class TeacherServiceImp implements TeacherService {
                 teacherRepository.deleteById(teacherId);
         }
 
-        private CourseResponse mapToCourseResponse(Course course) {
-                return CourseResponse.builder()
-                                .id(course.getId())
-                                .name(course.getName())
-                                .description(course.getDescription())
-                                .departmentName(course.getDepartment() != null ? course.getDepartment().getName()
-                                                : null)
-                                .teacherUserName(course.getTeacher() != null ? course.getTeacher().getUserName() : null)
-                                .creditHours(course.getCredits())
-                                .maxStudents(course.getCapacity())
-                                .enrolledStudents(course.getCourseEnrollments() != null
-                                                ? course.getCourseEnrollments().size()
-                                                : 0)
-                                .build();
-        }
-
-        private AnnouncementResponse mapToAnnouncementResponse(Announcement announcement) {
-                return AnnouncementResponse.builder()
-                                .id(announcement.getId())
-                                .title(announcement.getTitle())
-                                .content(announcement.getDescription())
-                                .courseId(announcement.getCourse() != null ? announcement.getCourse().getId() : null)
-                                .createdDate(announcement.getCreatedAt())
-                                .build();
-        }
-
-        private UpcomingEventResponse mapToUpcomingEventResponse(UpcomingEvent event) {
-                return UpcomingEventResponse.builder()
-                                .id(event.getId())
-                                .title(event.getTitle())
-                                .subtitle(event.getSubtitle())
-                                .eventDate(event.getEventDate())
-                                .type(event.getType().name())
-                                .userId(event.getUser() != null ? event.getUser().getId() : null)
-                                .userName(event.getUser() != null ? event.getUser().getUserName() : null)
-                                .createdAt(event.getCreatedAt())
-                                .build();
-        } 
-
-
         @Override
         @Cacheable(value = "teachersCache", key = "'teacherDetails:' + #userDetailsRequest.userId")
         public TeacherDetailsResponse getTeacherDetails(UserDetailsRequest userDetailsRequest) {
@@ -192,23 +109,17 @@ public class TeacherServiceImp implements TeacherService {
 
                 Set<CourseResponse> courses = teacher.getCourses() != null
                                 ? teacher.getCourses().stream()
-                                                .map(this::mapToCourseResponse)
+                                                .map(teacherMapper::mapToCourseResponse)
                                                 .collect(Collectors.toSet())
                                 : Collections.emptySet();
 
                 // Get all announcements from teacher's courses
                 List<AnnouncementResponse> announcements = teacher.getCourses() != null
-                                ? teacher.getCourses().stream()
-                                                .flatMap(course -> announcementRepository.findByCourseId(course.getId()).stream())
-                                                .map(this::mapToAnnouncementResponse)
-                                                .collect(Collectors.toList())
+                                ? teacherMapper.mapAnnouncementsForTeacher(teacher)
                                 : Collections.emptyList();
 
                 // Get upcoming events for the teacher
-                List<UpcomingEventResponse> upcomingEvents = upcomingEventRepository.findByUserId(teacher.getId())
-                                .stream()
-                                .map(this::mapToUpcomingEventResponse)
-                                .collect(Collectors.toList());
+                List<UpcomingEventResponse> upcomingEvents = teacherMapper.mapUpcomingEventsForTeacher(teacher.getId());
 
                 // Calculate total number of students across all courses
                 Long numberOfStudents = teacher.getCourses() != null

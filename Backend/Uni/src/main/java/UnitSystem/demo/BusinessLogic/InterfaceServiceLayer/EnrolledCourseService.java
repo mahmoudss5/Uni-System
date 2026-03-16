@@ -19,4 +19,6 @@ public interface EnrolledCourseService {
 
     void unenrollStudentFromCourse(Long enrolledCourseId);
     EnrolledCourse findEnrolledCourseById(Long enrolledCourseId);
+   boolean isStudentEnrolledInCourse(Long studentId, Long courseId);
+   boolean isStudentEnrolledInCourse(String useEmail,Long courseId);
 }

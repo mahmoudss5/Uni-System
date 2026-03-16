@@ -1,6 +1,8 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
+import UnitSystem.demo.BusinessLogic.Mappers.MappingUtils;
+import UnitSystem.demo.BusinessLogic.Mappers.StudentMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
@@ -8,16 +10,9 @@ import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
-import UnitSystem.demo.DataAccessLayer.Entities.Announcement;
-import UnitSystem.demo.DataAccessLayer.Entities.EnrolledCourse;
-import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
-import UnitSystem.demo.DataAccessLayer.Entities.UpcomingEvent;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
-import UnitSystem.demo.DataAccessLayer.Repositories.AnnouncementRepository;
-import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.StudentRepository;
-import UnitSystem.demo.DataAccessLayer.Repositories.UpcomingEventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,59 +26,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.aspectj.runtime.internal.Conversions.longValue;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentServiceImp implements StudentService {
 
     private final StudentRepository studentRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AnnouncementRepository announcementRepository;
-    private final UpcomingEventRepository upcomingEventRepository;
-
-    private StudentResponse mapToStudentResponse(Student student) {
-        return StudentResponse.builder()
-                .id(student.getId())
-                .userName(student.getUserName())
-                .email(student.getEmail())
-                .active(student.getActive())
-                .createdAt(student.getCreatedAt())
-                .gpa(student.getGpa())
-                .enrollmentYear(student.getEnrollmentYear())
-                .totalCredits(student.getTotalCredits())
-                .roles(student.getRoles().stream()
-                        .map(Role::getName)
-                        .collect(Collectors.toSet()))
-                .enrolledCoursesCount(student.getEnrolledCourses() != null ? student.getEnrolledCourses().size() : 0)
-                .build();
-    }
-
-    private Student mapToStudent(StudentRequest studentRequest) {
-        Set<Role> roles = studentRequest.getRoles().stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
-                .collect(Collectors.toSet());
-
-        return Student.builder()
-                .userName(studentRequest.getUserName())
-                .email(studentRequest.getEmail())
-                .password(passwordEncoder.encode(studentRequest.getPassword()))
-                .active(studentRequest.getActive() != null ? studentRequest.getActive() : true)
-                .gpa(studentRequest.getGpa())
-                .enrollmentYear(studentRequest.getEnrollmentYear())
-                .totalCredits(studentRequest.getTotalCredits())
-                .roles(roles)
-                .build();
-    }
+    private final StudentMapper studentMapper;
+   private final MappingUtils mappingUtils;
 
     @Override
     @Cacheable(value = "studentsCache", key = "'allStudents'")
     public List<StudentResponse> getAllStudents() {
         return studentRepository.findAll().stream()
-                .map(this::mapToStudentResponse)
+                .map(studentMapper::mapToStudentResponse)
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +48,7 @@ public class StudentServiceImp implements StudentService {
     @Cacheable(value = "studentsCache", key = "'studentById:' + #studentId")
     public StudentResponse getStudentById(Long studentId) {
         return studentRepository.findById(studentId)
-                .map(this::mapToStudentResponse)
+                .map(studentMapper::mapToStudentResponse)
                 .orElse(null);
     }
 
@@ -99,15 +56,15 @@ public class StudentServiceImp implements StudentService {
     @Cacheable(value = "studentsCache", key = "'studentByUserName:' + #userName")
     public StudentResponse getStudentByUserName(String userName) {
         Student student = studentRepository.findByUserName(userName);
-        return student != null ? mapToStudentResponse(student) : null;
+        return student != null ? studentMapper.mapToStudentResponse(student) : null;
     }
 
     @Override
     @CacheEvict(value = "studentsCache", allEntries = true)
     public StudentResponse createStudent(StudentRequest studentRequest) {
-        Student student = mapToStudent(studentRequest);
+        Student student = studentMapper.mapToStudent(studentRequest);
         studentRepository.save(student);
-        return mapToStudentResponse(student);
+        return studentMapper.mapToStudentResponse(student);
     }
 
     @Override
@@ -127,15 +84,11 @@ public class StudentServiceImp implements StudentService {
         existingStudent.setTotalCredits(studentRequest.getTotalCredits());
 
         if (studentRequest.getRoles() != null) {
-            Set<Role> roles = studentRequest.getRoles().stream()
-                    .map(roleName -> roleRepository.findByName(roleName)
-                            .orElseThrow(() -> new RuntimeException("Role not found: " + roleName)))
-                    .collect(Collectors.toSet());
-            existingStudent.setRoles(roles);
+            existingStudent.setRoles(mappingUtils.mapRoleNamesToRoles(studentRequest.getRoles()));
         }
 
         studentRepository.save(existingStudent);
-        return mapToStudentResponse(existingStudent);
+        return studentMapper.mapToStudentResponse(existingStudent);
     }
 
     @Override
@@ -148,45 +101,6 @@ public class StudentServiceImp implements StudentService {
     @CacheEvict(value = "studentsCache", allEntries = true)
     public void deleteStudent(Long studentId) {
         studentRepository.deleteById(studentId);
-    }
-
-    private EnrolledCourseResponse mapToEnrolledCourseResponse(EnrolledCourse enrolledCourse) {
-        return EnrolledCourseResponse.builder()
-                .id(enrolledCourse.getId())
-                .studentId(enrolledCourse.getStudent().getId())
-                .studentName(enrolledCourse.getStudent() instanceof Student s ? s.getUserName() : "")
-                .courseId(enrolledCourse.getCourse().getId())
-                .courseCode(enrolledCourse.getCourse().getCourseCode())
-                .credits(longValue(enrolledCourse.getCourse().getCredits()))
-                .teacherName(enrolledCourse.getCourse().getTeacher().getUserName())
-                .courseName(enrolledCourse.getCourse().getName())
-                .startDate(enrolledCourse.getCourse().getStartDate())
-                .endDate(enrolledCourse.getCourse().getEndDate())
-                .enrollmentDate(enrolledCourse.getEnrollmentDate())
-                .build();
-    }
-
-    private AnnouncementResponse mapToAnnouncementResponse(Announcement announcement) {
-        return AnnouncementResponse.builder()
-                .id(announcement.getId())
-                .title(announcement.getTitle())
-                .content(announcement.getDescription())
-                .courseId(announcement.getCourse() != null ? announcement.getCourse().getId() : null)
-                .createdDate(announcement.getCreatedAt())
-                .build();
-    }
-
-    private UpcomingEventResponse mapToUpcomingEventResponse(UpcomingEvent event) {
-        return UpcomingEventResponse.builder()
-                .id(event.getId())
-                .title(event.getTitle())
-                .subtitle(event.getSubtitle())
-                .eventDate(event.getEventDate())
-                .type(event.getType().name())
-                .userId(event.getUser() != null ? event.getUser().getId() : null)
-                .userName(event.getUser() != null ? event.getUser().getUserName() : null)
-                .createdAt(event.getCreatedAt())
-                .build();
     }
 
     private String calculateAcademicStanding(BigDecimal gpa) {
@@ -213,24 +127,15 @@ public class StudentServiceImp implements StudentService {
 
         Set<EnrolledCourseResponse> enrolledCourses = student.getEnrolledCourses() != null
                 ? student.getEnrolledCourses().stream()
-                        .map(this::mapToEnrolledCourseResponse)
+                        .map(studentMapper::mapToEnrolledCourseResponse)
                         .collect(Collectors.toSet())
                 : Collections.emptySet();
 
-
         // Get all announcements from student's enrolled courses
-        List<AnnouncementResponse> announcements = student.getEnrolledCourses() != null
-                ? student.getEnrolledCourses().stream()
-                        .flatMap(enrolledCourse -> announcementRepository.findByCourseId(enrolledCourse.getCourse().getId()).stream())
-                        .map(this::mapToAnnouncementResponse)
-                        .collect(Collectors.toList())
-                : Collections.emptyList();
+        List<AnnouncementResponse> announcements = studentMapper.mapAnnouncementsForStudent(student);
 
         // Get upcoming events for the student
-        List<UpcomingEventResponse> upcomingEvents = upcomingEventRepository.findByUserId(student.getId())
-                .stream()
-                .map(this::mapToUpcomingEventResponse)
-                .collect(Collectors.toList());
+        List<UpcomingEventResponse> upcomingEvents = studentMapper.mapUpcomingEventsForStudent(student.getId());
 
         return StudentDetailsResponse.builder()
                 .id(student.getId())

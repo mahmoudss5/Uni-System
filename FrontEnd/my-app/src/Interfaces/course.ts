@@ -25,3 +25,13 @@ export interface CourseRequest{
     creditHours:number;
     maxStudents:number;
 }
+
+export interface CourseSidebar {
+courseCode:string;
+creditHours:number;
+startDate:Date;
+endDate:Date;
+enrolledStudents:number;
+name:string;
+teacherUserName:string;
+}

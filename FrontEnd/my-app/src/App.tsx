@@ -89,7 +89,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/CourseDetails/:id",
-    element: <CourseDetails />,
+    element: (
+      <ProtectedRoute>
+        <CourseDetails />
+      </ProtectedRoute>
+    ),
   },
 
   

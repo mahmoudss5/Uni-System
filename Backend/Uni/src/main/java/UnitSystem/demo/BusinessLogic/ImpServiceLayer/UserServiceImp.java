@@ -1,14 +1,11 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
+import UnitSystem.demo.BusinessLogic.Mappers.UserMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
-import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
-import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
-import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
-import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
@@ -34,26 +31,7 @@ public class UserServiceImp implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-    private UserResponse mapToUserResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUserName())
-                .email(user.getEmail())
-                .active(user.getActive())
-                .roles(user.getRoles())
-                .build();
-    }
-
-    private User mapToUser(UserRequest userRequest) {
-        return User.builder()
-                .userName(userRequest.getUsername())
-                .email(userRequest.getEmail())
-                .password(passwordEncoder.encode(userRequest.getPassword()))
-                .active(true)
-                .roles(new HashSet<>())
-                .build();
-    }
+    private final UserMapper userMapper;
 
     @Override
     @CacheEvict(value = "usersCache", allEntries = true)
@@ -67,7 +45,7 @@ public class UserServiceImp implements UserService {
             throw new RuntimeException("Username is already taken");
         }
 
-        User user = mapToUser(userRequest);
+        User user = userMapper.mapToUser(userRequest);
 
         // Assign default role (Student) if no roles specified
         Role defaultRole = roleRepository.findByName(RoleType.Student.name())
@@ -82,7 +60,7 @@ public class UserServiceImp implements UserService {
         userRepository.save(user);
 
         log.info("User created successfully: {}", user.getUserName());
-        return mapToUserResponse(user);
+        return userMapper.mapToUserResponse(user);
     }
 
     @Override
@@ -106,7 +84,7 @@ public class UserServiceImp implements UserService {
 
         userRepository.save(existingUser);
         log.info("User updated successfully: {}", existingUser.getUserName());
-        return mapToUserResponse(existingUser);
+        return userMapper.mapToUserResponse(existingUser);
     }
 
     @Override
@@ -117,7 +95,7 @@ public class UserServiceImp implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        UserResponse response = mapToUserResponse(user);
+        UserResponse response = userMapper.mapToUserResponse(user);
         userRepository.delete(user);
 
         log.info("User deleted successfully: {}", user.getUserName());
@@ -136,7 +114,7 @@ public class UserServiceImp implements UserService {
         userRepository.save(user);
 
         log.info("User deactivated successfully: {}", user.getUserName());
-        return mapToUserResponse(user);
+        return userMapper.mapToUserResponse(user);
     }
 
     @Override
@@ -205,15 +183,13 @@ public class UserServiceImp implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
     }
 
-
     @Override
     @Cacheable(value = "usersCache", key = "'allUsers'")
     public List<UserResponse> getAllUsers() {
         log.info("Retrieving all users");
         return userRepository.findAll().stream()
-                .map(this::mapToUserResponse)
+                .map(userMapper::mapToUserResponse)
                 .collect(Collectors.toList());
     }
 
-    
 }

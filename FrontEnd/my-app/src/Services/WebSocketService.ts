@@ -5,18 +5,18 @@ import type { NotificationMessage } from "../Interfaces/Notification";
 import type { AnnouncementCourseResponse } from "../Interfaces/announcement";
 import { getToken } from "./authService";
 import { ApiUrl } from "./config";
+import type { MessageResponse } from "../Interfaces/message";
+import type { MessageRequest } from "../Interfaces/message";
 
 type NotificationHandler = (notification: NotificationMessage) => void;
 type AnnouncementHandler = (announcement: AnnouncementCourseResponse) => void;
-
+type MessageHandler = (message: MessageResponse) => void;
 class WebSocketService {
     private client: Client | null = null;
     private subscriptions: StompSubscription[] = [];
     private connected = false;
     private token = getToken() || "";
-
-    // queue of callbacks waiting for connection to be ready
-    // both connect() and subscribeToAnnouncements() use this
+    private chatSub:Map<number,{messageSub:StompSubscription}> = new Map();
     private pendingCallbacks: (() => void)[] = [];
 
     // ── THE KEY METHOD ──────────────────────────────────────────────────────
@@ -115,7 +115,44 @@ class WebSocketService {
             this.announcementSub = null;
         }
     }
-
+    subscribeToChat(courseId: number, onMessage: MessageHandler): void {
+        if (this.chatSub.has(courseId)) {
+            return;
+        }
+        this.ensureConnected(() => {
+        const messageSub = this.client!.subscribe(
+            `/topic/course/${courseId}`,
+            (frame) => {
+                const message: MessageResponse = JSON.parse(frame.body);
+                onMessage(message);
+            },
+        );
+        this.chatSub.set(courseId, {messageSub});
+        });
+        
+    }
+    unsubscribeFromChat(courseId: number): void {
+        const sub = this.chatSub.get(courseId);
+        if (sub) {
+            sub.messageSub.unsubscribe();
+            this.chatSub.delete(courseId);
+        }
+    }
+    sendChatMessage(courseId: number, MessageRequest : MessageRequest): void {
+        if (!this.connected || !this.client) {
+            console.log("Not connected to WebSocket");
+            return;
+        }
+        console.log("Sending chat message to course", courseId);
+        this.client.publish({
+            
+            destination: `/app/course/${courseId}`,
+            body: JSON.stringify(MessageRequest),
+            headers: {
+                Authorization: `Bearer ${this.token}`,
+            },
+        });
+    }
     // ── FULL DISCONNECT ─────────────────────────────────────────────────────
     // only call this on logout
     disconnect(): void {

@@ -40,13 +40,11 @@ public class AnnouncementServiceImp implements AnnouncementService {
     @CacheEvict(value = "announcementsCache", allEntries = true)
     public void createAnnouncement(AnnouncementRequest request) {
         Course course = courseService.getCourseEntityById(request.getCourseId());
-
         Announcement announcement = Announcement.builder()
                 .course(course)
                 .title(request.getTitle())
                 .description(request.getContent())
                 .build();
-
         announcementRepository.save(announcement);
         sendAnnouncementToCourseUsers(announcement);
     }
@@ -61,7 +59,6 @@ public class AnnouncementServiceImp implements AnnouncementService {
     }
 
     @Override
-    @TeachersOnly
     @Cacheable(value = "announcementsCache", key = "'announcementById:' + #id")
     public AnnouncementResponse getAnnouncementById(Long id) {
         Announcement announcement = announcementRepository.findById(id)
@@ -70,7 +67,6 @@ public class AnnouncementServiceImp implements AnnouncementService {
     }
 
     @Override
-    @TeachersOnly
     @Cacheable(value = "announcementsCache", key = "'announcementsByCourse:' + #courseId")
     public List<AnnouncementResponse> getAnnouncementsByCourseId(Long courseId) {
         List<Announcement> announcements = announcementRepository.findByCourseId(courseId);

@@ -13,6 +13,8 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     List<Feedback> findByUser(User user);
 
+    List<Feedback> findByUserId(Long userId);
+
     List<Feedback> findByRole(String role);
 
     @Query("SELECT f FROM Feedback f ORDER BY f.createdAt DESC")

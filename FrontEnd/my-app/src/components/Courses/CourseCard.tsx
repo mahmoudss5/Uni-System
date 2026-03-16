@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { isCourseFull } from "../../Services/CourseService";
 import { DEPT_THEME, DEFAULT_THEME, DEPT_ICON, deptLabel, getCapacityPercent } from "../../Services/courseCardHelpers";
 import type { course } from "../../Interfaces/course";
@@ -15,6 +16,7 @@ export interface CourseCardProps {
 }
 
 export default function CourseCard({ course, enrollment, onEnroll, onDrop, isEnrolling, isDropping }: CourseCardProps) {
+    const navigate = useNavigate();
     const full     = isCourseFull(course.enrolledStudents, course.maxStudents);
     const enrolled = enrollment !== undefined;
     const fillPct  = getCapacityPercent(course.enrolledStudents, course.maxStudents);
@@ -102,7 +104,16 @@ export default function CourseCard({ course, enrollment, onEnroll, onDrop, isEnr
             </div>
 
             {/* ── Action button ── */}
-            <div className="px-5 pb-5">
+            <div className="px-5 pb-5 flex flex-col gap-2">
+                {enrolled && (
+                    <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => navigate(`/CourseDetails/${course.id}`)}
+                        className={`w-full py-2.5 rounded-xl bg-gradient-to-r ${theme.header} text-white font-semibold text-sm transition-opacity hover:opacity-90 cursor-pointer`}
+                    >
+                        Go to Course →
+                    </motion.button>
+                )}
                 {enrolled ? (
                     <motion.button
                         whileTap={{ scale: 0.97 }}

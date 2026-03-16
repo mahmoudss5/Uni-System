@@ -7,9 +7,9 @@ import java.util.List;
 
 public interface MessageService {
 
-    void CreateMessage(MessageRequest messageRequest);
-    List<MessageResponse> GetMessagesByCourseId(Long courseId);
-    List<MessageResponse> GetMessagesBySenderId(Long senderId);
-    long CountMessagesByCourseId(Long courseId);
-    void DeleteMessageById(Long messageId);
+    void createMessage(MessageRequest messageRequest);
+    List<MessageResponse> getMessagesByCourseId(Long courseId);
+    List<MessageResponse> getMessagesBySenderId(Long senderId);
+    long countMessagesByCourseId(Long courseId);
+    void deleteMessageById(Long messageId);
 }

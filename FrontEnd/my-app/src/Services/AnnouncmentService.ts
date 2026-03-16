@@ -30,7 +30,7 @@ export async function getAllAnnouncements() {
 
 export async function getAnnouncementByCourseId(courseId: number) {
     try {
-        const response = await axios.get(`${ApiUrl}/api/announcements/getAllByCourseId/${courseId}`, {
+        const response = await axios.get(`${ApiUrl}/api/announcements/course/${courseId}`, {
             headers: getAuthHeaders(),
         });
         return response.data;
