@@ -14,3 +14,8 @@ export interface MessageRequest {
     senderId: number;
     content: string;
 }
+export interface TypingPayload {
+    senderId: number;
+    senderName: string;
+    isTyping: boolean;
+}

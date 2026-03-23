@@ -1,6 +1,7 @@
 package UnitSystem.demo.DataAccessLayer.Entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "department")
+@Builder
 public class
 Department {
     @Id

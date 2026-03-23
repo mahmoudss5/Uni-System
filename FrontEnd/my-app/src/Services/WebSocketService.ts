@@ -1,63 +1,78 @@
-// Services/webSocketService.ts
 import { Client, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import type { NotificationMessage } from "../Interfaces/Notification";
 import type { AnnouncementCourseResponse } from "../Interfaces/announcement";
-import { getToken } from "./authService";
+import type { MessageRequest, MessageResponse, TypingPayload } from "../Interfaces/message";
+import { getToken } from "../Services/authService";
 import { ApiUrl } from "./config";
-import type { MessageResponse } from "../Interfaces/message";
-import type { MessageRequest } from "../Interfaces/message";
 
-type NotificationHandler = (notification: NotificationMessage) => void;
-type AnnouncementHandler = (announcement: AnnouncementCourseResponse) => void;
-type MessageHandler = (message: MessageResponse) => void;
+type NotificationHandler = (n: NotificationMessage) => void;
+type AnnouncementHandler = (a: AnnouncementCourseResponse) => void;
+type MessageHandler = (m: MessageResponse) => void;
+type TypingHandler = (t: TypingPayload) => void;
+
+// store everything needed to resubscribe after reconnect
+interface ChatHandlers {
+    onMessage: MessageHandler;
+    onTyping?: TypingHandler;
+    messageSub: StompSubscription | null;
+    typingSub: StompSubscription | null;
+}
+
 class WebSocketService {
     private client: Client | null = null;
-    private subscriptions: StompSubscription[] = [];
     private connected = false;
-    private token = getToken() || "";
-    private chatSub:Map<number,{messageSub:StompSubscription}> = new Map();
     private pendingCallbacks: (() => void)[] = [];
 
-    // ── THE KEY METHOD ──────────────────────────────────────────────────────
-    // guarantees connection exists before running the callback
-    // used by BOTH connect() and subscribeToAnnouncements()
-    private ensureConnected(onReady: () => void): void {
-        // already connected → run immediately, no waiting
-        if (this.connected) {
-            onReady();
-            return;
-        }
+    // ✅ store ALL registered handlers so we can resubscribe after reconnect
+    private notificationHandler: NotificationHandler | null = null;
+    private announcementHandler: AnnouncementHandler | null = null;
+    private chatHandlers: Map<number, ChatHandlers> = new Map();
 
-        // not connected yet → queue the callback
-        // it will run once onConnect fires
-        this.pendingCallbacks.push(onReady);
+    // individual subscriptions
+    private notifSub: StompSubscription | null = null;
+    private announcementSub: StompSubscription | null = null;
 
-        // already connecting (client exists but handshake not done)
-        // just wait — pendingCallbacks will fire when ready
-        if (this.client) return;
+    // ── get token fresh every time — not at import time ──────────────────────
+    private getAuthToken(): string {
+        return getToken() || "";  // ✅ called when needed, not at startup
+    }
 
-        // nothing started yet → create the client and start connection
+    // ── creates and activates the STOMP client ───────────────────────────────
+    private createClient(): void {
         this.client = new Client({
             webSocketFactory: () => new SockJS(`${ApiUrl}/ws`),
             connectHeaders: {
-                Authorization: `Bearer ${this.token}`,
+                // ✅ token read fresh at connection time
+                Authorization: `Bearer ${this.getAuthToken()}`,
             },
             reconnectDelay: 5000,
 
             onConnect: () => {
-                console.log("🔔 WebSocket connected");
+                console.log("✅ WebSocket connected");
                 this.connected = true;
 
-                // drain the queue — run all pending callbacks
-                // this handles BOTH notification and announcement subscriptions
-                this.pendingCallbacks.forEach((cb) => cb());
+                // ✅ resubscribe ALL handlers after every connect/reconnect
+                // this fixes the "works after refresh" bug
+                this.resubscribeAll();
+
+                // drain pending callbacks
+                const callbacks = [...this.pendingCallbacks];
                 this.pendingCallbacks = [];
+                callbacks.forEach((cb) => cb());
             },
 
             onDisconnect: () => {
-                console.log("WebSocket disconnected");
+                console.log("❌ WebSocket disconnected");
                 this.connected = false;
+                // clear old subscription objects — they are dead after disconnect
+                // handlers are kept so resubscribeAll() can restore them
+                this.notifSub = null;
+                this.announcementSub = null;
+                this.chatHandlers.forEach((handlers) => {
+                    handlers.messageSub = null;
+                    handlers.typingSub = null;
+                });
             },
 
             onStompError: (frame) => {
@@ -68,99 +83,196 @@ class WebSocketService {
         this.client.activate();
     }
 
-    connect(
-        _userId: number,
-        onNotification: NotificationHandler,
-        onConnected?: () => void,
-    ): void {
-        this.ensureConnected(() => {
-            const notifSub = this.client!.subscribe(
+    // ── resubscribes ALL active handlers ─────────────────────────────────────
+    // called after every connect and reconnect
+    private resubscribeAll(): void {
+        if (!this.client) return;
+
+        // resubscribe notifications
+        if (this.notificationHandler) {
+            this.notifSub = this.client.subscribe(
                 `/user/queue/notifications`,
                 (frame) => {
                     const notification: NotificationMessage = JSON.parse(frame.body);
-                    onNotification(notification);
-                },
+                    this.notificationHandler!(notification);
+                }
             );
-            this.subscriptions.push(notifSub);
+        }
+
+        // resubscribe announcements
+        if (this.announcementHandler) {
+            this.announcementSub = this.client.subscribe(
+                `/topic/announcements`,
+                (frame) => {
+                    const announcement: AnnouncementCourseResponse = JSON.parse(frame.body);
+                    this.announcementHandler!(announcement);
+                }
+            );
+        }
+
+        // resubscribe all active course chats
+        this.chatHandlers.forEach((handlers, courseId) => {
+            handlers.messageSub = this.client!.subscribe(
+                `/topic/course/${courseId}`,
+                (frame) => {
+                    const message: MessageResponse = JSON.parse(frame.body);
+                    handlers.onMessage(message);
+                }
+            );
+            if (handlers.onTyping) {
+                handlers.typingSub = this.client!.subscribe(
+                    `/topic/course/${courseId}.typing`,
+                    (frame) => {
+                        const typing: TypingPayload = JSON.parse(frame.body);
+                        handlers.onTyping!(typing);
+                    }
+                );
+            }
+        });
+    }
+
+    // ── ensures connection exists ────────────────────────────────────────────
+    private ensureConnected(onReady: () => void): void {
+        if (this.connected) {
+            onReady();
+            return;
+        }
+
+        this.pendingCallbacks.push(onReady);
+
+        // only create client once — even if ensureConnected called multiple times
+        if (!this.client) {
+            this.createClient();
+        }
+    }
+
+    // ── NOTIFICATIONS ────────────────────────────────────────────────────────
+    connect(
+        _userId: number,
+        onNotification: NotificationHandler,
+        onConnected?: () => void
+    ): void {
+        // ✅ save handler for resubscription after reconnect
+        this.notificationHandler = onNotification;
+
+        this.ensureConnected(() => {
+            // resubscribeAll() already handled it in onConnect
+            // just call the callback
             onConnected?.();
         });
     }
-    private announcementSub: StompSubscription | null = null;
 
+    // ── ANNOUNCEMENTS ────────────────────────────────────────────────────────
     subscribeToAnnouncements(onAnnouncement: AnnouncementHandler): void {
+        // ✅ save handler for resubscription after reconnect
+        this.announcementHandler = onAnnouncement;
+
         this.ensureConnected(() => {
-            const destination = `/user/queue/announcements`;
-            this.announcementSub = this.client!.subscribe(
-                destination,
-                (frame) => {
-                    const announcement: AnnouncementCourseResponse = JSON.parse(
-                        frame.body,
-                    );
-                    onAnnouncement(announcement);
-                },
-            );
-            this.subscriptions.push(this.announcementSub);
+            // resubscribeAll() already handled it
         });
     }
 
-    // ✅ unsubscribes ONLY from announcements
-    // notifications and connection stay alive
     unsubscribeFromAnnouncements(): void {
-        if (this.announcementSub) {
-            this.announcementSub.unsubscribe();
-            // remove from subscriptions array
-            this.subscriptions = this.subscriptions.filter(
-                (sub) => sub !== this.announcementSub,
-            );
-            this.announcementSub = null;
-        }
-    }
-    subscribeToChat(courseId: number, onMessage: MessageHandler): void {
-        if (this.chatSub.has(courseId)) {
-            return;
-        }
-        this.ensureConnected(() => {
-        const messageSub = this.client!.subscribe(
-            `/topic/course/${courseId}`,
-            (frame) => {
-                const message: MessageResponse = JSON.parse(frame.body);
-                onMessage(message);
-            },
-        );
-        this.chatSub.set(courseId, {messageSub});
-        });
-        
-    }
-    unsubscribeFromChat(courseId: number): void {
-        const sub = this.chatSub.get(courseId);
-        if (sub) {
-            sub.messageSub.unsubscribe();
-            this.chatSub.delete(courseId);
-        }
-    }
-    sendChatMessage(courseId: number, MessageRequest : MessageRequest): void {
-        if (!this.connected || !this.client) {
-            console.log("Not connected to WebSocket");
-            return;
-        }
-        console.log("Sending chat message to course", courseId);
-        this.client.publish({
-            
-            destination: `/app/course/${courseId}`,
-            body: JSON.stringify(MessageRequest),
-            headers: {
-                Authorization: `Bearer ${this.token}`,
-            },
-        });
-    }
-    // ── FULL DISCONNECT ─────────────────────────────────────────────────────
-    // only call this on logout
-    disconnect(): void {
-        this.subscriptions.forEach((sub) => sub.unsubscribe());
-        this.subscriptions = [];
-        this.pendingCallbacks = [];
+        this.announcementSub?.unsubscribe();
         this.announcementSub = null;
+        this.announcementHandler = null; // clear so reconnect doesn't restore it
+    }
+
+    // ── CHAT ─────────────────────────────────────────────────────────────────
+    subscribeToChat(
+        courseId: number,
+        onMessage: MessageHandler,
+        onTyping?: TypingHandler
+    ): void {
+        // ✅ always update handlers — even if courseId already exists
+        // this fixes the "works only once" bug
+        this.chatHandlers.set(courseId, {
+            onMessage,
+            onTyping,
+            messageSub: null,
+            typingSub: null,
+        });
+
+        this.ensureConnected(() => {
+            // resubscribeAll() handles the actual subscription
+            // but if we're already connected, do it immediately
+            if (this.connected && this.client) {
+                const handlers = this.chatHandlers.get(courseId)!;
+
+                // unsubscribe old subs if they exist (handles resubscription)
+                handlers.messageSub?.unsubscribe();
+                handlers.typingSub?.unsubscribe();
+
+                handlers.messageSub = this.client.subscribe(
+                    `/topic/course/${courseId}`,
+                    (frame) => {
+                        const message: MessageResponse = JSON.parse(frame.body);
+                        handlers.onMessage(message);
+                    }
+                );
+                if (handlers.onTyping) {
+                    handlers.typingSub = this.client.subscribe(
+                        `/topic/course/${courseId}.typing`,
+                        (frame) => {
+                            const typing: TypingPayload = JSON.parse(frame.body);
+                            handlers.onTyping!(typing);
+                        }
+                    );
+                }
+            }
+        });
+    }
+
+    sendChatMessage(courseId: number, request: MessageRequest): void {
+        if (!this.connected || !this.client) return;
+
+        this.client.publish({
+            destination: `/app/course/${courseId}`,
+            body: JSON.stringify(request),
+        });
+    }
+
+    sendTypingEvent(
+        courseId: number,
+        senderId: number,
+        senderName: string,
+        isTyping: boolean
+    ): void {
+        if (!this.connected || !this.client) return;
+
+        this.client.publish({
+            destination: `/app/course/${courseId}.typing`,
+            body: JSON.stringify({ senderId, senderName, isTyping }),
+        });
+    }
+
+    unsubscribeFromChat(courseId: number): void {
+        const handlers = this.chatHandlers.get(courseId);
+        if (handlers) {
+            handlers.messageSub?.unsubscribe();
+            handlers.typingSub?.unsubscribe();
+            this.chatHandlers.delete(courseId); // ✅ remove handlers too
+        }
+    }
+
+    // ── FULL DISCONNECT — only on logout ─────────────────────────────────────
+    disconnect(): void {
+        this.notifSub?.unsubscribe();
+        this.announcementSub?.unsubscribe();
+        this.chatHandlers.forEach(({ messageSub, typingSub }) => {
+            messageSub?.unsubscribe();
+            typingSub?.unsubscribe();
+        });
+
+        this.notificationHandler = null;
+        this.announcementHandler = null;
+        this.chatHandlers.clear();
+        this.notifSub = null;
+        this.announcementSub = null;
+        this.pendingCallbacks = [];
+
         this.client?.deactivate();
+        this.client = null;
         this.connected = false;
     }
 
