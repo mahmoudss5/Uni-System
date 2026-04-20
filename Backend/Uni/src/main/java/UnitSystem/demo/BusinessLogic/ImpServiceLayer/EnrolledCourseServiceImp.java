@@ -1,5 +1,7 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Security.CheckStudentPermission;
+import UnitSystem.demo.Aspect.Security.CheckTeacherPermission;
 import UnitSystem.demo.Aspect.Security.TeachersOnly;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.CourseService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.EnrolledCourseService;
@@ -9,7 +11,8 @@ import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.EnrolledCourse;
-import UnitSystem.demo.DataAccessLayer.Entities.Student;
+import UnitSystem.demo.DataAccessLayer.Entities.StudentPermissions;
+import UnitSystem.demo.DataAccessLayer.Entities.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.EnrolledCourseRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -67,6 +71,7 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     }
 
     @Override
+    @CheckStudentPermission(StudentPermissions.course_register)
     @Caching(evict = {
             @CacheEvict(value = "enrollmentsCache", allEntries = true),
             @CacheEvict(value = "studentsCache", key = "'studentDetails:' + #enrolledCourseRequest.studentId")
@@ -81,17 +86,19 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
         }
 
         EnrolledCourse enrolledCourse = mapper.mapToEnrolledCourse(enrolledCourseRequest);
-        enrolledCourseRepository.save(enrolledCourse);
+        enrolledCourseRepository.save(Objects.requireNonNull(enrolledCourse));
         return mapper.mapToEnrolledCourseResponse(enrolledCourse);
     }
 
     @Override
+    @CheckTeacherPermission(TeacherPermissions.unenroll_student)
     @Caching(evict = {
             @CacheEvict(value = "enrollmentsCache", allEntries = true),
             @CacheEvict(value = "studentsCache", allEntries = true)
     })
     public void unenrollStudentFromCourse(Long enrolledCourseId) {
-        enrolledCourseRepository.deleteById(enrolledCourseId);
+        Long id = Objects.requireNonNull(enrolledCourseId, "enrolledCourseId cannot be null");
+        enrolledCourseRepository.deleteById(id);
     }
 
     @Override

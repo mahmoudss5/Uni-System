@@ -2,6 +2,7 @@ package UnitSystem.demo.ExcHandler.GolbalHandler;
 
 import UnitSystem.demo.ExcHandler.Entites.AuthError;
 import UnitSystem.demo.ExcHandler.Entites.ErrorResponse;
+import UnitSystem.demo.ExcHandler.Entites.PermissionDeniedException;
 import UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,11 @@ public class GlobalHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", e.getMessage());
+    }
+
+    @ExceptionHandler(PermissionDeniedException.class)
+    public ResponseEntity<ErrorResponse> handlePermissionDenied(PermissionDeniedException e) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Forbidden", e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

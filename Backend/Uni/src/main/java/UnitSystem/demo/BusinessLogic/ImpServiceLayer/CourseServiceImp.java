@@ -1,6 +1,7 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.Aspect.Security.CourseTeacherOnly;
+import UnitSystem.demo.Aspect.Security.CheckTeacherPermission;
 import UnitSystem.demo.Aspect.Security.TeachersOnly;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.CourseService;
 import UnitSystem.demo.BusinessLogic.Mappers.CourseMapper;
@@ -8,6 +9,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
+import UnitSystem.demo.DataAccessLayer.Entities.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Repositories.CourseRepository;
 import UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -47,24 +50,27 @@ public class CourseServiceImp implements CourseService {
     @Override
     @Cacheable(value = "coursesCache", key = "'courseById:' + #courseId")
     public CourseResponse getCourseById(Long courseId) {
+        Long id = Objects.requireNonNull(courseId, "courseId cannot be null");
         log.info("Fetching course with ID: {}", courseId);
-        return courseRepository.findById(courseId)
+        return courseRepository.findById(id)
                 .map(courseMapper::mapToCourseResponse)
-                .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Course", id));
     }
 
     @Override
     @TeachersOnly
+    @CheckTeacherPermission(TeacherPermissions.create_course)
     @CacheEvict(value = "coursesCache", allEntries = true)
     public CourseResponse createCourse(CourseRequest courseRequest) {
         log.info("Creating course: {}", courseRequest);
         Course course = courseMapper.mapToCourse(courseRequest);
-        courseRepository.save(course);
+        courseRepository.save(Objects.requireNonNull(course));
         return courseMapper.mapToCourseResponse(course);
     }
 
     @Override
     @CourseTeacherOnly
+    @CheckTeacherPermission(TeacherPermissions.update_course)
     @CacheEvict(value = "coursesCache", allEntries = true)
     public CourseResponse updateCourse(CourseRequest courseRequest, Long courseId) {
         log.info("Updating course: {}", courseRequest);
@@ -76,9 +82,11 @@ public class CourseServiceImp implements CourseService {
 
     @Override
     @CourseTeacherOnly
+    @CheckTeacherPermission(TeacherPermissions.delete_course)
     @CacheEvict(value = "coursesCache", allEntries = true)
     public void deleteCourse(Long courseId) {
-        courseRepository.deleteById(courseId);
+        Long id = Objects.requireNonNull(courseId, "courseId cannot be null");
+        courseRepository.deleteById(id);
 
     }
 
@@ -100,15 +108,17 @@ public class CourseServiceImp implements CourseService {
 
     @Override
     public Teacher findCourseTeacher(Long courseId) {
-        return courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course", courseId))
+        Long id = Objects.requireNonNull(courseId, "courseId cannot be null");
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course", id))
                 .getTeacher();
     }
 
     @Override
     public Course getCourseEntityById(Long courseId) {
-        return courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+        Long id = Objects.requireNonNull(courseId, "courseId cannot be null");
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course", id));
     }
 
     @Override

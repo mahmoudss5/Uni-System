@@ -1,16 +1,14 @@
 package UnitSystem.demo.DataAccessLayer.Entities;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
 @Entity
 @Table(name = "department")
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class
 Department {

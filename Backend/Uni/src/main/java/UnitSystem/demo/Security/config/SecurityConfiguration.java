@@ -42,6 +42,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/courses/popular").permitAll()
                                 .requestMatchers("/api/departments/all").permitAll()
                                 .requestMatchers("/api/courses/popular").permitAll()
+                                .requestMatchers("/api/permissions/**").hasAuthority("Admin")
                                 .requestMatchers("/api/v1/auth/**",
                                         "/v2/api-docs",
                                         "/v3/api-docs",
