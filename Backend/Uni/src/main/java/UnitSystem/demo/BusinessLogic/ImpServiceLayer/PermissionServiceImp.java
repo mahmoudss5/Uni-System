@@ -13,12 +13,18 @@ import UnitSystem.demo.DataAccessLayer.Repositories.PermissionRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserPermissions;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PermissionServiceImp implements PermissionService {
@@ -97,10 +103,10 @@ public class PermissionServiceImp implements PermissionService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "usersCache", allEntries = true)
     public UserPermissionResponse assignPermissionToUser(UserPermissionRequest request) {
-        Objects.requireNonNull(request, "request cannot be null");
-        Long userId = Objects.requireNonNull(request.getUserId(), "userId cannot be null");
-        Long permissionId = Objects.requireNonNull(request.getPermissionId(), "permissionId cannot be null");
+        Long userId = request.getUserId();
+        Long permissionId = request.getPermissionId();
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -109,15 +115,11 @@ public class PermissionServiceImp implements PermissionService {
 
         UserPermission userPermission = userPermissionsRepository
                 .findByUser_IdAndPermission_Id(userId, permissionId)
-                .orElseGet(() -> {
-                    UserPermission created = new UserPermission();
-                    created.setId(new UserPermissionId(request.getUserId(),request.getPermissionId()));
-                    created.getId().setUserId(userId);
-                    created.getId().setPermissionId(permissionId);
-                    created.setUser(user);
-                    created.setPermission(permission);
-                    return created;
-                });
+                .orElseGet(() -> UserPermission.builder()
+                        .id(new UserPermissionId(userId, permissionId))
+                        .user(user)
+                        .permission(permission)
+                        .build());
 
         boolean granted = request.getGranted() == null || request.getGranted();
         userPermission.setGranted(granted);
@@ -126,34 +128,58 @@ public class PermissionServiceImp implements PermissionService {
         return toUserPermissionResponse(saved);
     }
 
+
+
     @Override
     @Transactional
-    public void removePermissionFromUser(Long userId, Long permissionId) {
-        Permission permission=permissionRepository.findById(permissionId)
-                .orElseThrow(() -> new RuntimeException("Permission not found"));
+    @CacheEvict(value = "usersCache", allEntries = true)
+    public void revokePermissionFromUser(Long userId, Long permissionId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        Permission permission = permissionRepository.findById(permissionId)
+                .orElseThrow(() -> new RuntimeException("Permission not found"));
 
-        List<UserPermission> userPermissions=userPermissionsRepository.findByUser_Id(userId);
-        Boolean found=false;
-        for (UserPermission userPermission:userPermissions) {
-            if (userPermission.getPermission().getId().equals(permission.getId())) {
-                 userPermission.setGranted(false);
-                 userPermissionsRepository.save(userPermission);
-                 found=true;
-                 break;
-            }
-        }
-        if (!found) {
-           UserPermission userPermission=UserPermission.builder()
-                   .id(new UserPermissionId(userId, permissionId))
-                   .user(user)
-                   .permission(permission)
-                   .granted(false)
-                   .build();
-           userPermissionsRepository.save(userPermission);
-        }
-        return;
+        UserPermission userPermission = userPermissionsRepository
+                .findByUser_IdAndPermission_Id(userId, permissionId)
+                .orElseGet(() -> UserPermission.builder()
+                        .id(new UserPermissionId(userId, permissionId))
+                        .user(user)
+                        .permission(permission)
+                        .build());
+
+        userPermission.setGranted(false);
+        userPermissionsRepository.save(userPermission);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "usersCache", allEntries = true)
+    public void resetUserPermissionOverride(Long userId, Long permissionId) {
+        log.info("Resetting permission override for userId={} and permissionId={}", userId, permissionId);
+        userPermissionsRepository.findByUser_IdAndPermission_Id(userId, permissionId)
+                .ifPresent(userPermissionsRepository::delete);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "usersCache", allEntries = true)
+    public void preventUserFromAccessingPermission(Long userId, Long permissionId) {
+        User user=userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Permission permission=permissionRepository.findById(permissionId)
+                .orElseThrow(() -> new RuntimeException("Permission not found"));
+
+        UserPermissionId userPermissionId = new UserPermissionId(userId, permissionId);
+        log.info("preventUserFromAccessingPermission UserPermissionId={} PermissionId={}", userPermissionId, permissionId);
+        UserPermission userPermission=UserPermission.builder()
+                .id(userPermissionId)
+                .user(user)
+                .permission(permission)
+                .granted(false)
+                .build();
+        userPermissionsRepository.save(userPermission);
+       log.info("UserPermission saved with id={} for userId={} and permissionId={}", userPermission.getId(), userId, permissionId);
+        return ;
     }
 
     @Override
@@ -165,6 +191,17 @@ public class PermissionServiceImp implements PermissionService {
         return userPermissionsRepository.findByUser_Id(id).stream()
                 .map(this::toUserPermissionResponse)
                 .toList();
+    }
+
+    @Override
+    public Map<Long, List<UserPermissionResponse>> getUserPermissionsForUsers(List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return userPermissionsRepository.findAllByUser_IdIn(userIds).stream()
+                .collect(Collectors.groupingBy(
+                        up -> up.getUser().getId(),
+                        Collectors.mapping(this::toUserPermissionResponse, Collectors.toList())));
     }
 
     private PermissionResponse toPermissionResponse(Permission permission) {

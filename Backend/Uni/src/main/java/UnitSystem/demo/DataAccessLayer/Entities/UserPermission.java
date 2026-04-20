@@ -15,12 +15,12 @@ public class UserPermission {
     @EmbeddedId
     private UserPermissionId id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("userId")
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @MapsId("permissionId")
     @JoinColumn(name = "permission_id")
     private Permission permission;

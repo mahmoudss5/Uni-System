@@ -1,7 +1,9 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.PermissionService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.BusinessLogic.Mappers.UserMapper;
+import UnitSystem.demo.DataAccessLayer.Dto.Permission.UserPermissionResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +35,7 @@ public class UserServiceImp implements UserService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final PermissionService permissionService;
 
     @Override
     @CacheEvict(value = "usersCache", allEntries = true)
@@ -195,8 +199,14 @@ public class UserServiceImp implements UserService {
     @Cacheable(value = "usersCache", key = "'allUsers'")
     public List<UserResponse> getAllUsers() {
         log.info("Retrieving all users");
-        List<UserResponse> responses= userRepository.findAll().stream()
-                .map(userMapper::mapToUserResponse)
+        List<User> users = userRepository.findAll();
+        List<Long> userIds = users.stream().map(User::getId).toList();
+        Map<Long, List<UserPermissionResponse>> permissionsByUserId =
+                permissionService.getUserPermissionsForUsers(userIds);
+        List<UserResponse> responses = users.stream()
+                .map(u -> userMapper.mapToUserResponse(
+                        u,
+                        permissionsByUserId.getOrDefault(u.getId(), List.of())))
                 .collect(Collectors.toList());
         log.info("Users retrieved successfully: {}", responses);
         return responses;

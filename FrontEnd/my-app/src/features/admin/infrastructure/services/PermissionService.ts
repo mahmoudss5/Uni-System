@@ -28,5 +28,4 @@ class PermissionService {
         return response.data;
     }
 }
-
 export const permissionService = new PermissionService();

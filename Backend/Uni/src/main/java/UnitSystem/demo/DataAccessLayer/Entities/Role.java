@@ -23,7 +23,7 @@ public class Role {
     @jakarta.persistence.Column(nullable = false, unique = true)
     private String name;
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany(mappedBy = "roles", fetch = FetchType.EAGER)
     @Builder.Default
     @JsonIgnore
     private Set<User> users = new HashSet<>();

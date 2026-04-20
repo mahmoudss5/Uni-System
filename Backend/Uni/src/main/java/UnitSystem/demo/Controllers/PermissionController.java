@@ -69,10 +69,17 @@ public class PermissionController {
 
     @Operation(summary = "Remove specific permission from user")
     @DeleteMapping("/users/{userId}/{permissionId}")
-    public ResponseEntity<Void> removePermissionFromUser(
+    public ResponseEntity<String> removePermissionFromUser(
             @PathVariable Long userId,
             @PathVariable Long permissionId) {
-        permissionService.removePermissionFromUser(userId, permissionId);
-        return ResponseEntity.noContent().build();
+
+        permissionService.resetUserPermissionOverride(userId, permissionId);
+        return ResponseEntity.ok("Permission removed from user successfully");
+    }
+    @Operation(summary = "Prevent user from accessing permission")
+    @PostMapping("/users/{userId}/{permissionId}")
+    public ResponseEntity<String> preventUserFromAccessingPermission(@PathVariable Long userId, @PathVariable Long permissionId) {
+        permissionService.preventUserFromAccessingPermission(userId, permissionId);
+        return ResponseEntity.ok("User prevented from accessing permission successfully");
     }
 }

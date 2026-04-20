@@ -11,6 +11,7 @@ interface Props {
     isPending: boolean;
     editCourse?: course | null;
     teacherUserName: string;
+    submitError?: string | null;
 }
 
 const EMPTY: Omit<CourseRequest, "teacherUserName"> = {
@@ -19,7 +20,7 @@ const EMPTY: Omit<CourseRequest, "teacherUserName"> = {
     departmentName: "", creditHours: 3, maxStudents: 30,
 };
 
-export function CourseFormModal({ isOpen, onClose, onSubmit, isPending, editCourse, teacherUserName }: Props) {
+export function CourseFormModal({ isOpen, onClose, onSubmit, isPending, editCourse, teacherUserName, submitError }: Props) {
     const [form, setForm] = useState(EMPTY);
    console.log("course Credits:", form.creditHours);
     useEffect(() => {
@@ -156,6 +157,12 @@ export function CourseFormModal({ isOpen, onClose, onSubmit, isPending, editCour
                                         <input type="number" name="maxStudents" required min={1} value={form.maxStudents} onChange={handleChange} className={inputCls} />
                                     </div>
                                 </div>
+
+                                {submitError && (
+                                    <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                                        {submitError}
+                                    </div>
+                                )}
 
                                 {/* footer */}
                                 <div className="flex gap-3 pt-1">

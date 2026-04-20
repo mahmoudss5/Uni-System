@@ -29,7 +29,7 @@ public class Teacher extends User{
     private BigDecimal salary;
 
 
-    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     private Set<Course> courses = new HashSet<>();
 

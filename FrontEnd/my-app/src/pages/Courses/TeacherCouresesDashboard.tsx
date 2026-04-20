@@ -19,6 +19,7 @@ export function TeacherCoursesDashboard() {
     const [activeTab, setActiveTab]     = useState<"active" | "completed">("active");
     const [modalOpen, setModalOpen]     = useState(false);
     const [editCourse, setEditCourse]   = useState<course | null>(null);
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const teacherUserName = getUserName();
 
@@ -31,20 +32,53 @@ export function TeacherCoursesDashboard() {
 
     function openCreate() {
         setEditCourse(null);
+        setSubmitError(null);
         setModalOpen(true);
     }
 
     function openEdit(course: course) {
         setEditCourse(course);
+        setSubmitError(null);
         setModalOpen(true);
     }
 
+    function getReadableError(error: unknown) {
+        const defaultMsg = "Unable to complete this operation. Please try again.";
+        if (!(error instanceof Error) || !error.message) return defaultMsg;
+
+        const message = error.message.toLowerCase();
+        if (message.includes("forbidden") || message.includes("access denied") || message.includes("permission")) {
+            return "You do not have permission to perform this operation.";
+        }
+        return error.message;
+    }
+
     function handleSubmit(data: CourseRequest) {
+        setSubmitError(null);
         if (editCourse) {
-            updateCourse({ courseId: editCourse.id, course: data }, { onSuccess: () => setModalOpen(false) });
+            updateCourse(
+                { courseId: editCourse.id, course: data },
+                {
+                    onSuccess: () => {
+                        setSubmitError(null);
+                        setModalOpen(false);
+                    },
+                    onError: (error) => {
+                        setSubmitError(getReadableError(error));
+                    },
+                }
+            );
         } else {
             console.log({ ...data, teacherUserName });
-            createCourse(data, { onSuccess: () => setModalOpen(false) });
+            createCourse(data, {
+                onSuccess: () => {
+                    setSubmitError(null);
+                    setModalOpen(false);
+                },
+                onError: (error) => {
+                    setSubmitError(getReadableError(error));
+                },
+            });
         }
     }
 
@@ -144,11 +178,15 @@ export function TeacherCoursesDashboard() {
             {/* ── modal ── */}
             <CourseFormModal
                 isOpen={modalOpen}
-                onClose={() => setModalOpen(false)}
+                onClose={() => {
+                    setSubmitError(null);
+                    setModalOpen(false);
+                }}
                 onSubmit={handleSubmit}
                 isPending={isCreating || isUpdating}
                 editCourse={editCourse}
                 teacherUserName={teacherUserName}
+                submitError={submitError}
             />
         </>
     );

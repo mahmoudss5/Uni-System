@@ -32,6 +32,7 @@ export default function AdminUserPermissionDashboard() {
         queryKey: ["user-permissions", selectedUser?.id],
         queryFn: () => permissionService.getUserPermissions(selectedUser!.id),
         enabled: Boolean(selectedUser),
+        initialData: selectedUser?.userPermissions,
     });
 
     const updatePermissionMutation = useMutation({
@@ -45,6 +46,7 @@ export default function AdminUserPermissionDashboard() {
                 await queryClient.invalidateQueries({
                     queryKey: ["user-permissions", selectedUser.id],
                 });
+                await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
             }
             setTimeout(() => setSuccessMessage(null), 2000);
         },

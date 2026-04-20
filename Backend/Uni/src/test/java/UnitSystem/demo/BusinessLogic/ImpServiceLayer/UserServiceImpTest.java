@@ -1,6 +1,8 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.PermissionService;
 import UnitSystem.demo.BusinessLogic.Mappers.UserMapper;
+import UnitSystem.demo.DataAccessLayer.Dto.Role.RoleResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
@@ -18,12 +20,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +42,8 @@ class UserServiceImpTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private UserMapper userMapper;
+    @Mock
+    private PermissionService permissionService;
     @InjectMocks
     private UserServiceImp userServiceImp;
 
@@ -44,6 +51,7 @@ class UserServiceImpTest {
     private UserRequest userRequest;
     private UserResponse userResponse;
     private Role studentRole;
+    private RoleResponse studentRoleResponse;
 
     @BeforeEach
     void setUp() {
@@ -67,12 +75,17 @@ class UserServiceImpTest {
                 .password("password123")
                 .build();
 
+        studentRoleResponse = RoleResponse.builder()
+                .id(1L)
+                .name(RoleType.Student.name())
+                .build();
+
         userResponse = UserResponse.builder()
                 .id(1L)
                 .username("john_doe")
                 .email("john@example.com")
                 .active(true)
-                .roles(new HashSet<>(Set.of(studentRole)))
+                .roles(new HashSet<>(Set.of(studentRoleResponse)))
                 .build();
     }
 
@@ -231,7 +244,8 @@ class UserServiceImpTest {
     @Test
     void getAllUsers_returnsListOfUserResponses() {
         when(userRepository.findAll()).thenReturn(List.of(user));
-        when(userMapper.mapToUserResponse(user)).thenReturn(userResponse);
+        when(permissionService.getUserPermissionsForUsers(List.of(1L))).thenReturn(Map.of());
+        when(userMapper.mapToUserResponse(eq(user), anyList())).thenReturn(userResponse);
 
         List<UserResponse> result = userServiceImp.getAllUsers();
 
@@ -239,6 +253,7 @@ class UserServiceImpTest {
         assertEquals(1, result.size());
         assertEquals("john_doe", result.get(0).getUsername());
         verify(userRepository).findAll();
+        verify(permissionService).getUserPermissionsForUsers(List.of(1L));
     }
 
     @Test

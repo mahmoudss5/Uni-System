@@ -30,7 +30,7 @@ public class Student extends User{
     @Column(name = "total_credits")
     private int totalCredits;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Builder.Default
     private Set<EnrolledCourse> enrolledCourses = new HashSet<>();
 
