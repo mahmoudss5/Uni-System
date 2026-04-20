@@ -31,9 +31,9 @@ INSERT INTO students (user_id, gpa, enrollment_year, total_credits) VALUES
 -- 3. Teachers  (user_id FK → users, office_location, salary)
 -- ---------------------------------------------------------------
 INSERT INTO teachers (user_id, office_location, salary) VALUES
-(3, 'Building A, Room 201', 75000.00),
-(4, 'Building B, Room 105', 80000.00),
-(8, 'Building A, Room 310', 72000.00);
+(3, 'Building A, Room 201', 'SV7t2wb6Jkl0gkWbP/CRTn9CBqy+2CF6Z5pAux7MsKA77GLf'),
+(4, 'Building B, Room 105', 'Gy8zE9UeuMB1jrfgm1x2bFo6H7LBBAGtVMTLa7lUlY2gE336'),
+(8, 'Building A, Room 310', 'q5G7US/uVG3d/sxHN9Qk2VQXfMfUJqVKnnzPp/QTIgeNpPCF');
 
 -- ---------------------------------------------------------------
 -- 4. User Roles  (role names are seeded by DataSeeder: Student, Teacher, Admin)

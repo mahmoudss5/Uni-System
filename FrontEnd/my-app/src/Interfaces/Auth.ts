@@ -1,7 +1,14 @@
 import type { Student } from "./student";
 import type { Teacher } from "./teacher";
 
-export type AuthUser = Student | Teacher;
+export interface AdminUser {
+    role: "admin";
+    id: number;
+    username: string;
+    email: string;
+}
+
+export type AuthUser = Student | Teacher | AdminUser;
 
 export interface AuthContextType {
     isError: string | undefined;

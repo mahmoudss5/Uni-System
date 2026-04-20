@@ -14,6 +14,7 @@ import Registration from "./pages/Courses/Registration";
 import OAuth2Callback from "./pages/OAuth2Callback";
 import CourseDetails from "./pages/CourseDetails/CourseDetails";
 import Setting from "./pages/SettingPage/Setting";
+import AdminUserPermissionDashboard from "./features/admin/presentation/pages/AdminUserPermissionDashboard";
 import { Toaster } from "sonner";
 const router = createBrowserRouter([
   {
@@ -59,6 +60,13 @@ const router = createBrowserRouter([
         path: "settings",
         element: <ProtectedRoute>
           <Setting />
+          </ProtectedRoute>,
+      }
+      ,
+      {
+        path: "admin/users-permissions",
+        element: <ProtectedRoute>
+          <AdminUserPermissionDashboard />
           </ProtectedRoute>,
       }
     ],

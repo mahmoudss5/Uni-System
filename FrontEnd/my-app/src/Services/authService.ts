@@ -142,5 +142,20 @@ export async function decodeToken(token: string) {
     return decoded;
 }
 
+export function getPostLoginRedirectPath(token?: string | null): string {
+    if (!token) return "/dashboard";
+
+    try {
+        const decoded = jwtDecode<MyTokenPayload>(token);
+        if ((decoded.roles ?? []).some((role) => role.toUpperCase().includes("Admin"))) {
+            return "/dashboard/admin/users-permissions";
+        }
+    } catch {
+        return "/dashboard";
+    }
+
+    return "/dashboard";
+}
+
 
 

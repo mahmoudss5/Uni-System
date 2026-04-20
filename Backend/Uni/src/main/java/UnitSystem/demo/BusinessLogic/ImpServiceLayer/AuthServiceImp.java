@@ -104,13 +104,14 @@ public class AuthServiceImp implements AuthService {
     @Override
     public AuthResponse login(AuthRequest request) {
         try {
-
+             log.info("Authenticating User: {}", request.getEmail());
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
                             request.getPassword()));
 
         } catch (BadCredentialsException e) {
+
             log.warn("Authentication failed for email: {}", request.getEmail());
             throw new AuthError("Invalid email or password");
         }

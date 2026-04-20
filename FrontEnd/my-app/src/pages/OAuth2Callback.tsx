@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { setToken, setUserCache } from "../Services/authService";
+import { getPostLoginRedirectPath, setToken, setUserCache } from "../Services/authService";
 import { getUserDashboardData } from "../Services/userService";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -26,7 +26,7 @@ export default function OAuth2Callback() {
                 setToken(token);
                 const user = await getUserDashboardData(token);
                 setUserCache(queryClient, user);
-                navigate("/dashboard", { replace: true });
+                navigate(getPostLoginRedirectPath(token), { replace: true });
             } catch {
                 navigate("/auth/login?error=oauth_failed", { replace: true });
             }

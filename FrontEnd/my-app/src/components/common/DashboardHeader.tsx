@@ -2,6 +2,7 @@ import { Bell, Search } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getToken } from "../../Services/authService";
 import { getUserDashboardData } from "../../Services/userService";
+import type { AdminUser } from "../../Interfaces/Auth";
 import type { Student } from "../../Interfaces/student";
 import type { Teacher } from "../../Interfaces/teacher";
 import NotificationBell from "./NotificationBell";
@@ -14,7 +15,9 @@ export default function DashboardHeader() {
     });
     const displayName = user?.role === "teacher"
         ? (user as Teacher).name
-        : (user as Student)?.username ?? "";
+        : user?.role === "admin"
+            ? (user as AdminUser).username
+            : (user as Student)?.username ?? "";
     const role = user?.role;
 
     const initial = displayName ? displayName.charAt(0).toUpperCase() : "";
@@ -27,7 +30,11 @@ export default function DashboardHeader() {
                     Welcome back, {displayName}!
                 </h1>
                 <p className="text-md text-blue-500 mt-0.5 italic">
-                    {user?.role === "teacher" ? "Have a great day teaching" : "Have a great day learning"}
+                    {user?.role === "teacher"
+                        ? "Have a great day teaching"
+                        : user?.role === "admin"
+                            ? "Have a productive day managing the system"
+                            : "Have a great day learning"}
                 </p>
             </div>
 

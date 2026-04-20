@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../ContextsProviders/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ApiUrl } from "../../Services/config";
+import { getPostLoginRedirectPath, getToken } from "../../Services/authService";
 
 export default function LoginForm() {
 
@@ -22,7 +23,7 @@ export default function LoginForm() {
         try {
             console.log(email, password);
             await login(email, password);
-            navigate("/dashboard", { replace: true });
+            navigate(getPostLoginRedirectPath(getToken()), { replace: true });
         } catch (error) {
             console.error(error);
             setIsSubmitting(false);

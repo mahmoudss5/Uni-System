@@ -1,4 +1,5 @@
 import { CheckCircle, Clock, BookOpen, Star } from "lucide-react";
+import { Navigate } from "react-router-dom";
 import StatsCard from "../components/Dashboard/StatsCard";
 import EnrolledCourses from "../components/Dashboard/EnrolledCourses";
 import RecentAnnouncements from "../components/Dashboard/RecentAnnouncements";
@@ -66,7 +67,12 @@ function StudentDashboardContent() {
 }
 
 export default function Dashboard() {
-    if (getRole() === "teacher") {
+    const role = getRole();
+    if (role === "admin") {
+        return <Navigate to="/dashboard/admin/users-permissions" replace />;
+    }
+
+    if (role === "teacher") {
         return <TeacherDashboard />;
     }
 

@@ -15,4 +15,8 @@ import java.io.Serializable;
 public class UserPermissionId  implements Serializable {
     private Long userId;
     private Long permissionId;
+    public UserPermissionId(Long userId, Long permissionId) {
+        this.userId = userId;
+        this.permissionId = permissionId;
+    }
 }

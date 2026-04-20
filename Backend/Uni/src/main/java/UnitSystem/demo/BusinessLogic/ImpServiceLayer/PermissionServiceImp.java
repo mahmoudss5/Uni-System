@@ -111,7 +111,7 @@ public class PermissionServiceImp implements PermissionService {
                 .findByUser_IdAndPermission_Id(userId, permissionId)
                 .orElseGet(() -> {
                     UserPermission created = new UserPermission();
-                    created.setId(new UserPermissionId());
+                    created.setId(new UserPermissionId(request.getUserId(),request.getPermissionId()));
                     created.getId().setUserId(userId);
                     created.getId().setPermissionId(permissionId);
                     created.setUser(user);
@@ -129,10 +129,31 @@ public class PermissionServiceImp implements PermissionService {
     @Override
     @Transactional
     public void removePermissionFromUser(Long userId, Long permissionId) {
-        UserPermission userPermission = userPermissionsRepository
-                .findByUser_IdAndPermission_Id(userId, permissionId)
-                .orElseThrow(() -> new RuntimeException("User permission mapping not found"));
-        userPermissionsRepository.delete(Objects.requireNonNull(userPermission));
+        Permission permission=permissionRepository.findById(permissionId)
+                .orElseThrow(() -> new RuntimeException("Permission not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<UserPermission> userPermissions=userPermissionsRepository.findByUser_Id(userId);
+        Boolean found=false;
+        for (UserPermission userPermission:userPermissions) {
+            if (userPermission.getPermission().getId().equals(permission.getId())) {
+                 userPermission.setGranted(false);
+                 userPermissionsRepository.save(userPermission);
+                 found=true;
+                 break;
+            }
+        }
+        if (!found) {
+           UserPermission userPermission=UserPermission.builder()
+                   .id(new UserPermissionId(userId, permissionId))
+                   .user(user)
+                   .permission(permission)
+                   .granted(false)
+                   .build();
+           userPermissionsRepository.save(userPermission);
+        }
+        return;
     }
 
     @Override

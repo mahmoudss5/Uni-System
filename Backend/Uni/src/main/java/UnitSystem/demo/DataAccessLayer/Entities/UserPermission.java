@@ -7,9 +7,11 @@ import lombok.*;
 @Entity
 @Table(name = "user_permissions")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserPermission {
+   
     @EmbeddedId
     private UserPermissionId id;
 

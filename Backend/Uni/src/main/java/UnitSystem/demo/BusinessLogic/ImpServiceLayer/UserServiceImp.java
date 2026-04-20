@@ -138,10 +138,18 @@ public class UserServiceImp implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-        Role role = roleRepository.findByName(roleType.name())
+        String targetRoleName = roleType.name();
+        boolean alreadyHasRole = user.getRoles().stream()
+                .anyMatch(existingRole -> targetRoleName.equals(existingRole.getName()));
+        if (alreadyHasRole) {
+            log.info("User {} already has role {}. Skipping assignment.", user.getUserName(), roleType);
+            return;
+        }
+
+        Role role = roleRepository.findByName(targetRoleName)
                 .orElseGet(() -> {
                     Role newRole = Role.builder()
-                            .name(roleType.name())
+                            .name(targetRoleName)
                             .build();
                     return roleRepository.save(newRole);
                 });
@@ -187,9 +195,11 @@ public class UserServiceImp implements UserService {
     @Cacheable(value = "usersCache", key = "'allUsers'")
     public List<UserResponse> getAllUsers() {
         log.info("Retrieving all users");
-        return userRepository.findAll().stream()
+        List<UserResponse> responses= userRepository.findAll().stream()
                 .map(userMapper::mapToUserResponse)
                 .collect(Collectors.toList());
+        log.info("Users retrieved successfully: {}", responses);
+        return responses;
     }
 
 }

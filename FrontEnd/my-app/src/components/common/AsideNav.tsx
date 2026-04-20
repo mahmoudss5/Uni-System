@@ -8,6 +8,7 @@ import {
     Settings,
     LogOut,
     GraduationCap,
+    ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "../../ContextsProviders/AuthContext";
 import { motion } from "framer-motion";
@@ -18,6 +19,7 @@ const navItems = [
     { label: "Registration", icon: ClipboardList, to: "/dashboard/registration" },
     { label: "Grades & Transcript", icon: FileText, to: "/dashboard/grades" },
     { label: "Schedule", icon: Calendar, to: "/dashboard/schedule" },
+    { label: "Admin Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions" },
     { label: "Settings", icon: Settings, to: "/dashboard/settings" },
 ];
 
