@@ -1,10 +1,12 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Security.TeachersOnly;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
 import UnitSystem.demo.BusinessLogic.Mappers.MappingUtils;
 import UnitSystem.demo.BusinessLogic.Mappers.TeacherMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.Teacher.SalaryDto;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
@@ -148,6 +150,24 @@ public class TeacherServiceImp implements TeacherService {
                                 .upcomingEvents(upcomingEvents)
                                 .coursesCount(courses.size())
                                 .numberOfStudents(numberOfStudents)
+                                .build();
+        }
+
+        @Override
+        @TeachersOnly
+        public SalaryDto getTeacherSalary(Long teacherId) {
+                String encryptedSalary = teacherRepository.getRawEncryptedSalary(teacherId);
+                Teacher teacher =teacherRepository.findById(teacherId)
+                                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + teacherId));
+
+                if (encryptedSalary == null) {
+                        throw new RuntimeException("Teacher not found with ID: " + teacherId);
+                }
+                return SalaryDto.builder()
+                        .teacherName(teacher.getUserName())
+                        .plainTextSalary(teacher.getSalary() != null ? teacher.getSalary().toString() : "N/A")
+                        .encryptedSalary(encryptedSalary)
+                        .decryptedSalary(teacher.getSalary() != null ? teacher.getSalary().toString() : "N/A")
                                 .build();
         }
 }

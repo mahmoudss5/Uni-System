@@ -37,8 +37,7 @@ public class DepartmentServiceImp implements DepartmentService {
     }
 
     @Override
-    @Cacheable(value = "departmentsCache", key = "'departmentByName:' + #name")
-    public DepartmentResponse getDepartmentByName(String name) {
+    @Cacheable(value = "departmentsCache", key = "#name", unless = "#result == null")    public DepartmentResponse getDepartmentByName(String name) {
         Department department = departmentRepository.findByName(name);
         return department != null ? departmentMapper.mapToDepartmentResponse(department) : null;
     }

@@ -22,7 +22,7 @@ CREATE TABLE `students` (
 CREATE TABLE `teachers` (
                             `user_id` BIGINT NOT NULL,
                             `office_location` VARCHAR(255),
-                            `salary` DECIMAL(10,2),
+                            `salary` varchar(256),
                             PRIMARY KEY (`user_id`)
 );
 

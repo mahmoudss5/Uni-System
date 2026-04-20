@@ -72,6 +72,7 @@ public class AuthServiceImp implements AuthService {
     }
 
     private User buildAndSaveTeacher(UserRequest userRequest, Role role) {
+        BigDecimal salary= BigDecimal.valueOf(10000);
         User teacher = Teacher.builder()
                 .email(userRequest.getEmail())
                 .password(passwordEncoder.encode(userRequest.getPassword()))
@@ -79,7 +80,7 @@ public class AuthServiceImp implements AuthService {
                 .roles(Set.of(role))
                 .active(true)
                 .officeLocation("")
-                .salary(BigDecimal.ZERO)
+                .salary(salary)
                 .build();
         teacherService.saveUserASTeacher(teacher);
         return teacher;

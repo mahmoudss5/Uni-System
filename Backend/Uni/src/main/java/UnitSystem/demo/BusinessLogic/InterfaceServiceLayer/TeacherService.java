@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.InterfaceServiceLayer;
 
+import UnitSystem.demo.DataAccessLayer.Dto.Teacher.SalaryDto;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
@@ -24,4 +25,5 @@ public interface TeacherService {
     void deleteTeacher(Long teacherId);
 
     TeacherDetailsResponse getTeacherDetails(UserDetailsRequest userDetailsRequest);
+    SalaryDto getTeacherSalary(Long teacherId);
 }

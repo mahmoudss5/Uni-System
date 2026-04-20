@@ -1,6 +1,7 @@
 package UnitSystem.demo.Controllers;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
+import UnitSystem.demo.DataAccessLayer.Dto.Teacher.SalaryDto;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
@@ -84,4 +85,15 @@ public class TeacherController {
         TeacherDetailsResponse details = teacherService.getTeacherDetails(request);
         return ResponseEntity.ok(details);
     }
+
+    @Operation(summary = "Get teacher salary (plain text and Encrypted)")
+    @GetMapping("/{id}/salary")
+    public ResponseEntity<SalaryDto> getTeacherSalary(@PathVariable Long id) {
+        SalaryDto salary = teacherService.getTeacherSalary(id);
+        if (salary != null) {
+            return ResponseEntity.ok(salary);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 }

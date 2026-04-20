@@ -24,6 +24,7 @@ public class Teacher extends User{
     @Column(name = "office_location", nullable = false)
     private String officeLocation;
 
+    @Convert(converter = SalaryEncryptionConverter.class)
     @Column(name = "salary", nullable = false)
     private BigDecimal salary;
 
