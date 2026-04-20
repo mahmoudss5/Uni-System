@@ -1,4 +1,4 @@
-import { ApiUrl, Token, getHeaders } from "./config";
+import { ApiUrl, Token, UserPermissionsStorageKey, getHeaders } from "./config";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import type { QueryClient } from "@tanstack/react-query";
@@ -42,6 +42,44 @@ export function removeToken() {
     if(getToken()) {
         localStorage.removeItem(Token);
     }
+}
+
+export function setUserPermissions(permissions: string[]) {
+    localStorage.setItem(UserPermissionsStorageKey, JSON.stringify(permissions));
+}
+
+export function getUserPermissions(): string[] {
+    const rawPermissions = localStorage.getItem(UserPermissionsStorageKey);
+    if (!rawPermissions) return [];
+    try {
+        const parsed = JSON.parse(rawPermissions);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+export function removeUserPermissions() {
+    localStorage.removeItem(UserPermissionsStorageKey);
+}
+
+export function hasPermission(permission: string): boolean {
+    return getUserPermissions().includes(permission);
+}
+
+export function assertPermission(permission: string) {
+    if (!hasPermission(permission)) {
+        throw new Error("Access denied");
+    }
+}
+
+export function getTokenFromAuthResponse(data: any): string {
+    return data?.token || data?.Token || data;
+}
+
+export function getPermissionsFromAuthResponse(data: any): string[] {
+    const permissions = data?.userPermissions || data?.UserPermissions || [];
+    return Array.isArray(permissions) ? permissions : [];
 }
 
 export async function HandleRegister( email: string, password: string, username: string,teacherCode?: string,) {

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ApiUrl, getAuthHeaders } from "./config";
 import type { MessageRequest, MessageResponse } from "../Interfaces/message";
+import { assertPermission } from "./authService";
 
 export async function getMessagesByCourse(courseId: number): Promise<MessageResponse[]> {
     try {
@@ -19,6 +20,7 @@ export async function getMessagesByCourse(courseId: number): Promise<MessageResp
 
 export async function sendMessage(request: MessageRequest): Promise<void> {
     try {
+        assertPermission("send_message");
         await axios.post(`${ApiUrl}/api/messages`, request, {
             headers: getAuthHeaders(),
         });
@@ -33,6 +35,7 @@ export async function sendMessage(request: MessageRequest): Promise<void> {
 
 export async function deleteMessage(messageId: number): Promise<void> {
     try {
+        assertPermission("send_message");
         await axios.delete(`${ApiUrl}/api/messages/${messageId}`, {
             headers: getAuthHeaders(),
         });

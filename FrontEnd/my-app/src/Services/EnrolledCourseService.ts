@@ -2,6 +2,7 @@ import axios from "axios";
 import { ApiUrl } from "./config";
 import { getAuthHeaders } from "./config";
 import type { EnrolledCourseRequest } from "../Interfaces/enrolledCourse";
+import { assertPermission } from "./authService";
 
 export async function getAllEnrolledCourses() {
     try {
@@ -85,6 +86,7 @@ export async function getEnrolledCourseById(id: number) {
 }
 export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCourseRequest) {
     try {
+        assertPermission("course_register");
         console.log("Enrolling student in course:", enrolledCourseRequest);
         const response = await axios.post(`${ApiUrl}/api/enrolled-courses`, enrolledCourseRequest, {
             headers: getAuthHeaders(),
@@ -105,6 +107,7 @@ export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCours
 export async function unenrollStudentFromCourse(id: number) {
     
     try {
+        assertPermission("unenroll_student");
         console.log("Unenrolling student from course:", id);
         const response = await axios.delete(`${ApiUrl}/api/enrolled-courses/${id}`, {
             headers: getAuthHeaders(),

@@ -1,7 +1,8 @@
 import { createContext, useContext, useMemo } from "react";
 import {
     HandleLogin, HandleRegister, setToken, setUserCache,
-    removeToken, removeUserCache,
+    removeToken, removeUserCache, setUserPermissions, removeUserPermissions,
+    getPermissionsFromAuthResponse, getTokenFromAuthResponse,
 } from "../Services/authService";
 import { getUserDashboardData } from "../Services/userService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -20,8 +21,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         mutationFn: ({ email, password }: { email: string; password: string }) =>
             HandleLogin(email, password),
         onSuccess: async (data) => {
-            const token = data.token || data;
+            const token = getTokenFromAuthResponse(data);
+            const permissions = getPermissionsFromAuthResponse(data);
             setToken(token);
+            setUserPermissions(permissions);
             const user = await getUserDashboardData(token);
             setUserCache(queryClient, user);
         },
@@ -33,8 +36,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }: { email: string; password: string; username: string; TeacherCode?: string }) =>
             HandleRegister(email, password, username, TeacherCode),
         onSuccess: async (data) => {
-            const token = data.token || data;
+            const token = getTokenFromAuthResponse(data);
+            const permissions = getPermissionsFromAuthResponse(data);
             setToken(token);
+            setUserPermissions(permissions);
             const user = await getUserDashboardData(token);
             setUserCache(queryClient, user);
         },
@@ -47,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 registerMutation.mutateAsync({ email, password, username, TeacherCode }),
             logout: () => {
                 removeToken();
+                removeUserPermissions();
                 removeUserCache(queryClient);
             },
             isError: loginMutation.error?.message || registerMutation.error?.message,
