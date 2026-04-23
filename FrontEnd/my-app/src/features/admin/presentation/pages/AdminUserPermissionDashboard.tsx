@@ -6,7 +6,7 @@ import PermissionModal from "../components/PermissionModal";
 import type { User, UserPermission, UserPermissionRequest, UserTypeFilter } from "../../domain/interfaces";
 import { userService } from "../../infrastructure/services/UserService";
 import { permissionService } from "../../infrastructure/services/PermissionService";
-
+import { getRole } from "../../../../Services/userService";
 function hasRole(user: User, targetRole: "STUDENT" | "TEACHER"): boolean {
     return user.roles.some((role) => role.name.toUpperCase().includes(targetRole));
 }
@@ -17,7 +17,16 @@ export default function AdminUserPermissionDashboard() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [optimisticUserPermissions, setOptimisticUserPermissions] = useState<UserPermission[] | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
+    const role = getRole();
+    if(role !== "admin") {
+        return (
+            <div className="min-h-full flex items-center justify-center bg-slate-100 p-8">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    You do not have permission to access this page.
+                </div>
+            </div>
+        );
+    }
     const usersQuery = useQuery({
         queryKey: ["admin-users"],
         queryFn: () => userService.getAllUsers(),
@@ -110,6 +119,7 @@ export default function AdminUserPermissionDashboard() {
             }
         );
     };
+  
 
     return (
         <section className="min-h-full bg-slate-100 p-8">

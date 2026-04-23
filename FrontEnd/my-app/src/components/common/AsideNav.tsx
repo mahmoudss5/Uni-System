@@ -19,7 +19,7 @@ const navItems = [
     { label: "Registration", icon: ClipboardList, to: "/dashboard/registration" },
     { label: "Grades & Transcript", icon: FileText, to: "/dashboard/grades" },
     { label: "Schedule", icon: Calendar, to: "/dashboard/schedule" },
-    { label: "Admin Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions" },
+    { label: "Admin Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions", adminOnly: true },
     { label: "Settings", icon: Settings, to: "/dashboard/settings" },
 ];
 
@@ -27,6 +27,8 @@ export default function AsideNav() {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const role = getRole();
+    const visibleNavItems = navItems.filter((item) => !item.adminOnly || role === "admin");
+
     const handleLogout = () => {
         logout();
         navigate("/auth/login");
@@ -47,7 +49,7 @@ export default function AsideNav() {
 
             {/* Nav Links */}
             <nav className="flex-1 px-3 py-4 space-y-1">
-                {navItems.map(({ label, icon: Icon, to }) => (
+                {visibleNavItems.map(({ label, icon: Icon, to }) => (
                     <motion.div
                     key={to}    
                     whileHover={{ scale: 1.05 }}

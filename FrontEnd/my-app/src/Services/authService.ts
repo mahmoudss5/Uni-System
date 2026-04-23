@@ -48,6 +48,13 @@ export function setUserPermissions(permissions: string[]) {
     localStorage.setItem(UserPermissionsStorageKey, JSON.stringify(permissions));
 }
 
+export function IsAdmin(): boolean {
+    const token = getToken();
+    if (!token) return false;
+        const decoded = jwtDecode<MyTokenPayload>(token);
+        return (decoded.roles ?? []).some((role) => role.toLowerCase().includes("Admin"));
+}
+
 export function getUserPermissions(): string[] {
     const rawPermissions = localStorage.getItem(UserPermissionsStorageKey);
     if (!rawPermissions) return [];
