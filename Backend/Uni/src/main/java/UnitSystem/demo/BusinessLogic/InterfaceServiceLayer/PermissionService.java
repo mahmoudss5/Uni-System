@@ -30,4 +30,6 @@ public interface PermissionService {
     void revokePermissionFromUser(Long userId, Long permissionId);
     void resetUserPermissionOverride(Long userId, Long permissionId);
     void preventUserFromAccessingPermission(Long userId, Long permissionId);
+    List<PermissionResponse> getStudentPermissions();
+    List<PermissionResponse> getTeacherPermissions();
 }

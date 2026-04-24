@@ -33,6 +33,21 @@ export default function AdminUserPermissionDashboard() {
         queryFn: () => permissionService.getAllPermissions(),
     });
 
+    // Determine selected user's role to pick the right permissions endpoint
+    const selectedUserRole = selectedUser
+        ? hasRole(selectedUser, "STUDENT") ? "student" : hasRole(selectedUser, "TEACHER") ? "teacher" : null
+        : null;
+
+    // Fetch only the permissions that belong to the selected user's role
+    const rolePermissionsQuery = useQuery({
+        queryKey: ["role-permissions", selectedUserRole],
+        queryFn: () =>
+            selectedUserRole === "student"
+                ? permissionService.getStudentPermissions()
+                : permissionService.getTeacherPermissions(),
+        enabled: Boolean(selectedUser) && selectedUserRole !== null,
+    });
+
     const userPermissionsQuery = useQuery({
         queryKey: ["user-permissions", selectedUser?.id],
         queryFn: () => permissionService.getUserPermissions(selectedUser!.id),
@@ -48,9 +63,8 @@ export default function AdminUserPermissionDashboard() {
         },
         onSettled: async () => {
             if (selectedUser) {
-                await queryClient.invalidateQueries({
-                    queryKey: ["user-permissions", selectedUser.id],
-                });
+                await queryClient.invalidateQueries({ queryKey: ["user-permissions", selectedUser.id] });
+                await queryClient.invalidateQueries({ queryKey: ["role-permissions", selectedUserRole] });
                 await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
             }
             setTimeout(() => setSuccessMessage(null), 2000);
@@ -67,7 +81,31 @@ export default function AdminUserPermissionDashboard() {
         return nonAdminUsers;
     }, [selectedFilter, usersQuery.data]);
 
-    const effectiveUserPermissions = optimisticUserPermissions ?? userPermissionsQuery.data ?? [];
+    // Convert role permissions to Permission[] for the modal's display list (only role-specific ones)
+    const roleDisplayPermissions = useMemo(() => {
+        return (rolePermissionsQuery.data ?? []).map((p) => ({
+            ...p,
+            id: Number(p.id),
+        }));
+    }, [rolePermissionsQuery.data]);
+
+    // Merge role defaults (granted: true) with explicit user overrides.
+    // User overrides always win over role defaults.
+    const effectiveUserPermissions = useMemo((): UserPermission[] => {
+        const base = optimisticUserPermissions ?? userPermissionsQuery.data ?? [];
+        const roleDefaults: UserPermission[] = (rolePermissionsQuery.data ?? []).map((p) => ({
+            userId: selectedUser?.id ?? 0,
+            permissionId: Number(p.id),
+            permissionName: p.name,
+            granted: true, // role default = always granted
+        }));
+        // Overlay: explicit override replaces the role default for that permissionId
+        const overrideIds = new Set(base.map((p) => Number(p.permissionId)));
+        return [
+            ...roleDefaults.filter((p) => !overrideIds.has(Number(p.permissionId))),
+            ...base,
+        ];
+    }, [optimisticUserPermissions, userPermissionsQuery.data, rolePermissionsQuery.data, selectedUser?.id]);
 
     const handleSelectUser = (user: User) => {
         setSelectedUser(user);
@@ -97,7 +135,7 @@ export default function AdminUserPermissionDashboard() {
                       userId: selectedUser.id,
                       permissionId,
                       permissionName:
-                          permissionsQuery.data?.find((permission) => permission.id === permissionId)?.name ??
+                          roleDisplayPermissions.find((p) => p.id === permissionId)?.name ??
                           `Permission ${permissionId}`,
                       granted: nextGranted,
                   },
@@ -155,12 +193,12 @@ export default function AdminUserPermissionDashboard() {
                 {selectedUser && (
                     <PermissionModal
                         user={selectedUser}
-                        permissions={permissionsQuery.data ?? []}
+                        permissions={roleDisplayPermissions}
                         userPermissions={effectiveUserPermissions}
-                        isLoading={userPermissionsQuery.isLoading || permissionsQuery.isLoading}
+                        isLoading={rolePermissionsQuery.isLoading || userPermissionsQuery.isLoading}
                         isSaving={updatePermissionMutation.isPending}
                         errorMessage={
-                            userPermissionsQuery.isError || permissionsQuery.isError || updatePermissionMutation.isError
+                            rolePermissionsQuery.isError || userPermissionsQuery.isError || updatePermissionMutation.isError
                                 ? "Unable to update permissions right now."
                                 : null
                         }

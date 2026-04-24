@@ -82,4 +82,14 @@ public class PermissionController {
         permissionService.preventUserFromAccessingPermission(userId, permissionId);
         return ResponseEntity.ok("User prevented from accessing permission successfully");
     }
+    @Operation(summary = "get Student Role permissions")
+    @GetMapping("/rolePermission/student")
+   public ResponseEntity<List<PermissionResponse>> getStudentPermissions() {
+        return ResponseEntity.ok(permissionService.getStudentPermissions());
+    }
+    @Operation(summary = "get Teacher Role permissions")
+    @GetMapping("/rolePermission/teacher")
+    public ResponseEntity<List<PermissionResponse>> getTeacherPermissions() {
+        return ResponseEntity.ok(permissionService.getTeacherPermissions());
+    }
 }

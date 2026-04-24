@@ -27,5 +27,19 @@ class PermissionService {
         });
         return response.data;
     }
+
+    async getStudentPermissions(): Promise<Permission[]> {
+        const response = await axios.get<Permission[]>(`${ApiUrl}/api/permissions/rolePermission/student`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }
+
+    async getTeacherPermissions(): Promise<Permission[]> {
+        const response = await axios.get<Permission[]>(`${ApiUrl}/api/permissions/rolePermission/teacher`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data;
+    }
 }
 export const permissionService = new PermissionService();

@@ -12,20 +12,13 @@ interface PermissionModalProps {
     onClose: () => void;
 }
 
-/** True if any of the user's roles includes this permission (from role_permissions). */
-function isGrantedByRole(user: User, permissionId: number): boolean {
-    return user.roles.some((role) => (role.permissions ?? []).some((p) => p.id === permissionId));
-}
-
 /**
- * Effective access for the UI: explicit user_permissions row wins; otherwise inherit from roles.
+ * Looks up the granted status from userPermissions (which already contains merged role defaults + overrides).
+ * Uses Number() to safely compare permissionId regardless of string/number type from the API.
  */
-function isEffectivePermissionGranted(user: User, userPermissions: UserPermission[], permissionId: number): boolean {
-    const override = userPermissions.find((p) => p.permissionId === permissionId);
-    if (override !== undefined) {
-        return override.granted;
-    }
-    return isGrantedByRole(user, permissionId);
+function isEffectivePermissionGranted(userPermissions: UserPermission[], permissionId: number): boolean {
+    const match = userPermissions.find((p) => Number(p.permissionId) === Number(permissionId));
+    return match?.granted ?? false;
 }
 
 export default function PermissionModal({
@@ -75,7 +68,7 @@ export default function PermissionModal({
                     ) : (
                         <ul className="space-y-3">
                             {permissions.map((permission) => {
-                                const granted = isEffectivePermissionGranted(user, userPermissions, permission.id);
+                                const granted = isEffectivePermissionGranted(userPermissions, permission.id);
 
                                 return (
                                     <li
