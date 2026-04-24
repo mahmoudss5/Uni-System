@@ -26,6 +26,7 @@ public class MessageServiceImp implements MessageService {
     private final SimpMessagingTemplate messagingTemplate;
     @Override
     @CacheEvict(value = "messagesCache", allEntries = true)
+    
     public void createMessage(MessageRequest messageRequest) {
         log.info("Creating message for course ID: {}", messageRequest.getCourseId());
         Message message = messageMapper.mapToMessageEntity(messageRequest);

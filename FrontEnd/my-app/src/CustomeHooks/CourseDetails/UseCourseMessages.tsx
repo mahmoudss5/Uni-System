@@ -3,6 +3,8 @@ import { getMessagesByCourse } from "../../Services/MessageService";
 import type { MessageResponse, MessageRequest } from "../../Interfaces/message";
 import { useCallback, useEffect, useState } from "react";
 import { webSocketService } from "../../Services/WebSocketService";
+import { hasPermission } from "../../Services/authService";
+import { toast } from "sonner";
 
 export function useCourseMessages(courseId: number) {
     const queryClient = useQueryClient();
@@ -41,6 +43,10 @@ export function useCourseMessages(courseId: number) {
 
 
 const postMessage = useCallback((request: MessageRequest) => {
+    if (!hasPermission("send_message")) {
+        toast.error("Access Denied: You do not have permission to send messages.");
+        return;
+    }
     setIsSending(true);
     webSocketService.sendChatMessage(courseId, request);
     setTimeout(() => setIsSending(false), 300);

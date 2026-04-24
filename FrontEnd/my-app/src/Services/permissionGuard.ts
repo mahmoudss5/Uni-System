@@ -1,5 +1,6 @@
 import axios from "axios";
 import { hasPermission } from "./authService";
+import { toast } from "sonner";
 
 type PermissionRule = {
     method: string;
@@ -44,6 +45,7 @@ export const setupPermissionGuardInterceptor = () => {
             );
 
             if (matchedRule && !hasPermission(matchedRule.permission)) {
+                toast.error("Access Denied: You do not have permission to perform this action.");
                 return Promise.reject(new Error("Access denied"));
             }
 

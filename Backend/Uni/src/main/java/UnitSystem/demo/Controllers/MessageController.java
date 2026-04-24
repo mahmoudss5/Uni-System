@@ -1,5 +1,4 @@
 package UnitSystem.demo.Controllers;
-
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.MessageService;
 import UnitSystem.demo.DataAccessLayer.Dto.Message.MessageRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Message.MessageResponse;
@@ -9,7 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.DestinationVariable;
+import UnitSystem.demo.Security.Annotations.RequiresPermission;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +25,7 @@ public class MessageController {
 
     @Operation(summary = "send a message in a course chat with bradcasting to all course members")
     @MessageMapping("/course/{courseId}")
+    @RequiresPermission("send_message")
     public void sendMessage(MessageRequest messageRequest){
         messageService.createMessage(messageRequest);
     }
@@ -33,6 +33,7 @@ public class MessageController {
 
     @Operation(summary = "Send a message in a course chat")
     @PostMapping
+    @RequiresPermission("send_message")
     public ResponseEntity<Void> createMessage(@Valid @RequestBody MessageRequest messageRequest) {
         messageService.createMessage(messageRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -58,6 +59,7 @@ public class MessageController {
 
     @Operation(summary = "Delete a message by ID")
     @DeleteMapping("/{id}")
+    @RequiresPermission("send_message")
     public ResponseEntity<Void> deleteMessageById(@PathVariable Long id) {
         messageService.deleteMessageById(id);
         return ResponseEntity.noContent().build();
