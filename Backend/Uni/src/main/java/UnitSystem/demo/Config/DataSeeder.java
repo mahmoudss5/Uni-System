@@ -1,4 +1,5 @@
 package UnitSystem.demo.Config;
+
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.DepartmentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
@@ -56,8 +57,7 @@ public class DataSeeder {
                     departmentService.createDepartment(
                             UnitSystem.demo.DataAccessLayer.Dto.Department.DepartmentRequest.builder()
                                     .name(departmentType.name())
-                                    .build()
-                    );
+                                    .build());
                     System.out.println("Seeded Department: " + departmentType.name());
                 }
             });

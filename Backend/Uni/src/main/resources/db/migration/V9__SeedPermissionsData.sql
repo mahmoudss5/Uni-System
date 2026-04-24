@@ -3,6 +3,14 @@
 -- =============================================================
 
 -- ---------------------------------------------------------------
+-- 0. Ensure Roles Exist
+-- ---------------------------------------------------------------
+INSERT IGNORE INTO roles (name) VALUES 
+    ('Admin'), 
+    ('Teacher'), 
+    ('Student');
+
+-- ---------------------------------------------------------------
 -- 1. Permissions (from TeacherPermissions and StudentPermissions enums)
 -- ---------------------------------------------------------------
 INSERT INTO permissions (id, name, description) VALUES
