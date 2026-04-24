@@ -6,6 +6,7 @@ import UnitSystem.demo.DataAccessLayer.Entities.Student;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -34,6 +35,11 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     @Query("SELECT s.email FROM Student s JOIN EnrolledCourse ec ON s.id = ec.student.id WHERE ec.course.id = :courseId")
     List<String> findStudentEmailsByCourseId(@Param("courseId") Long courseId);
+
+
+    @Modifying
+    @Query("DELETE FROM Course c WHERE c.id = :id")
+    void deletByIdDirect(@Param("id") Long id);
 
 
 }

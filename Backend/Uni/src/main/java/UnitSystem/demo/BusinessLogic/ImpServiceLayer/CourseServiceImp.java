@@ -12,6 +12,7 @@ import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Entities.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Repositories.CourseRepository;
 import UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -84,10 +85,12 @@ public class CourseServiceImp implements CourseService {
     @CourseTeacherOnly
     @CheckTeacherPermission(TeacherPermissions.delete_course)
     @CacheEvict(value = "coursesCache", allEntries = true)
+    @Transactional
     public void deleteCourse(Long courseId) {
-        Long id = Objects.requireNonNull(courseId, "courseId cannot be null");
-        courseRepository.deleteById(id);
-
+        log.info("Deleting course: {}", courseId);
+        Course course=courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+        courseRepository.deletByIdDirect(courseId);
+        log.info("After Deleted course: {}", courseId);
     }
 
     @Override

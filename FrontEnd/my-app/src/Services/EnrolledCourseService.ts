@@ -105,7 +105,7 @@ export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCours
     }
 }
 export async function unenrollStudentFromCourse(id: number) {
-    
+
     try {
         assertPermission("unenroll_student");
         console.log("Unenrolling student from course:", id);
@@ -122,6 +122,7 @@ export async function unenrollStudentFromCourse(id: number) {
                 throw new Error("No response from server");
             }   
         }
+        if (error instanceof Error) throw error;
         throw new Error("Error unenrolling student from course");
     }
 }

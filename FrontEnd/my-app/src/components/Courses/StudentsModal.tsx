@@ -15,7 +15,7 @@ interface Props {
 
 function StudentRow({ enrollment, courseId }: { enrollment: EnrolledCourseResponse; courseId: number }) {
     const [confirmOpen, setConfirmOpen] = useState(false);
-    const { unenrollStudentFromCourse, isPending } = useUnEnrollStudentFromCourse(enrollment.id);
+    const { drop: unenrollStudentFromCourse, isDropping: isPending } = useUnEnrollStudentFromCourse();
 
     function handleUnenroll() {
         unenrollStudentFromCourse(enrollment.id, {

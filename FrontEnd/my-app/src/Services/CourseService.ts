@@ -160,6 +160,7 @@ export async function deleteCourse(id:number) {
                 throw new Error("No response from server");
             }
         }
+        if (error instanceof Error) throw error;
         throw new Error("Error deleting course");
     }
 }

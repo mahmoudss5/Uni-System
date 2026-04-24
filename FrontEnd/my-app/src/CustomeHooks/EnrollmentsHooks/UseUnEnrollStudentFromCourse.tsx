@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { unenrollStudentFromCourse } from "../../Services/EnrolledCourseService";
 import { queryClient } from "../../main";
+import { toast } from "sonner";
 
 export function useUnEnrollStudentFromCourse() {
     const { mutate, isPending, error } = useMutation({
@@ -9,7 +10,9 @@ export function useUnEnrollStudentFromCourse() {
             queryClient.invalidateQueries({ queryKey: ["enrolledCourses"] });
         },
         onError: (err) => {
-            console.error("Error unenrolling student from course:", err instanceof Error ? err.message : err);
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            console.error("Error unenrolling student from course:", errorMsg);
+            toast.error(errorMsg);
         },
     });
 

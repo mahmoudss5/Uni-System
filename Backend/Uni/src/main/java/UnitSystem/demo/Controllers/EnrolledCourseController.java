@@ -7,12 +7,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/enrolled-courses")
 @Tag(name = "Enrolled Course", description = "Endpoints for course enrollment management")
@@ -64,6 +66,7 @@ public class EnrolledCourseController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> unenrollStudentFromCourse(@PathVariable Long id) {
+        log.info(" from controller Attempting to unenroll student from course with enrollment ID: {}", id);
         enrolledCourseService.unenrollStudentFromCourse(id);
         return ResponseEntity.noContent().build();
     }

@@ -16,16 +16,19 @@ import UnitSystem.demo.DataAccessLayer.Entities.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.EnrolledCourseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EnrolledCourseServiceImp implements EnrolledCourseService {
@@ -74,7 +77,8 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     @CheckStudentPermission(StudentPermissions.course_register)
     @Caching(evict = {
             @CacheEvict(value = "enrollmentsCache", allEntries = true),
-            @CacheEvict(value = "studentsCache", key = "'studentDetails:' + #enrolledCourseRequest.studentId")
+            @CacheEvict(value = "studentsCache", key = "'studentDetails:' + #enrolledCourseRequest.studentId"),
+            @CacheEvict(value = "coursesCache", allEntries = true)
     })
     public EnrolledCourseResponse enrollStudentInCourse(EnrolledCourseRequest enrolledCourseRequest) {
         User student = userService.findUserById(enrolledCourseRequest.getStudentId());
@@ -94,11 +98,17 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     @CheckTeacherPermission(TeacherPermissions.unenroll_student)
     @Caching(evict = {
             @CacheEvict(value = "enrollmentsCache", allEntries = true),
-            @CacheEvict(value = "studentsCache", allEntries = true)
+            @CacheEvict(value = "studentsCache", allEntries = true),
+            @CacheEvict(value = "coursesCache", allEntries = true)
     })
+    @Transactional
     public void unenrollStudentFromCourse(Long enrolledCourseId) {
-        Long id = Objects.requireNonNull(enrolledCourseId, "enrolledCourseId cannot be null");
-        enrolledCourseRepository.deleteById(id);
+
+        if (!enrolledCourseRepository.existsById(enrolledCourseId)) {
+            throw new RuntimeException("Enrolled course not found with ID: " + enrolledCourseId);
+        }
+        enrolledCourseRepository.deleteByIdDirect(enrolledCourseId);
+        log.info(" after the method end Attempting to unenroll student from course with enrollment ID: {}", enrolledCourseId);
     }
 
     @Override
