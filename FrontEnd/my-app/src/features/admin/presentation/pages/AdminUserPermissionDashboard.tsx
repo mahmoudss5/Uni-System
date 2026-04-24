@@ -11,6 +11,10 @@ function hasRole(user: User, targetRole: "STUDENT" | "TEACHER"): boolean {
     return user.roles.some((role) => role.name.toUpperCase().includes(targetRole));
 }
 
+function isAdmin(user: User): boolean {
+    return user.roles.some((role) => role.name.toUpperCase().includes("ADMIN"));
+}
+
 export default function AdminUserPermissionDashboard() {
     const queryClient = useQueryClient();
     const [selectedFilter, setSelectedFilter] = useState<UserTypeFilter>("all");
@@ -18,15 +22,7 @@ export default function AdminUserPermissionDashboard() {
     const [optimisticUserPermissions, setOptimisticUserPermissions] = useState<UserPermission[] | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const role = getRole();
-    if(role !== "admin") {
-        return (
-            <div className="min-h-full flex items-center justify-center bg-slate-100 p-8">
-                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                    You do not have permission to access this page.
-                </div>
-            </div>
-        );
-    }
+   
     const usersQuery = useQuery({
         queryKey: ["admin-users"],
         queryFn: () => userService.getAllUsers(),
@@ -62,10 +58,13 @@ export default function AdminUserPermissionDashboard() {
     });
 
     const filteredUsers = useMemo(() => {
-        const users = usersQuery.data ?? [];
-        if (selectedFilter === "students") return users.filter((user) => hasRole(user, "STUDENT"));
-        if (selectedFilter === "teachers") return users.filter((user) => hasRole(user, "TEACHER"));
-        return users;
+        // Exclude any user who has an Admin role, even if they also have Student/Teacher
+        const nonAdminUsers = (usersQuery.data ?? []).filter(
+            (user) => !isAdmin(user) && (hasRole(user, "STUDENT") || hasRole(user, "TEACHER"))
+        );
+        if (selectedFilter === "students") return nonAdminUsers.filter((user) => hasRole(user, "STUDENT"));
+        if (selectedFilter === "teachers") return nonAdminUsers.filter((user) => hasRole(user, "TEACHER"));
+        return nonAdminUsers;
     }, [selectedFilter, usersQuery.data]);
 
     const effectiveUserPermissions = optimisticUserPermissions ?? userPermissionsQuery.data ?? [];
@@ -119,7 +118,15 @@ export default function AdminUserPermissionDashboard() {
             }
         );
     };
-  
+    if(role !== "admin") {
+        return (
+            <div className="min-h-full flex items-center justify-center bg-slate-100 p-8">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                    You do not have permission to access this page.
+                </div>
+            </div>
+        );
+    }
 
     return (
         <section className="min-h-full bg-slate-100 p-8">
