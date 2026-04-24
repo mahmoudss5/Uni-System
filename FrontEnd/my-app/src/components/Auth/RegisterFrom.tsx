@@ -11,6 +11,7 @@ export default function RegisterFrom() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [role, setRole] = useState<Role>("student");
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const handleGitHubLogin = () => {
         window.location.href = `${ApiUrl}/oauth2/authorization/github`;
@@ -36,12 +37,36 @@ export default function RegisterFrom() {
         try {
             console.log("Registering with:", { email, username, password, role, teacherCode });
             await register(email, password, username, teacherCode);
-            navigate("/dashboard", { replace: true });
+            setIsSuccess(true);
         } catch (error) {
             console.error(error);
         }
         setLoading(false);
     };
+
+    if (isSuccess) {
+        return (
+            <div className="w-full max-w-md px-4 sm:px-8 py-4">
+                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100 text-center flex flex-col items-center justify-center space-y-6 transform transition-all hover:scale-[1.02]">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center shadow-inner">
+                        <svg className="w-10 h-10 text-green-500 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div className="space-y-2">
+                        <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Account Registered!</h2>
+                        <p className="text-gray-600 text-base px-2">Your account has been created successfully. You can now log in with your credentials.</p>
+                    </div>
+                    <Link
+                        to="/auth/login"
+                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-bold text-lg hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 focus:ring-4 focus:ring-blue-300 transition-all duration-300"
+                    >
+                        Go to Login Page
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full max-w-md px-4 sm:px-8 py-4">

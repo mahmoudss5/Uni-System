@@ -35,14 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email, password, username, TeacherCode,
         }: { email: string; password: string; username: string; TeacherCode?: string }) =>
             HandleRegister(email, password, username, TeacherCode),
-        onSuccess: async (data) => {
-            const token = getTokenFromAuthResponse(data);
-            const permissions = getPermissionsFromAuthResponse(data);
-            setToken(token);
-            setUserPermissions(permissions);
-            const user = await getUserDashboardData(token);
-            setUserCache(queryClient, user);
-        },
     });
 
     const value = useMemo<AuthContextType>(
