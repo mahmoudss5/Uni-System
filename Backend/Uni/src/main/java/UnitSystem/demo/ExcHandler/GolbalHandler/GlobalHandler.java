@@ -1,9 +1,6 @@
 package UnitSystem.demo.ExcHandler.GolbalHandler;
 
-import UnitSystem.demo.ExcHandler.Entites.AuthError;
-import UnitSystem.demo.ExcHandler.Entites.ErrorResponse;
-import UnitSystem.demo.ExcHandler.Entites.PermissionDeniedException;
-import UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException;
+import UnitSystem.demo.ExcHandler.Entites.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -52,5 +50,18 @@ public class GlobalHandler {
     private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String error, String message) {
         ErrorResponse body = new ErrorResponse(status.value(), error, message, LocalDateTime.now());
         return ResponseEntity.status(status).body(body);
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleRateLimit(
+            RateLimitExceededException ex) {
+        return ResponseEntity
+                .status(429)
+                .header("Retry-After", "60")
+                .body(Map.of(
+                        "status",  429,
+                        "error",   "Too Many Requests",
+                        "message", ex.getMessage()
+                ));
     }
 }

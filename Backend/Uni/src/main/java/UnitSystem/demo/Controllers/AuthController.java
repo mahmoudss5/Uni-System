@@ -1,5 +1,6 @@
 package UnitSystem.demo.Controllers;
 
+import UnitSystem.demo.Aspect.Security.RateLimit;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.AuthService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthRequest;
@@ -30,6 +31,7 @@ private final AuthService authService;
     @Operation(summary = "Authenticate user and generate JWT token")
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
+    @RateLimit(perSeconds = 60, requests = 5, key = "login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         AuthResponse authResponse = authService.login(authRequest);
         return ResponseEntity.ok(authResponse);

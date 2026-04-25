@@ -1,5 +1,6 @@
 package UnitSystem.demo.Controllers;
 
+import UnitSystem.demo.Aspect.Security.RateLimit;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.CourseService;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
@@ -23,6 +24,7 @@ public class CourseController {
 
     @Operation(summary = "Get all courses")
     @GetMapping("all")
+    @RateLimit(perSeconds = 60, requests = 100, key = "getAllCourses")
     public ResponseEntity<List<CourseResponse>> getAllCourses() {
         List<CourseResponse> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);
@@ -30,6 +32,7 @@ public class CourseController {
 
     @Operation(summary = "Get most popular courses")
     @GetMapping("/popular/{topN}")
+    @RateLimit // by default 20 request per 60 sec
     public ResponseEntity<List<CourseResponse>> getMostPopularCourses(@PathVariable int topN) {
         List<CourseResponse> courses = courseService.getMostPopularCourses(topN);
         return ResponseEntity.ok(courses);
