@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import UnitSystem.demo.Security.Annotations.RequiresPermission;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class MessageController {
     @Operation(summary = "send a message in a course chat with bradcasting to all course members")
     @MessageMapping("/course/{courseId}")
     @RequiresPermission("send_message")
-    public void sendMessage(MessageRequest messageRequest){
+    public void sendMessage(MessageRequest messageRequest, SimpMessageHeaderAccessor accessor){
         messageService.createMessage(messageRequest);
     }
 

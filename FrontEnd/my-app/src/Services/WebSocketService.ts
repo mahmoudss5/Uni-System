@@ -5,6 +5,7 @@ import type { AnnouncementCourseResponse } from "../Interfaces/announcement";
 import type { MessageRequest, MessageResponse, TypingPayload } from "../Interfaces/message";
 import { getToken } from "../Services/authService";
 import { ApiUrl } from "./config";
+import { toast } from "sonner";
 
 type NotificationHandler = (n: NotificationMessage) => void;
 type AnnouncementHandler = (a: AnnouncementCourseResponse) => void;
@@ -76,11 +77,41 @@ class WebSocketService {
             },
 
             onStompError: (frame) => {
-                console.error("STOMP error:", frame.headers["message"]);
+                const serverMessage = this.extractServerErrorMessage(frame);
+                console.error("STOMP error:", serverMessage);
+
+                if (this.isPermissionDeniedMessage(serverMessage)) {
+                    toast.error("You do not have permission to send messages in this course chat.");
+                    return;
+                }
+
+                toast.error(serverMessage || "Unable to send message right now. Please try again.");
             },
         });
 
         this.client.activate();
+    }
+
+    private extractServerErrorMessage(frame: { headers: Record<string, string>; body?: string }): string {
+        const headerMessage = frame.headers?.message;
+        const body = frame.body?.trim();
+
+        if (body) {
+            try {
+                const parsed = JSON.parse(body) as { message?: string; error?: string };
+                const jsonMessage = parsed?.message || parsed?.error;
+                if (jsonMessage) return jsonMessage;
+            } catch {
+                // If body is plain text, use it directly.
+                return body;
+            }
+        }
+
+        return headerMessage || "WebSocket error";
+    }
+
+    private isPermissionDeniedMessage(message: string): boolean {
+        return /access denied|missing required permission|permission|forbidden|denied/i.test(message);
     }
 
     // ── resubscribes ALL active handlers ─────────────────────────────────────

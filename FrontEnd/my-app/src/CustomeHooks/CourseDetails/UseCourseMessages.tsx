@@ -1,9 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMessagesByCourse } from "../../Services/MessageService";
+import { getMessagesByCourse, sendMessage } from "../../Services/MessageService";
 import type { MessageResponse, MessageRequest } from "../../Interfaces/message";
 import { useCallback, useEffect, useState } from "react";
 import { webSocketService } from "../../Services/WebSocketService";
-import { hasPermission } from "../../Services/authService";
 import { toast } from "sonner";
 
 export function useCourseMessages(courseId: number) {
@@ -31,26 +30,34 @@ export function useCourseMessages(courseId: number) {
         );
     }, [courseId, queryClient]);
 
- useEffect(() => {
-    if(courseId <= 0) {
-        return;
-    }
-    webSocketService.subscribeToChat(courseId, handleNewMessage);
-    return () => {
-        webSocketService.unsubscribeFromChat(courseId);
-    };
-}, [courseId, handleNewMessage]);
+    useEffect(() => {
+        if (courseId <= 0) {
+            return;
+        }
+        webSocketService.subscribeToChat(courseId, handleNewMessage);
+        return () => {
+            webSocketService.unsubscribeFromChat(courseId);
+        };
+    }, [courseId, handleNewMessage]);
 
 
-const postMessage = useCallback((request: MessageRequest) => {
-    if (!hasPermission("send_message")) {
-        toast.error("Access Denied: You do not have permission to send messages.");
-        return;
-    }
-    setIsSending(true);
-    webSocketService.sendChatMessage(courseId, request);
-    setTimeout(() => setIsSending(false), 300);
-}, [courseId]);
+    const postMessage = useCallback(async (request: MessageRequest): Promise<boolean> => {
+        setIsSending(true);
+        try {
+            await sendMessage(request);
+            return true;
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Unable to send message right now.";
+            if (/access denied|missing required permission|permission|forbidden|denied/i.test(message)) {
+                toast.error("You do not have permission to send messages in this course chat.");
+            } else {
+                toast.error(message);
+            }
+            return false;
+        } finally {
+            setIsSending(false);
+        }
+    }, []);
 
     return {
         messages: data ?? [],

@@ -91,17 +91,19 @@ export default function CourseChatTab({
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    function handleSend() {
+    async function handleSend() {
         const trimmed = text.trim();
         if (!trimmed || isSending) return;
-        postMessage({ courseId, senderId: currentUserId, content: trimmed });
-        setText("");
+        const sent = await postMessage({ courseId, senderId: currentUserId, content: trimmed });
+        if (sent) {
+            setText("");
+        }
     }
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            handleSend();
+            void handleSend();
         }
     }
 
@@ -149,7 +151,7 @@ export default function CourseChatTab({
                     className="flex-1 px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
                 />
                 <button
-                    onClick={handleSend}
+                    onClick={() => void handleSend()}
                     disabled={!text.trim() || isSending}
                     className="w-10 h-10 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white rounded-xl flex items-center justify-center transition-colors cursor-pointer"
                 >
