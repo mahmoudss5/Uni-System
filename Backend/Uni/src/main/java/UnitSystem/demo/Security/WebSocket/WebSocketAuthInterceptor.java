@@ -2,8 +2,6 @@ package UnitSystem.demo.Security.WebSocket;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.CourseService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.EnrolledCourseService;
-import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
-import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.Security.User.CustomUserDetailsService;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
@@ -26,6 +24,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
     private final EnrolledCourseService enrolledCourseService;
+    private final CourseService courseService;
 
 
     @Override
@@ -68,9 +67,14 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                 String[] parts = destination.split("/");
                 if (parts.length >= 4) {
                     try {
-                        Long courseId = Long.valueOf(parts[3]);
-                        if (!enrolledCourseService.isStudentEnrolledInCourse(userEmail, courseId)) {
-                            throw new RuntimeException("Unauthorized: User is not enrolled in course " + courseId);
+                        String courseSegment = parts[3];
+                        if (courseSegment.endsWith(".typing")) {
+                            courseSegment = courseSegment.substring(0, courseSegment.indexOf(".typing"));
+                        }
+
+                        Long courseId = Long.valueOf(courseSegment);
+                        if (!hasAccessToCourseChat(userEmail, courseId)) {
+                            throw new RuntimeException("Unauthorized: User is not allowed to access course chat " + courseId);
                         }
                     } catch (NumberFormatException e) {
                         throw new RuntimeException("Bad Request: Invalid course ID format");
@@ -80,5 +84,16 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
         }
 
         return message;
+    }
+
+    private boolean hasAccessToCourseChat(String userEmail, Long courseId) {
+        if (enrolledCourseService.isStudentEnrolledInCourse(userEmail, courseId)) {
+            return true;
+        }
+
+        String teacherEmail = courseService.getCourseEntityById(courseId)
+                .getTeacher()
+                .getEmail();
+        return userEmail.equalsIgnoreCase(teacherEmail);
     }
 }
