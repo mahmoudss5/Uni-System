@@ -48,7 +48,7 @@ public class PermissionAuthorizationAspect {
                         .anyMatch(permission -> permission.getName().equalsIgnoreCase(requiredPermission)));
 
         if (!hasPermission) {
-            log.warn("Access denied for user {}. Missing permission: {}", user.getUserName(), requiredPermission);
+            log.warn(" in hasPermission condtion check Access denied for user {}. Missing permission: {}", user.getUserName(), requiredPermission);
             throw new PermissionDeniedException(
                     "Access denied: missing permission '" + requiredPermission + "'.");
         }
