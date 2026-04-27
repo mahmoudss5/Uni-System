@@ -64,7 +64,7 @@ public class PermissionAspect {
          Optional<UserPermission> userPermissionOpt = userPermissionsRepository.findByUser_IdAndPermission_Id(user.getId(), permission.getId());
 
        boolean hasPermission=true;
-       if(userPermissionOpt.isPresent() && !userPermissionOpt.get().isGranted()) {
+        if(userPermissionOpt.isPresent() && !userPermissionOpt.get().isGranted()) {
            hasPermission=false;
        }
         // 4. Permission check logic
@@ -75,7 +75,9 @@ public class PermissionAspect {
         if (!hasPermission) {
             throw new AccessDeniedException("Access Denied: Missing required permission - " + requiredPermission);
         }
+
     }
+
     private String currentUser() {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         return (auth != null) ? auth.getName() : "anonymous";

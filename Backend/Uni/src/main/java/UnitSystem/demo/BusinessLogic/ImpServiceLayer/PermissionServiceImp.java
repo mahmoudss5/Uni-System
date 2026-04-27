@@ -1,6 +1,7 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.PermissionService;
+import UnitSystem.demo.BusinessLogic.Mappers.PermissionMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Permission.PermissionRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Permission.PermissionResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Permission.UserPermissionRequest;
@@ -30,12 +31,14 @@ public class PermissionServiceImp implements PermissionService {
         private final PermissionRepository permissionRepository;
         private final UserPermissions userPermissionsRepository;
         private final UserRepository userRepository;
+
         private final RoleRepository roleRepository;
+        private final PermissionMapper permissionMapper;
 
         @Override
         public List<PermissionResponse> getAllPermissions() {
                 return permissionRepository.findAll().stream()
-                                .map(this::toPermissionResponse)
+                                .map(permissionMapper::toPermissionResponse)
                                 .toList();
         }
 
@@ -44,7 +47,7 @@ public class PermissionServiceImp implements PermissionService {
                 Long id = Objects.requireNonNull(permissionId, "permissionId cannot be null");
                 Permission permission = permissionRepository.findById(id)
                                 .orElseThrow(() -> new RuntimeException("Permission not found"));
-                return toPermissionResponse(permission);
+                return permissionMapper.toPermissionResponse(permission);
         }
 
         @Override
@@ -64,7 +67,7 @@ public class PermissionServiceImp implements PermissionService {
                                 .build();
 
                 Permission savedPermission = permissionRepository.save(Objects.requireNonNull(permission));
-                return toPermissionResponse(savedPermission);
+                return permissionMapper.toPermissionResponse(savedPermission);
         }
 
         @Override
@@ -87,7 +90,7 @@ public class PermissionServiceImp implements PermissionService {
                 permission.setName(permissionName);
                 permission.setDescription(request.getDescription());
                 Permission updatedPermission = permissionRepository.save(permission);
-                return toPermissionResponse(updatedPermission);
+                return permissionMapper.toPermissionResponse(updatedPermission);
         }
 
         @Override
@@ -124,7 +127,7 @@ public class PermissionServiceImp implements PermissionService {
                 userPermission.setGranted(granted);
 
                 UserPermission saved = userPermissionsRepository.save(userPermission);
-                return toUserPermissionResponse(saved);
+                return permissionMapper.toUserPermissionResponse(saved);
         }
 
         @Override
@@ -181,23 +184,23 @@ public class PermissionServiceImp implements PermissionService {
                 return;
         }
 
-    @Override
-    public List<PermissionResponse> getStudentPermissions() {
-        Role studentRole = roleRepository.findByName(RoleType.Student.name())
-                .orElseThrow(() -> new RuntimeException("Student role not found"));
-        return studentRole.getPermissions().stream()
-                .map(this::toPermissionResponse)
-                .toList();
-    }
+        @Override
+        public List<PermissionResponse> getStudentPermissions() {
+                Role studentRole = roleRepository.findByName(RoleType.Student.name())
+                                .orElseThrow(() -> new RuntimeException("Student role not found"));
+                return studentRole.getPermissions().stream()
+                                .map(permissionMapper::toPermissionResponse)
+                                .toList();
+        }
 
-    @Override
-    public List<PermissionResponse> getTeacherPermissions() {
-        Role teacherRole = roleRepository.findByName(RoleType.Teacher.name())
-                .orElseThrow(() -> new RuntimeException("Teacher role not found"));
-        return teacherRole.getPermissions().stream()
-                .map(this::toPermissionResponse)
-                .toList();
-    }
+        @Override
+        public List<PermissionResponse> getTeacherPermissions() {
+                Role teacherRole = roleRepository.findByName(RoleType.Teacher.name())
+                                .orElseThrow(() -> new RuntimeException("Teacher role not found"));
+                return teacherRole.getPermissions().stream()
+                                .map(permissionMapper::toPermissionResponse)
+                                .toList();
+        }
 
         @Override
         public List<UserPermissionResponse> getUserPermissions(Long userId) {
@@ -206,7 +209,7 @@ public class PermissionServiceImp implements PermissionService {
                         throw new RuntimeException("User not found");
                 }
                 return userPermissionsRepository.findByUser_Id(id).stream()
-                                .map(this::toUserPermissionResponse)
+                                .map(permissionMapper::toUserPermissionResponse)
                                 .toList();
         }
 
@@ -218,24 +221,8 @@ public class PermissionServiceImp implements PermissionService {
                 return userPermissionsRepository.findAllByUser_IdIn(userIds).stream()
                                 .collect(Collectors.groupingBy(
                                                 up -> up.getUser().getId(),
-                                                Collectors.mapping(this::toUserPermissionResponse,
+                                                Collectors.mapping(permissionMapper::toUserPermissionResponse,
                                                                 Collectors.toList())));
         }
 
-        private PermissionResponse toPermissionResponse(Permission permission) {
-                return PermissionResponse.builder()
-                                .id(permission.getId())
-                                .name(permission.getName())
-                                .description(permission.getDescription())
-                                .build();
-        }
-
-        private UserPermissionResponse toUserPermissionResponse(UserPermission userPermission) {
-                return UserPermissionResponse.builder()
-                                .userId(userPermission.getUser().getId())
-                                .permissionId(userPermission.getPermission().getId())
-                                .permissionName(userPermission.getPermission().getName())
-                                .granted(userPermission.isGranted())
-                                .build();
-        }
 }

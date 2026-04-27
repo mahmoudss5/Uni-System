@@ -25,6 +25,7 @@ public class SalaryEncryptionConverter implements AttributeConverter<BigDecimal,
 
     @Override
     public String convertToDatabaseColumn(BigDecimal attribute) {
+
         if (attribute == null) {
             return null;
         }

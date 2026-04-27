@@ -33,9 +33,10 @@ UniSystem is a modern, full-stack university management system designed to strea
 - **Full-Stack Solution**: React + TypeScript frontend with Spring Boot backend
 - **RESTful API**: Well-structured REST APIs following best practices
 - **WebSocket / Real-time**: STOMP-based WebSocket for live course chat and push notifications
-- **AOP-driven Security**: Custom annotations (`@TeachersOnly`, `@CourseTeacherOnly`) enforced by Spring AOP aspects
+- **AOP-driven Security**: Custom annotations (`@TeachersOnly`, `@CourseTeacherOnly`, `@CheckStudentPermission`, `@CheckTeacherPermission`) enforced by Spring AOP aspects
 - **AOP-driven Audit Logging**: `@AuditLog` annotation automatically records every sensitive action
-- **Security**: JWT-based authentication, role-based access control, and GitHub OAuth2 login
+- **Rate Limiting**: `@RateLimit` annotation prevents abuse of APIs
+- **Security**: Granular Role-Based Access Control (RBAC) with dynamic permission assignment, JWT-based authentication, and GitHub OAuth2 login
 - **Redis Caching**: Configurable caching layer backed by Redis
 - **Detail Views**: Rich detail endpoints for students (with GPA-based academic standing) and teachers (with full course list)
 - **Notifications**: Per-user notification inbox with read/unread tracking and type filtering
@@ -53,10 +54,12 @@ UniSystem is a modern, full-stack university management system designed to strea
 - Account activation / deactivation
 - Stateless security with `OncePerRequestFilter` JWT validation
 
-### AOP — Security & Audit Aspects
+### AOP — Security, Audit & Rate Limiting
 
 - `@TeachersOnly` — method-level annotation that allows access only to users with the `TEACHER` role
 - `@CourseTeacherOnly` — allows access only to the teacher who owns the targeted course
+- `@CheckStudentPermission` & `@CheckTeacherPermission` — granular, feature-specific permission checks dynamically evaluated against the user's assigned permissions
+- `@RateLimit` — token-bucket or threshold-based rate limiting per user/IP
 - `@AuditLog` — automatically captures and persists action details after successful method execution
 - Aspects are applied transparently via Spring AOP, keeping controllers clean
 
@@ -155,7 +158,7 @@ UniSystem is a modern, full-stack university management system designed to strea
 | Spring WebSocket    | STOMP real-time messaging         |
 | Spring Data Redis   | Caching layer                     |
 | MySQL               | 8.0                               |
-| Flyway              | Database migrations (V1–V7)       |
+| Flyway              | Database migrations (V1–V9)       |
 | SpringDoc OpenAPI   | 2.7.0 — Swagger UI                |
 | Lombok              | Boilerplate reduction             |
 | Jakarta Validation  | Request validation                |
@@ -186,6 +189,7 @@ UniSystem is a modern, full-stack university management system designed to strea
 │  │  Security Layer (JWT + OAuth2 + CORS)                │   │
 │  ├──────────────────────────────────────────────────────┤   │
 │  │  AOP Layer (@TeachersOnly · @CourseTeacherOnly       │   │
+│  │             @CheckStudentPermission · @RateLimit     │   │
 │  │             @AuditLog)                               │   │
 │  ├──────────────────────────────────────────────────────┤   │
 │  │  Business Logic (Services)                           │   │
@@ -196,7 +200,7 @@ UniSystem is a modern, full-stack university management system designed to strea
 │  └──────────────────────────────────────────────────────┘   │
 ├──────────────────────┬──────────────────────────────────────┤
 │   MySQL Database     │           Redis Cache                │
-│  (Flyway V1–V7)      │                                      │
+│  (Flyway V1–V9)      │                                      │
 └──────────────────────┴──────────────────────────────────────┘
 ```
 
@@ -250,7 +254,7 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-Backend starts on `http://localhost:8080`. Flyway runs all migrations (V1–V7) automatically on startup.
+Backend starts on `http://localhost:8080`. Flyway runs all migrations (V1–V9) automatically on startup.
 
 ### 3. Frontend Setup
 
@@ -283,8 +287,10 @@ UniSystem/
 │       │   │   │   ├── AuditLog.java              # @AuditLog annotation
 │       │   │   │   └── AuditLogAspect.java         # After-advice records audit entries
 │       │   │   └── Security/
-│       │   │       ├── TeachersOnly.java           # @TeachersOnly annotation
-│       │   │       ├── CourseTeacherOnly.java      # @CourseTeacherOnly annotation
+│       │   │       ├── TeachersOnly.java, CourseTeacherOnly.java
+│       │   │       ├── CheckStudentPermission.java, CheckTeacherPermission.java
+│       │   │       ├── RateLimit.java, RateLimitAspect.java
+│       │   │       ├── PermissionAuthorizationAspect.java
 │       │   │       └── SecurityAspect.java         # Before-advice enforces role checks
 │       │   ├── Controllers/
 │       │   │   ├── AuthController.java
@@ -300,6 +306,7 @@ UniSystem/
 │       │   │   ├── UpcomingEventController.java
 │       │   │   ├── MessageController.java          # Course group chat REST
 │       │   │   ├── NotificationController.java     # Per-user notifications REST
+│       │   │   ├── PermissionController.java       # RBAC & Granular Permissions
 │       │   │   └── WebSocketController.java        # STOMP WebSocket endpoint
 │       │   ├── BusinessLogic/
 │       │   │   ├── InterfaceServiceLayer/          # Service interfaces
@@ -343,7 +350,9 @@ UniSystem/
 │               ├── V4__AddAnouncmentTable.schema.sql
 │               ├── V5__AddUpcomingEventsTable.schema.sql
 │               ├── V6__SampleData.sql             # Seed data
-│               └── V7__addNotficationAndMessagesTable.schema.sql
+│               ├── V7__addNotficationAndMessagesTable.schema.sql
+│               ├── V8__AddPremessionMangamentTables.schema.sql
+│               └── V9__SeedPermissionsData.sql    # Seed RBAC rules
 ├── FrontEnd/
 │   └── my-app/
 │       └── src/
@@ -506,6 +515,18 @@ Swagger UI is available at `http://localhost:8080/swagger-ui.html` when the back
 | PUT    | `/api/feedbacks/{id}`          | Update feedback   |
 | DELETE | `/api/feedbacks/{id}`          | Delete feedback   |
 
+### Permissions
+
+| Method | Endpoint                                 | Description                                      |
+| ------ | ---------------------------------------- | ------------------------------------------------ |
+| GET    | `/api/permissions`                       | Get all available permissions                    |
+| GET    | `/api/permissions/{id}`                  | Get permission by ID                             |
+| POST   | `/api/permissions`                       | Create new permission                            |
+| POST   | `/api/permissions/user`                  | Assign specific permission to user               |
+| GET    | `/api/permissions/user/{userId}`         | Get all granted permissions for a user           |
+| GET    | `/api/permissions/student`               | Get default student permissions                  |
+| GET    | `/api/permissions/teacher`               | Get default teacher permissions                  |
+
 ### Audit Logs
 
 | Method | Endpoint                                              | Description      |
@@ -572,6 +593,8 @@ Swagger UI is available at `http://localhost:8080/swagger-ui.html` when the back
 | V5      | `V5__AddUpcomingEventsTable.schema.sql`                | Creates `upcoming_events` table (linked to users)                                  |
 | V6      | `V6__SampleData.sql`                                   | Inserts seed / sample data for development                                         |
 | V7      | `V7__addNotficationAndMessagesTable.schema.sql`        | Creates `notifications` table (per-user) and `messages` table (per-course chat)    |
+| V8      | `V8__AddPremessionMangamentTables.schema.sql`          | Creates `permissions`, `role_permissions`, and `user_permissions` tables           |
+| V9      | `V9__SeedPermissionsData.sql`                          | Seeds initial permissions and maps them to default roles                           |
 
 ### Entity Relationships
 
@@ -580,6 +603,7 @@ users  (JOINED inheritance parent)
   ├── students          (user_id PK/FK)
   ├── teachers          (user_id PK/FK)
   ├── user_roles        (M:N with roles)
+  ├── user_permissions  (M:N with permissions)
   ├── feedbacks         (1:N)
   ├── audit_logs        (1:N)
   ├── upcoming_events   (1:N)
@@ -608,7 +632,10 @@ students
 | `students`         | Student-specific fields (GPA, enrollment year, credits)             |
 | `teachers`         | Teacher-specific fields (office location, salary)                   |
 | `roles`            | Role definitions (Student, Teacher, Admin)                          |
+| `permissions`      | Granular system permissions (e.g., `SEND_MESSAGE`, `EDIT_COURSE`)   |
 | `user_roles`       | User↔Role join table                                                |
+| `role_permissions` | Role↔Permission join table (Default permissions for a role)         |
+| `user_permissions` | User↔Permission join table (Overrides/specific grants per user)     |
 | `courses`          | Course catalogue (name, code, description, dates, capacity, credits) |
 | `departments`      | Academic departments                                                |
 | `enrolled_courses` | Student↔Course enrollment records                                   |
@@ -633,10 +660,12 @@ students
 
 - On first GitHub login, a new `User` is created automatically and a JWT is returned via redirect to `localhost:5173`
 
-### AOP Security
+### AOP Security & Rate Limiting
 
-- `@TeachersOnly` — applied to endpoints that only teachers may call (e.g., create course). Enforced by `SecurityAspect.checkTeacherRole()` which reads the current user's roles from the `SecurityContext`.
+- `@TeachersOnly` — applied to endpoints that only teachers may call.
 - `@CourseTeacherOnly` — applied to enrollment management endpoints. Enforced by `SecurityAspect.checkCourseTeacher()` which validates that the acting user is the teacher of the targeted course.
+- `@CheckStudentPermission` / `@CheckTeacherPermission` — evaluates fine-grained permissions (like `SEND_MESSAGE`) directly against the user's explicit permissions or role-based defaults via `PermissionAuthorizationAspect`.
+- `@RateLimit` — limits requests to critical endpoints (like sending messages) within a specified time window to prevent spam and abuse.
 
 ### WebSocket Security
 
