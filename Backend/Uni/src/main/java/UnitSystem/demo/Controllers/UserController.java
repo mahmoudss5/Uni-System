@@ -84,4 +84,17 @@ public class UserController {
         userService.assignRoleToUser(userId, role);
         return ResponseEntity.ok().build();
     }
+    @Operation(summary = "Activate user Account")
+    @PostMapping("/{userId}/activate")
+    public ResponseEntity<Void> active(@PathVariable Long userId) {
+         userService.activeUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Deactive user Account")
+    @PostMapping("/{userId}/deactivate")
+    public ResponseEntity<String> deactive(@PathVariable Long userId) {
+        userService.deactivateUser(userId);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.Aspect.Security.CheckStudentPermission;
 import UnitSystem.demo.Aspect.Security.CheckTeacherPermission;
 import UnitSystem.demo.Aspect.Security.TeachersOnly;
@@ -75,6 +76,7 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
 
     @Override
     @CheckStudentPermission(StudentPermissions.course_register)
+    @AuditLog
     @Caching(evict = {
             @CacheEvict(value = "enrollmentsCache", allEntries = true),
             @CacheEvict(value = "studentsCache", key = "'studentDetails:' + #enrolledCourseRequest.studentId"),
@@ -102,6 +104,7 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
             @CacheEvict(value = "coursesCache", allEntries = true)
     })
     @Transactional
+    @AuditLog
     public void unenrollStudentFromCourse(Long enrolledCourseId) {
 
         if (!enrolledCourseRepository.existsById(enrolledCourseId)) {

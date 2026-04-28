@@ -32,4 +32,5 @@ public interface PermissionService {
     void preventUserFromAccessingPermission(Long userId, Long permissionId);
     List<PermissionResponse> getStudentPermissions();
     List<PermissionResponse> getTeacherPermissions();
+
 }

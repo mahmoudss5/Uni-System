@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.PermissionService;
 import UnitSystem.demo.BusinessLogic.Mappers.PermissionMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Permission.PermissionRequest;
@@ -52,6 +53,7 @@ public class PermissionServiceImp implements PermissionService {
 
         @Override
         @Transactional
+        @AuditLog
         public PermissionResponse createPermission(PermissionRequest request) {
                 Objects.requireNonNull(request, "request cannot be null");
                 String permissionName = Objects.requireNonNull(request.getName(), "permission name cannot be null");
@@ -72,6 +74,8 @@ public class PermissionServiceImp implements PermissionService {
 
         @Override
         @Transactional
+        @AuditLog
+
         public PermissionResponse updatePermission(Long permissionId, PermissionRequest request) {
                 Long id = Objects.requireNonNull(permissionId, "permissionId cannot be null");
                 Objects.requireNonNull(request, "request cannot be null");
@@ -95,6 +99,7 @@ public class PermissionServiceImp implements PermissionService {
 
         @Override
         @Transactional
+        @AuditLog
         public void deletePermission(Long permissionId) {
                 Long id = Objects.requireNonNull(permissionId, "permissionId cannot be null");
                 if (!permissionRepository.existsById(id)) {
@@ -106,6 +111,7 @@ public class PermissionServiceImp implements PermissionService {
         @Override
         @Transactional
         @CacheEvict(value = "usersCache", allEntries = true)
+        @AuditLog
         public UserPermissionResponse assignPermissionToUser(UserPermissionRequest request) {
                 Long userId = request.getUserId();
                 Long permissionId = request.getPermissionId();
@@ -133,6 +139,7 @@ public class PermissionServiceImp implements PermissionService {
         @Override
         @Transactional
         @CacheEvict(value = "usersCache", allEntries = true)
+        @AuditLog
         public void revokePermissionFromUser(Long userId, Long permissionId) {
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -163,6 +170,7 @@ public class PermissionServiceImp implements PermissionService {
         @Override
         @Transactional
         @CacheEvict(value = "usersCache", allEntries = true)
+        @AuditLog
         public void preventUserFromAccessingPermission(Long userId, Long permissionId) {
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -202,6 +210,8 @@ public class PermissionServiceImp implements PermissionService {
                                 .toList();
         }
 
+
+
         @Override
         public List<UserPermissionResponse> getUserPermissions(Long userId) {
                 Long id = Objects.requireNonNull(userId, "userId cannot be null");
@@ -224,5 +234,6 @@ public class PermissionServiceImp implements PermissionService {
                                                 Collectors.mapping(permissionMapper::toUserPermissionResponse,
                                                                 Collectors.toList())));
         }
+
 
 }

@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.Aspect.Security.CourseTeacherOnly;
 import UnitSystem.demo.Aspect.Security.CheckTeacherPermission;
 import UnitSystem.demo.Aspect.Security.TeachersOnly;
@@ -62,6 +63,7 @@ public class CourseServiceImp implements CourseService {
     @TeachersOnly
     @CheckTeacherPermission(TeacherPermissions.create_course)
     @CacheEvict(value = "coursesCache", allEntries = true)
+    @AuditLog
     public CourseResponse createCourse(CourseRequest courseRequest) {
         log.info("Creating course: {}", courseRequest);
         Course course = courseMapper.mapToCourse(courseRequest);
@@ -86,6 +88,7 @@ public class CourseServiceImp implements CourseService {
     @CheckTeacherPermission(TeacherPermissions.delete_course)
     @CacheEvict(value = "coursesCache", allEntries = true)
     @Transactional
+    @AuditLog
     public void deleteCourse(Long courseId) {
         log.info("Deleting course: {}", courseId);
         Course course=courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", courseId));

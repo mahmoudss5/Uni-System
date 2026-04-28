@@ -1,0 +1,71 @@
+services:
+
+  # ─── MySQL ────────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8
+    container_name: unisystem_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: helwanuni
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  # ─── Redis ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:alpine
+    container_name: unisystem_redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ─── Spring Boot Backend ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./Backend/Uni
+      dockerfile: Dockerfile
+    container_name: unisystem_backend
+    environment:
+      # Override datasource to point to the mysql container
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/helwanuni
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      # Override Redis to point to the redis container
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      # CORS: allow the Vite dev server running on the host
+      APP_FRONTEND_URL: http://localhost:5173
+      # Disable the Spring Boot Docker Compose integration (we manage services ourselves)
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      # Secrets (sourced from .env)
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      SECRET: ${SECRET}
+      TEACHER_CODE: ${TEACHER_CODE}
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
+  redis_data:

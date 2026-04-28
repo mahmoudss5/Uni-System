@@ -1,5 +1,6 @@
 import type { User } from "../../domain/interfaces";
-
+import { deactivateUser } from "../../../../Services/userService";
+import { activateUser } from "../../../../Services/userService";
 interface UserTableProps {
     users: User[];
     onSelectUser: (user: User) => void;
@@ -37,9 +38,16 @@ export default function UserTable({ users, onSelectUser }: UserTableProps) {
                         <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                             Status
                         </th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+
+                    <th>
+                        change Acount status
+                    </th>
+                        
+                        <th className="mr-6 px-15 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
                             Action
                         </th>
+
+
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -47,7 +55,7 @@ export default function UserTable({ users, onSelectUser }: UserTableProps) {
                         <tr key={user.id} className="hover:bg-slate-50">
                             <td className="px-4 py-3 text-sm font-medium text-slate-800">{user.username}</td>
                             <td className="px-4 py-3 text-sm text-slate-600">{user.email}</td>
-                            <td className="px-4 py-3 text-sm text-slate-600">
+                            <td className={`px-4 py-3 text-sm font-medium ${user.roles.some((role) => toDisplayRoleName(role.name) === 'Student') ? "text-gray-500" : "text-green-500"}`} >
                                 {user.roles.map((role) => toDisplayRoleName(role.name)).join(", ")}
                             </td>
                             <td className="px-4 py-3 text-sm">
@@ -58,6 +66,19 @@ export default function UserTable({ users, onSelectUser }: UserTableProps) {
                                 >
                                     {user.active ? "Active" : "Inactive"}
                                 </span>
+                            </td>
+                            <td>
+                                {
+                                    user.active ? (
+                                        <button className="bg-red-400 text-white ml-16 px-2 py-2 rounded-lg cursor-pointer" onClick={() => deactivateUser(user.id)}>
+                                            Deactivate
+                                        </button>
+                                    ) : (
+                                        <button className="bg-green-500 text-white ml-16 px-2 py-2 rounded-lg" onClick={() => activateUser(user.id)}>
+                                            Activate
+                                        </button>
+                                    )
+                                }
                             </td>
                             <td className="px-4 py-3 text-right">
                                 <button

@@ -28,5 +28,6 @@ public interface UserService {
     Optional<User> findByEmail(String email);
     User save(User user);
     User findUserById(Long id);
-
+  void deactivateUser(Long userId);
+  void activeUser(Long userId);
 }

@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.PermissionService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.BusinessLogic.Mappers.UserMapper;
@@ -108,6 +109,7 @@ public class UserServiceImp implements UserService {
 
     @Override
     @CacheEvict(value = "usersCache", allEntries = true)
+    @AuditLog
     public UserResponse deActivateUser(Long userId) {
         log.info("Deactivating user with ID: {}", userId);
 
@@ -193,6 +195,26 @@ public class UserServiceImp implements UserService {
     public User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + id));
+    }
+
+    @Override
+    @AuditLog
+    @CacheEvict(value = "usersCache", allEntries = true)
+    public void deactivateUser(Long userId) {
+         User user=userRepository.findById(userId)
+                 .orElseThrow(()->new RuntimeException("User not found with ID: "+userId));
+         user.setActive(false);
+         userRepository.save(user);
+    }
+
+    @Override
+    @AuditLog
+    @CacheEvict(value = "usersCache", allEntries = true)
+    public void activeUser(Long userId) {
+        User user=userRepository.findById(userId)
+                .orElseThrow(()->new RuntimeException("User not found with ID: "+userId));
+        user.setActive(true);
+        userRepository.save(user);
     }
 
     @Override

@@ -9,6 +9,8 @@ import {
     LogOut,
     GraduationCap,
     ShieldCheck,
+    BookAIcon,
+    BlindsIcon,
 } from "lucide-react";
 import { useAuth } from "../../ContextsProviders/AuthContext";
 import { motion } from "framer-motion";
@@ -22,12 +24,20 @@ const navItems = [
     { label: "Admin Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions", adminOnly: true },
     { label: "Settings", icon: Settings, to: "/dashboard/settings" },
 ];
+const AdminNavItems = [
+    { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard/admin" },
+    { label: "Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions" },
+    { label: "Audit log", icon: BlindsIcon, to: "/dashboard/admin/audit-log" },
+    { label: "Courses", icon: BookAIcon, to: "/dashboard/admin/courses" },
+];
 
 export default function AsideNav() {
     const { logout } = useAuth();
     const navigate = useNavigate();
     const role = getRole();
-    const visibleNavItems = navItems.filter((item) => !item.adminOnly || role === "admin");
+    const visibleNavItems = role === "admin" ? AdminNavItems : navItems;
+    console.log("Role is:", role);
+    console.log("Visible nav items:", visibleNavItems);
 
     const handleLogout = () => {
         logout();
