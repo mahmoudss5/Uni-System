@@ -15,6 +15,7 @@ import OAuth2Callback from "./pages/OAuth2Callback";
 import CourseDetails from "./pages/CourseDetails/CourseDetails";
 import Setting from "./pages/SettingPage/Setting";
 import AdminUserPermissionDashboard from "./features/admin/presentation/pages/AdminUserPermissionDashboard";
+import { AdminCoursesDashboard } from "./features/admin/presentation/pages/AdminCoursesDashboard";
 import { Toaster } from "sonner";
 const router = createBrowserRouter([
   {
@@ -68,6 +69,10 @@ const router = createBrowserRouter([
         element: <ProtectedRoute>
           <AdminUserPermissionDashboard />
           </ProtectedRoute>,
+      }
+      ,{
+        path: "admin/courses",
+        element: <ProtectedRoute><AdminCoursesDashboard /></ProtectedRoute>
       }
     ],
   },

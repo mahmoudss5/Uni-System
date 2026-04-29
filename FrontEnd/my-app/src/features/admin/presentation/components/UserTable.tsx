@@ -4,17 +4,16 @@ import { activateUser } from "../../../../Services/userService";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "../../../../main";
 import { toast } from "sonner";
+
 interface UserTableProps {
     users: User[];
     onSelectUser: (user: User) => void;
 }
-
 function toDisplayRoleName(name: string): string {
     if (name.toUpperCase().includes("STUDENT")) return "Student";
     if (name.toUpperCase().includes("TEACHER")) return "Teacher";
     return name;
 }
-
 export default function UserTable({ users, onSelectUser }: UserTableProps) {
     const { mutate: deactivateUserMutation } = useMutation({
         mutationFn: (userId: number) => deactivateUser(userId),
@@ -34,12 +33,6 @@ export default function UserTable({ users, onSelectUser }: UserTableProps) {
             toast.error(error.message);
         },
     });
-    
-    
-    
-    
-    
-    
     if (users.length === 0) {
         return (
             <div className="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-500">
