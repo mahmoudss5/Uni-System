@@ -16,6 +16,7 @@ import CourseDetails from "./pages/CourseDetails/CourseDetails";
 import Setting from "./pages/SettingPage/Setting";
 import AdminUserPermissionDashboard from "./features/admin/presentation/pages/AdminUserPermissionDashboard";
 import { AdminCoursesDashboard } from "./features/admin/presentation/pages/AdminCoursesDashboard";
+import AdminAuditLogDashboard from "./features/admin/presentation/pages/AdminAuditLogDashboard";
 import { Toaster } from "sonner";
 const router = createBrowserRouter([
   {
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
       ,{
         path: "admin/courses",
         element: <ProtectedRoute><AdminCoursesDashboard /></ProtectedRoute>
+      },
+      {
+        path: "admin/audit-log",
+        element: <ProtectedRoute><AdminAuditLogDashboard /></ProtectedRoute>
       }
     ],
   },

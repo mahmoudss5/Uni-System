@@ -8,7 +8,6 @@ import UnitSystem.demo.DataAccessLayer.Entities.AuditLog;
 import UnitSystem.demo.DataAccessLayer.Repositories.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class AuditLogServiceImp implements AuditLogService {
     private final AuditLogMapper auditLogMapper;
 
     @Override
-    @Cacheable(value = "auditLogsCache", key = "'allAuditLogs'")
     public List<AuditLogResponse> getAllAuditLogs() {
         return auditLogRepository.findAll().stream()
                 .map(auditLogMapper::mapToAuditLogResponse)
@@ -29,7 +27,6 @@ public class AuditLogServiceImp implements AuditLogService {
     }
 
     @Override
-    @Cacheable(value = "auditLogsCache", key = "'auditLogsByUser:' + #userName")
     public List<AuditLogResponse> getAuditLogsByUserName(String userName) {
         return auditLogRepository.findAllByUserUserName(userName).stream()
                 .map(auditLogMapper::mapToAuditLogResponse)
@@ -37,7 +34,6 @@ public class AuditLogServiceImp implements AuditLogService {
     }
 
     @Override
-    @Cacheable(value = "auditLogsCache", key = "'auditLogsByAction:' + #action")
     public List<AuditLogResponse> getAuditLogsByAction(String action) {
         return auditLogRepository.findAllByAction(action).stream()
                 .map(auditLogMapper::mapToAuditLogResponse)
@@ -45,7 +41,6 @@ public class AuditLogServiceImp implements AuditLogService {
     }
 
     @Override
-    @Cacheable(value = "auditLogsCache", key = "'auditLogsByActionAndUser:' + #action + ':' + #userName")
     public List<AuditLogResponse> getAuditLogsByActionAndUserName(String action, String userName) {
         return auditLogRepository.findAllByActionAndUserUserName(action, userName).stream()
                 .map(auditLogMapper::mapToAuditLogResponse)
@@ -53,7 +48,6 @@ public class AuditLogServiceImp implements AuditLogService {
     }
 
     @Override
-    @Cacheable(value = "auditLogsCache", key = "'auditLogById:' + #auditLogId")
     public AuditLogResponse getAuditLogById(Long auditLogId) {
         return auditLogRepository.findById(auditLogId)
                 .map(auditLogMapper::mapToAuditLogResponse)
