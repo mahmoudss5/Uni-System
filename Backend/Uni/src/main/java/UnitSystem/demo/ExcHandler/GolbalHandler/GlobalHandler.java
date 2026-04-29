@@ -79,5 +79,11 @@ public class GlobalHandler {
         // Inject the payload (the missing courses list) into the JSON
         errorResponse.put("required_courses", ex.getMissingPrerequisites() );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+
+    }
+
+    @ExceptionHandler(AccountDeactivated.class)
+    public ResponseEntity<ErrorResponse> handleAccountDeactivated(AccountDeactivated e) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", e.getMessage());
     }
 }

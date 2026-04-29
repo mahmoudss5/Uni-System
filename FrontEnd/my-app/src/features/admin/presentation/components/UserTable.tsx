@@ -1,6 +1,9 @@
 import type { User } from "../../domain/interfaces";
 import { deactivateUser } from "../../../../Services/userService";
 import { activateUser } from "../../../../Services/userService";
+import { useMutation } from "@tanstack/react-query";
+import { queryClient } from "../../../../main";
+import { toast } from "sonner";
 interface UserTableProps {
     users: User[];
     onSelectUser: (user: User) => void;
@@ -13,6 +16,30 @@ function toDisplayRoleName(name: string): string {
 }
 
 export default function UserTable({ users, onSelectUser }: UserTableProps) {
+    const { mutate: deactivateUserMutation } = useMutation({
+        mutationFn: (userId: number) => deactivateUser(userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+        },
+        onError:(error) => {
+            toast.error(error.message);
+        },
+    });
+    const { mutate: activateUserMutation } = useMutation({
+        mutationFn: (userId: number) => activateUser(userId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+        },
+        onError:(error) => {
+            toast.error(error.message);
+        },
+    });
+    
+    
+    
+    
+    
+    
     if (users.length === 0) {
         return (
             <div className="rounded-xl border border-slate-200 bg-white p-6 text-center text-slate-500">
@@ -70,11 +97,11 @@ export default function UserTable({ users, onSelectUser }: UserTableProps) {
                             <td>
                                 {
                                     user.active ? (
-                                        <button className="bg-red-400 text-white ml-16 px-2 py-2 rounded-lg cursor-pointer" onClick={() => deactivateUser(user.id)}>
+                                        <button className="bg-red-400 text-white ml-16 px-2 py-2 rounded-lg cursor-pointer" onClick={() => deactivateUserMutation(user.id)}>
                                             Deactivate
                                         </button>
                                     ) : (
-                                        <button className="bg-green-500 text-white ml-16 px-2 py-2 rounded-lg" onClick={() => activateUser(user.id)}>
+                                        <button className="bg-green-500 text-white ml-16 px-2 py-2 rounded-lg" onClick={() => activateUserMutation(user.id)}>
                                             Activate
                                         </button>
                                     )

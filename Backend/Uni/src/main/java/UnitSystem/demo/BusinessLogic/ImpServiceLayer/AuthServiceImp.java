@@ -15,6 +15,7 @@ import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
+import UnitSystem.demo.ExcHandler.Entites.AccountDeactivated;
 import UnitSystem.demo.ExcHandler.Entites.AuthError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -103,6 +104,13 @@ public class AuthServiceImp implements AuthService {
 
     @Override
     public AuthResponse login(AuthRequest request) {
+        Boolean isActive=userRepository.findByEmail(request.getEmail())
+                .map(User::getActive)
+                .orElseThrow(() -> new AuthError("Invalid email or password"));
+
+        if(!isActive) {
+            throw new AccountDeactivated("Account is deactivated. Please contact support.");
+        }
         try {
              log.info("Authenticating User: {}", request.getEmail());
             authenticationManager.authenticate(
