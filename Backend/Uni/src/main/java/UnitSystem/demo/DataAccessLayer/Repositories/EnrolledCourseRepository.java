@@ -22,4 +22,7 @@ public interface EnrolledCourseRepository extends JpaRepository<EnrolledCourse, 
     Optional<EnrolledCourse> findById(Long id);
     @Modifying
     @Query("DELETE FROM EnrolledCourse ec WHERE ec.id = :id")
-    void deleteByIdDirect(@Param("id") Long id);}
+    void deleteByIdDirect(@Param("id") Long id);
+
+    List<Long>findAllIdByStudentId(Long id);
+}

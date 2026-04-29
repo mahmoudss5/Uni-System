@@ -20,11 +20,11 @@ export function getRole(): "teacher" | "student" | "admin" {
 
 export async function deactivateUser(userId: number){
    if(getRole() !== "admin"){
-    toast.error("You are not authorized to perform this action");
+    toast.error("You are not authorized to perform this action"); 
     return;
    }    
    try{
-      await axios.patch(`${ApiUrl}/api/users/${userId}/deactivate`, {}, {
+      await axios.post(`${ApiUrl}/api/users/${userId}/deactivate`, {}, {
          headers: getAuthHeaders(),
       })
       toast.success("User deactivated successfully");
@@ -43,27 +43,27 @@ export async function deactivateUser(userId: number){
 }
 
 export async function activateUser(userId: number){
-   if(getRole() !== "admin"){
-    toast.error("You are not authorized to perform this action");
+    if(getRole() !== "admin"){
+        toast.error("You are not authorized to perform this action"); 
     return;
    }    
-   try{
-      await axios.post(`${ApiUrl}/api/users/${userId}/activate`, {}, {
-         headers: getAuthHeaders(),
-      })
-      toast.success("User activated successfully");
-   }
-   catch(error){
-    if(axios.isAxiosError(error)){
-        if(error.response){
-            throw new Error(error.response.data.message);
+       try{
+          await axios.post(`${ApiUrl}/api/users/${userId}/activate`, {}, {
+             headers: getAuthHeaders(),
+          })
+          toast.success("User activated successfully");
+       }
+       catch(error){
+        if(axios.isAxiosError(error)){
+            if(error.response){
+                throw new Error(error.response.data.message);
+            }
+            if(error.request){
+                throw new Error("No response from server");
+            }
         }
-        if(error.request){
-            throw new Error("No response from server");
-        }
-    }
     throw new Error("An error occurred while activating the user");
-   }
+       }
 }
 
 

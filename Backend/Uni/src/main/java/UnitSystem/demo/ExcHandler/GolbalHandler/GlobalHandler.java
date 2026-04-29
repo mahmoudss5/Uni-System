@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -63,5 +64,20 @@ public class GlobalHandler {
                         "error",   "Too Many Requests",
                         "message", ex.getMessage()
                 ));
+    }
+
+    @ExceptionHandler(MissingPrerequisitesException.class)
+    public ResponseEntity<Map<String, Object>> handleMissingPrerequisites(
+            MissingPrerequisitesException ex
+    )
+    {
+        Map<String, Object> errorResponse = new LinkedHashMap<>();
+        errorResponse.put("timestamp", LocalDateTime.now());
+        errorResponse.put("status", HttpStatus.CONFLICT.value()); // 409 is a good status for business rule violations
+        errorResponse.put("error", "Prerequisites Not Met");
+        errorResponse.put("message", ex.getMessage());
+        // Inject the payload (the missing courses list) into the JSON
+        errorResponse.put("required_courses", ex.getMissingPrerequisites() );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 }

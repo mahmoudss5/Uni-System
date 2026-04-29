@@ -62,4 +62,14 @@ public class Course {
     @Builder.Default
     @JsonIgnore
     private Set<Message> messages = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+          name = "course_prerequisites",
+          joinColumns = @JoinColumn(name = "course_id"),
+          inverseJoinColumns = @JoinColumn(name = "course_prerequisite")
+    )
+    private Set<Course>coursePrerequisites = new HashSet<>();
+
+
 }

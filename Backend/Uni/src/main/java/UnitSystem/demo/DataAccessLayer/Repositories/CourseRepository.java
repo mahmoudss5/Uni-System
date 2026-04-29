@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long> {
@@ -41,5 +42,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("DELETE FROM Course c WHERE c.id = :id")
     void deletByIdDirect(@Param("id") Long id);
 
-
+    @Query("SELECT p.id FROM Course c JOIN c.coursePrerequisites p WHERE c.id = :courseId")
+    Set<Long> findPrerequisiteIdsByCourseId(@Param("courseId") Long courseId);
 }
+

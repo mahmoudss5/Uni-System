@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -91,7 +92,7 @@ public class CourseServiceImp implements CourseService {
     @AuditLog
     public void deleteCourse(Long courseId) {
         log.info("Deleting course: {}", courseId);
-        Course course=courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
         courseRepository.deletByIdDirect(courseId);
         log.info("After Deleted course: {}", courseId);
     }
@@ -130,5 +131,25 @@ public class CourseServiceImp implements CourseService {
     @Override
     public List<String> findStudentEmailsByCourseId(Long courseId) {
         return courseRepository.findStudentEmailsByCourseId(courseId);
+    }
+
+    @Override
+    public List<Long> getCoursePrerequisites(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+        List<Long> prerequisiteIds = courseRepository.findPrerequisiteIdsByCourseId(courseId).stream().toList();
+        log.info("Course ID: {}, Prerequisite IDs: {}", courseId, prerequisiteIds);
+        return prerequisiteIds;
+    }
+
+    @Override
+    public List<String> getCoursesNamesByCourseIds(List<Long> courseIds) {
+       List<String> coursesNames = new ArrayList<>();
+       for (Long courseId : courseIds) {
+        Course course = courseRepository.findById(courseId)
+        .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
+        coursesNames.add(course.getName());
+       }
+       return coursesNames;
     }
 }
