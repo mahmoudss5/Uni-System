@@ -1,10 +1,10 @@
 package UnitSystem.demo.BusinessLogic.InterfaceServiceLayer;
-
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.SalaryDto;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
+import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 
 import java.util.List;
@@ -26,4 +26,5 @@ public interface TeacherService {
 
     TeacherDetailsResponse getTeacherDetails(UserDetailsRequest userDetailsRequest);
     SalaryDto getTeacherSalary(Long teacherId);
+    Teacher findTeacherEntityById(Long teacherId);
 }

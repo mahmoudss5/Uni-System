@@ -54,4 +54,18 @@ public class AnnouncementController {
         List<AnnouncementResponse> responses = announcementService.getAllAnnouncements();
         return ResponseEntity.ok(responses);
     }
+
+    @Operation(summary = "Get all announcements for a student")
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<List<AnnouncementResponse>> getAllAnnouncementsByStudentId(@PathVariable Long studentId) {
+        List<AnnouncementResponse> responses = announcementService.getAllAnnouncementsByStudentId(studentId);
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "Get all announcements for a teacher")
+    @GetMapping("/teacher/{teacherId}")
+    public ResponseEntity<List<AnnouncementResponse>> getAllAnnouncementsByTeacherId(@PathVariable Long teacherId) {
+        List<AnnouncementResponse> responses = announcementService.getAllAnnouncementsByTeacherId(teacherId);
+        return ResponseEntity.ok(responses);
+    }
 }

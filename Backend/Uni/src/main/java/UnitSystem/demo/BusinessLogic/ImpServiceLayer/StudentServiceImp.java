@@ -151,4 +151,10 @@ public class StudentServiceImp implements StudentService {
                 .upcomingEvents(upcomingEvents)
                 .build();
     }
+
+    @Override
+    public Student getStudentEntityById(Long studentId) {
+        return studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+    }
 }

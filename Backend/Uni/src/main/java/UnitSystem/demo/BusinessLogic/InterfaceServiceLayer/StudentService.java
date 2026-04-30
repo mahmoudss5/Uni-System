@@ -4,6 +4,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
+import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 
 import java.util.List;
@@ -23,4 +24,5 @@ public interface StudentService {
     void deleteStudent(Long studentId);
 
     StudentDetailsResponse getStudentDetails(UserDetailsRequest userDetailsRequest);
+    Student getStudentEntityById(Long studentId);
 }

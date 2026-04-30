@@ -127,7 +127,8 @@ public class TeacherServiceImp implements TeacherService {
                 Long numberOfStudents = teacher.getCourses() != null
                                 ? teacher.getCourses().stream()
                                                 .mapToLong(course -> course.getCourseEnrollments() != null
-                                                                ? course.getCourseEnrollments().size() : 0)
+                                                                ? course.getCourseEnrollments().size()
+                                                                : 0)
                                                 .sum()
                                 : 0L;
 
@@ -157,17 +158,25 @@ public class TeacherServiceImp implements TeacherService {
         @TeachersOnly
         public SalaryDto getTeacherSalary(Long teacherId) {
                 String encryptedSalary = teacherRepository.getRawEncryptedSalary(teacherId);
-                Teacher teacher =teacherRepository.findById(teacherId)
+                Teacher teacher = teacherRepository.findById(teacherId)
                                 .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + teacherId));
 
                 if (encryptedSalary == null) {
                         throw new RuntimeException("Teacher not found with ID: " + teacherId);
                 }
                 return SalaryDto.builder()
-                        .teacherName(teacher.getUserName())
-                        .plainTextSalary(teacher.getSalary() != null ? teacher.getSalary().toString() : "N/A")
-                        .encryptedSalary(encryptedSalary)
-                        .decryptedSalary(teacher.getSalary() != null ? teacher.getSalary().toString() : "N/A")
+                                .teacherName(teacher.getUserName())
+                                .plainTextSalary(teacher.getSalary() != null ? teacher.getSalary().toString() : "N/A")
+                                .encryptedSalary(encryptedSalary)
+                                .decryptedSalary(teacher.getSalary() != null ? teacher.getSalary().toString() : "N/A")
                                 .build();
         }
+
+        @Override
+        public Teacher findTeacherEntityById(Long teacherId) {
+                return teacherRepository.findById(teacherId)
+                                .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + teacherId));
+        }
+
+
 }

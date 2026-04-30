@@ -33,6 +33,7 @@ private final AuthService authService;
     @ResponseStatus(HttpStatus.OK)
     @RateLimit(perSeconds = 60, requests = 5, key = "login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
+        log.info("Received request to authenticate user: {}", authRequest);
         AuthResponse authResponse = authService.login(authRequest);
         return ResponseEntity.ok(authResponse);
     }

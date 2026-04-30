@@ -105,8 +105,8 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
-    @AuditLog
     public AuthResponse login(AuthRequest request) {
+        log.info("Logging in user: {}", request.getEmail());
         Boolean isActive=userRepository.findByEmail(request.getEmail())
                 .map(User::getActive)
                 .orElseThrow(() -> new AuthError("Invalid email or password"));

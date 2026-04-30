@@ -11,4 +11,6 @@ public interface AnnouncementService {
         AnnouncementResponse getAnnouncementById(Long id);
         List<AnnouncementResponse> getAnnouncementsByCourseId(Long courseId);
         List<AnnouncementResponse> getAllAnnouncements();
+        List<AnnouncementResponse>getAllAnnouncementsByStudentId(Long studentId);
+        List<AnnouncementResponse>getAllAnnouncementsByTeacherId(Long teacherId);
 }

@@ -2,6 +2,7 @@ package UnitSystem.demo.Security.Audit;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.AuditLogService;
 import UnitSystem.demo.DataAccessLayer.Dto.AuditLog.AuditLogRequest;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;
+import UnitSystem.demo.Security.Util.SecurityUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class SecurityAuditLogger {
 
     public void logUnauthorizedAccess(HttpServletRequest request, Authentication authentication, String reason, int statusCode) {
         try {
-            Long userId = resolveUserId(authentication);
+            Long userId = SecurityUtils.getCurrentUserId();
             String action = statusCode == 401 ? "UNAUTHORIZED_ACCESS_ATTEMPT" : "ACCESS_DENIED";
             String details = String.format(
                     "Blocked request %s %s. reason=%s",
@@ -39,13 +40,7 @@ public class SecurityAuditLogger {
         }
     }
 
-    private Long resolveUserId(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            return null;
-        }
-        String email = authentication.getName();
-        return userRepository.findByEmail(email).map(user -> user.getId()).orElse(null);
-    }
+
 
     private String resolveClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
