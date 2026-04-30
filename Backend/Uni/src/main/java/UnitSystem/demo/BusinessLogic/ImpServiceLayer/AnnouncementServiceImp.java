@@ -6,10 +6,12 @@ import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.*;
 import UnitSystem.demo.BusinessLogic.Mappers.AnnouncementMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
+import UnitSystem.demo.DataAccessLayer.Dto.Notification.Course.NotificationCourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Announcement;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
+import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Repositories.AnnouncementRepository;
@@ -39,6 +41,7 @@ public class AnnouncementServiceImp implements AnnouncementService {
     private final TeacherService teacherService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final AnnouncementMapper announcementMapper;
+    private final NotificationService notificationService;
 
     @Override
     @TeachersOnly
@@ -53,6 +56,7 @@ public class AnnouncementServiceImp implements AnnouncementService {
                 .build();
         announcementRepository.save(announcement);
         sendAnnouncementToCourseUsers(announcement);
+        sendAnnouncementNotificationToCourseStudents(announcement);
         log.info("Created announcement successfully: {}", announcement);
     }
 
@@ -91,6 +95,16 @@ public class AnnouncementServiceImp implements AnnouncementService {
             simpMessagingTemplate.convertAndSendToUser(email, destination,
                     announcementMapper.mapToResponse(announcement));
         }
+    }
+
+    private void sendAnnouncementNotificationToCourseStudents(Announcement announcement) {
+        NotificationCourseRequest notificationRequest = NotificationCourseRequest.builder()
+                .courseId(announcement.getCourse().getId())
+                .title("New Announcement: " + announcement.getTitle())
+                .message(announcement.getDescription())
+                .type(NotificationType.ANNOUNCEMENT)
+                .build();
+        notificationService.sendNotificationToCourse(notificationRequest);
     }
 
     @Override

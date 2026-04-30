@@ -97,6 +97,7 @@ UniSystem is a modern, full-stack university management system designed to strea
 
 - Course-linked announcements (title, description, timestamp)
 - CRUD per course
+- Creating an announcement also triggers notifications for all enrolled students in that course
 
 ### Feedback System
 
@@ -144,7 +145,9 @@ UniSystem is a modern, full-stack university management system designed to strea
 | TailwindCSS      | 4.2.0   |
 | Framer Motion    | 12.34.3 |
 | Lucide React     | 0.575.0 |
-| TanStack Query   | latest  |
+| TanStack Query   | 5.90.21 |
+| Axios            | 1.13.6  |
+| Chart.js         | 4.5.1   |
 
 ### Backend
 
@@ -495,13 +498,15 @@ Swagger UI is available at `http://localhost:8080/swagger-ui.html` when the back
 
 ### Announcements
 
-| Method | Endpoint                                      | Description         |
-| ------ | --------------------------------------------- | ------------------- |
-| POST   | `/api/announcements/create`                   | Create announcement |
-| POST   | `/api/announcements/delete/{id}`              | Delete announcement |
-| POST   | `/api/announcements/get/{id}`                 | Get by ID           |
-| POST   | `/api/announcements/getByCourseId/{courseId}` | Get by course       |
-| POST   | `/api/announcements/getAll`                   | Get all             |
+| Method | Endpoint                                  | Description                     |
+| ------ | ----------------------------------------- | ------------------------------- |
+| POST   | `/api/announcements/create`               | Create announcement             |
+| DELETE | `/api/announcements/{id}`                 | Delete announcement             |
+| GET    | `/api/announcements/{id}`                 | Get announcement by ID          |
+| GET    | `/api/announcements/course/{courseId}`    | Get all announcements by course |
+| GET    | `/api/announcements`                      | Get all announcements           |
+| GET    | `/api/announcements/student/{studentId}`  | Get announcements for student   |
+| GET    | `/api/announcements/teacher/{teacherId}`  | Get announcements for teacher   |
 
 ### Feedbacks
 
@@ -570,6 +575,7 @@ Swagger UI is available at `http://localhost:8080/swagger-ui.html` when the back
 | ------ | ----------------------------------------------- | --------------------------------------------- |
 | POST   | `/api/notifications`                            | Create a notification                         |
 | POST   | `/api/notifications/user/send`                  | Send a notification to a specific user        |
+| POST   | `/api/notifications/course`                     | Send a notification to all enrolled students in a course |
 | GET    | `/api/notifications/{id}`                       | Get notification by ID                        |
 | GET    | `/api/notifications/user/{userId}`              | Get all notifications for a user (newest first) |
 | GET    | `/api/notifications/user/{userId}/unread`       | Get unread notifications for a user           |
@@ -698,6 +704,11 @@ GET  /v3/api-docs/**
 cd Backend/Uni
 mvn test
 ```
+
+Backend tests include service and repository test coverage for key modules such as:
+`AnnouncementServiceImpTest`, `NotificationServiceImpTest`, `MessageServiceImpTest`,
+`TeacherServiceImpTest`, `StudentServiceImpTest`, `CourseServiceImpTest`,
+plus repository-level tests for core entities.
 
 ### Frontend
 
