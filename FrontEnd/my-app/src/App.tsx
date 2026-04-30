@@ -18,6 +18,7 @@ import AdminUserPermissionDashboard from "./features/admin/presentation/pages/Ad
 import { AdminCoursesDashboard } from "./features/admin/presentation/pages/AdminCoursesDashboard";
 import AdminAuditLogDashboard from "./features/admin/presentation/pages/AdminAuditLogDashboard";
 import { Toaster } from "sonner";
+import { AdminDashboard } from "./features/admin/presentation/pages/AdminDashboard";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -78,6 +79,13 @@ const router = createBrowserRouter([
       {
         path: "admin/audit-log",
         element: <ProtectedRoute><AdminAuditLogDashboard /></ProtectedRoute>
+      }
+      ,{
+
+        path: "admin/dashboard",
+        element: <ProtectedRoute>
+          <AdminDashboard />
+        </ProtectedRoute>
       }
     ],
   },

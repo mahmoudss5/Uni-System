@@ -86,6 +86,7 @@ export async function getEnrolledCourseById(id: number) {
 }
 export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCourseRequest) {
     try {
+        console.log("Asserting permission:", "course_register");
         assertPermission("course_register");
         console.log("Enrolling student in course:", enrolledCourseRequest);
         const response = await axios.post(`${ApiUrl}/api/enrolled-courses`, enrolledCourseRequest, {
@@ -95,9 +96,11 @@ export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCours
     }catch(error){
         if(axios.isAxiosError(error)){
             if(error.response){
+                console.error("Error response from server:", error.response.data);
                 throw new Error(error.response.data.message);
             }
             if(error.request){
+                console.error("No response received from server:", error.request);
                 throw new Error("No response from server");
             }
         }

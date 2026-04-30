@@ -1,5 +1,5 @@
 package UnitSystem.demo.Security.config;
-
+import UnitSystem.demo.Security.Util.SecurityUtils;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
@@ -34,7 +34,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
           String ip = request.getRemoteAddr();
         Bucket bucket = ipBuckets.computeIfAbsent(ip, key -> newBucket());
-
+         SecurityUtils.getInstance().setUserIp(ip);
           if(bucket.tryConsume(1)) {
               filterChain.doFilter(request, response);
           } else {

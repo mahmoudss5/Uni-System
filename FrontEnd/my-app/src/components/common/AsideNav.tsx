@@ -21,11 +21,10 @@ const navItems = [
     { label: "Registration", icon: ClipboardList, to: "/dashboard/registration" },
     { label: "Grades & Transcript", icon: FileText, to: "/dashboard/grades" },
     { label: "Schedule", icon: Calendar, to: "/dashboard/schedule" },
-    { label: "Admin Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions", adminOnly: true },
     { label: "Settings", icon: Settings, to: "/dashboard/settings" },
 ];
 const AdminNavItems = [
-    { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard/admin" },
+    { label: "Dashboard", icon: LayoutDashboard, to: "/dashboard/admin/dashboard" },
     { label: "Users", icon: ShieldCheck, to: "/dashboard/admin/users-permissions" },
     { label: "Audit log", icon: BlindsIcon, to: "/dashboard/admin/audit-log" },
     { label: "Courses", icon: BookAIcon, to: "/dashboard/admin/courses" },

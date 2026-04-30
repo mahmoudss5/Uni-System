@@ -2,6 +2,7 @@ package UnitSystem.demo.Security.config;
 
 import UnitSystem.demo.Security.Jwt.JwtAuthenticationFilter;
 import UnitSystem.demo.Security.Oauth2.OAuth2LoginSuccessHandler;
+import UnitSystem.demo.Security.Audit.SecurityAuditLogger;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +13,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -28,6 +31,7 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final SecurityAuditLogger securityAuditLogger;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,6 +47,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/api/courses/popular").permitAll()
                                 .requestMatchers("/api/departments/all").permitAll()
                                 .requestMatchers("/api/courses/popular").permitAll()
+                                .requestMatchers("/api/audit-logs/**").hasAuthority("Admin")
                                 .requestMatchers("/api/permissions/**").hasAuthority("Admin")
                                 .requestMatchers("/api/v1/auth/**",
                                         "/v2/api-docs",
@@ -58,7 +63,8 @@ public class SecurityConfiguration {
                                 .permitAll()
                                 .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(restAuthenticationEntryPoint()))
+                        .authenticationEntryPoint(restAuthenticationEntryPoint())
+                        .accessDeniedHandler(restAccessDeniedHandler()))
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
@@ -101,10 +107,32 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationEntryPoint restAuthenticationEntryPoint() {
         return (request, response, authException) -> {
+            securityAuditLogger.logUnauthorizedAccess(
+                    request,
+                    SecurityContextHolder.getContext().getAuthentication(),
+                    authException.getMessage(),
+                    HttpServletResponse.SC_UNAUTHORIZED
+            );
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write(
                     "{\"error\": \"Unauthorized\", \"message\": \"Authentication required\"}");
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler restAccessDeniedHandler() {
+        return (request, response, accessDeniedException) -> {
+            securityAuditLogger.logUnauthorizedAccess(
+                    request,
+                    SecurityContextHolder.getContext().getAuthentication(),
+                    accessDeniedException.getMessage(),
+                    HttpServletResponse.SC_FORBIDDEN
+            );
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write(
+                    "{\"error\": \"Forbidden\", \"message\": \"You are not authorized to access this resource\"}");
         };
     }
 

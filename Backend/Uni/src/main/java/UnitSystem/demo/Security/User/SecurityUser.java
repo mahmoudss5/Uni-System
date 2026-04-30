@@ -1,5 +1,8 @@
 package UnitSystem.demo.Security.User;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.userdetails.UserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,10 +10,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
-public class SecurityUser implements UserDetails {
+@RequiredArgsConstructor
+public  class  SecurityUser implements UserDetails {
 
     private final User user;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -54,6 +58,5 @@ public class SecurityUser implements UserDetails {
 
         return user.getId();
     }
-
 
 }
