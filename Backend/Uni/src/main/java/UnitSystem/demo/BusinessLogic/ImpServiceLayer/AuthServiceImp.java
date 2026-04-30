@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.TeacherService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.AuthService;
@@ -42,6 +43,7 @@ public class AuthServiceImp implements AuthService {
     private final AuthMapper authMapper;
 
     @Override
+    @AuditLog
     public AuthResponse register(UserRequest userRequest) {
         log.info("Registering User: {}", userRequest);
 
@@ -103,6 +105,7 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
+    @AuditLog
     public AuthResponse login(AuthRequest request) {
         Boolean isActive=userRepository.findByEmail(request.getEmail())
                 .map(User::getActive)

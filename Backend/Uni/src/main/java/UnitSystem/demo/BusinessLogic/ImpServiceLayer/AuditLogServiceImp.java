@@ -5,11 +5,13 @@ import UnitSystem.demo.BusinessLogic.Mappers.AuditLogMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.AuditLog.AuditLogRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.AuditLog.AuditLogResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.AuditLog;
+import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
 import UnitSystem.demo.DataAccessLayer.Repositories.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -66,5 +68,29 @@ public class AuditLogServiceImp implements AuditLogService {
     @CacheEvict(value = "auditLogsCache", allEntries = true)
     public void deleteAuditLog(Long auditLogId) {
         auditLogRepository.deleteById(auditLogId);
+    }
+
+    @Override
+    public List<AuditLogResponse> getLastWeekStudentsLogs() {
+        return auditLogRepository.findAllByUserRolesName(RoleType.Student.name()).stream()
+                .filter(auditLog -> auditLog.getCreatedAt().isAfter(LocalDateTime.now().minusDays(7)))
+                .map(auditLogMapper::mapToAuditLogResponse)
+                .toList();
+    }
+
+    @Override
+    public List<AuditLogResponse> getLastWeekTeachersLogs() {
+        return auditLogRepository.findAllByUserRolesName(RoleType.Teacher.name()).stream()
+                .filter(auditLog -> auditLog.getCreatedAt().isAfter(LocalDateTime.now().minusDays(7)))
+                .map(auditLogMapper::mapToAuditLogResponse)
+                .toList();
+    }
+
+    @Override
+    public List<AuditLogResponse> getLastWeekAdminsLogs() {
+        return auditLogRepository.findAllByUserRolesName(RoleType.Admin.name()).stream()
+                .filter(auditLog -> auditLog.getCreatedAt().isAfter(LocalDateTime.now().minusDays(7)))
+                .map(auditLogMapper::mapToAuditLogResponse)
+                .toList();
     }
 }

@@ -1,5 +1,6 @@
 package UnitSystem.demo.Controllers;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UpcomingEventService;
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
@@ -52,12 +53,14 @@ public class UpcomingEventController {
 
     @Operation(summary = "Create a new event")
     @PostMapping
+    @AuditLog
     public ResponseEntity<UpcomingEventResponse> createEvent(@RequestBody UpcomingEventRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(upcomingEventService.createEvent(request));
     }
 
     @Operation(summary = "Update an existing event")
     @PutMapping("/{id}")
+    @AuditLog
     public ResponseEntity<UpcomingEventResponse> updateEvent(@PathVariable Long id,
             @RequestBody UpcomingEventRequest request) {
         return ResponseEntity.ok(upcomingEventService.updateEvent(id, request));
@@ -65,6 +68,7 @@ public class UpcomingEventController {
 
     @Operation(summary = "Delete an event")
     @DeleteMapping("/{id}")
+    @AuditLog
     public ResponseEntity<Void> deleteEvent(@PathVariable Long id) {
         upcomingEventService.deleteEvent(id);
         return ResponseEntity.noContent().build();

@@ -46,3 +46,36 @@ export async function getAuditLogsByAction(action: string): Promise<AuditLog[]> 
         throw new Error(getApiErrorMessage(error, "Error fetching audit logs"));
     }
 }
+
+export async function getLastWeekStudentsLogs(): Promise<AuditLog[]> {
+    try {
+        const response = await axios.get<AuditLog[]>(`${ApiUrl}/api/audit-logs/last-week-students-logs`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data.map(mapAuditLog);
+    } catch (error) {
+        throw new Error(getApiErrorMessage(error, "Error fetching last week students logs"));
+    }
+}
+
+export async function getLastWeekTeachersLogs(): Promise<AuditLog[]> {
+    try {
+        const response = await axios.get<AuditLog[]>(`${ApiUrl}/api/audit-logs/last-week-teachers-logs`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data.map(mapAuditLog);
+    } catch (error) {
+        throw new Error(getApiErrorMessage(error, "Error fetching last week teachers logs"));
+    }
+}
+
+export async function getLastWeekAdminsLogs(): Promise<AuditLog[]> {
+    try {
+        const response = await axios.get<AuditLog[]>(`${ApiUrl}/api/audit-logs/last-week-admins-logs`, {
+            headers: getAuthHeaders(),
+        });
+        return response.data.map(mapAuditLog);
+    } catch (error) {
+        throw new Error(getApiErrorMessage(error, "Error fetching last week admins logs"));
+    }
+}

@@ -1,5 +1,6 @@
 package UnitSystem.demo.Controllers;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.FeedbackService;
 import UnitSystem.demo.DataAccessLayer.Dto.Feedback.FeedbackRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Feedback.FeedbackResponse;
@@ -53,6 +54,7 @@ public class FeedbackController {
     }
 
     @Operation(summary = "Create a new feedback")
+    @AuditLog
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<FeedbackResponse> createFeedback(@Valid @RequestBody FeedbackRequest feedbackRequest) {
@@ -72,6 +74,7 @@ public class FeedbackController {
     }
 
     @Operation(summary = "Delete a feedback")
+    @AuditLog
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> deleteFeedback(@PathVariable Long id) {

@@ -76,4 +76,26 @@ public class AuditLogController {
         auditLogService.deleteAuditLog(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Get last week students logs")
+    @GetMapping("/last-week-students-logs")
+    public ResponseEntity<List<AuditLogResponse>> getLastWeekStudentsLogs() {
+        List<AuditLogResponse> auditLogs = auditLogService.getLastWeekStudentsLogs();
+        return ResponseEntity.ok(auditLogs);
+    }
+
+    @Operation(summary = "Get last week teachers logs")
+    @GetMapping("/last-week-teachers-logs")
+    public ResponseEntity<List<AuditLogResponse>> getLastWeekTeachersLogs() {
+        List<AuditLogResponse> auditLogs = auditLogService.getLastWeekTeachersLogs();
+        return ResponseEntity.ok(auditLogs);
+    }
+    
+    @Operation(summary = "Get last week admins logs")
+    @GetMapping("/last-week-admins-logs")
+    public ResponseEntity<List<AuditLogResponse>> getLastWeekAdminsLogs() {
+        List<AuditLogResponse> auditLogs = auditLogService.getLastWeekAdminsLogs();
+        return ResponseEntity.ok(auditLogs);
+    }
+    
 }

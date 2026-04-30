@@ -1,5 +1,6 @@
 package UnitSystem.demo.BusinessLogic.ImpServiceLayer;
 
+import UnitSystem.demo.Aspect.Logs.AuditLog;
 import UnitSystem.demo.Aspect.Security.TeachersOnly;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.AnnouncementService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.CourseService;
@@ -38,6 +39,7 @@ public class AnnouncementServiceImp implements AnnouncementService {
     @Override
     @TeachersOnly
     @CacheEvict(value = "announcementsCache", allEntries = true)
+    @AuditLog
     public void createAnnouncement(AnnouncementRequest request) {
         Course course = courseService.getCourseEntityById(request.getCourseId());
         Announcement announcement = Announcement.builder()
@@ -52,6 +54,7 @@ public class AnnouncementServiceImp implements AnnouncementService {
     @Override
     @TeachersOnly
     @CacheEvict(value = "announcementsCache", allEntries = true)
+    @AuditLog
     public void deleteAnnouncement(Long id) {
         Announcement announcement = announcementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Announcement not found"));

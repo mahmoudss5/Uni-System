@@ -3,15 +3,20 @@ import {
     DatabaseIcon,
     UsersIcon,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getRole } from "../../../../Services/userService";
 import { useQuery } from "@tanstack/react-query";
 import { userService } from "../../infrastructure/services/UserService";
 import { getAllCourses } from "../../../../Services/CourseService";
 import { getAllAuditLogs } from "../../../../Services/AuditLogService";
+import { useGetWeeklyRolesActivity } from "../../../../CustomeHooks/AuditLogsHooks/UseGetWeeklyRolesActivity";
+import Chart from "chart.js/auto";
+import type { ChartConfiguration } from "chart.js";
 
 export function AdminDashboard() {
     const role = getRole();
+    const chartCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const chartInstanceRef = useRef<Chart<"line"> | null>(null);
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ["admin-dashboard-metrics"],
@@ -56,6 +61,91 @@ export function AdminDashboard() {
                 time: new Date(log.createdAt).toLocaleString(),
             }));
     }, [data?.auditLogs]);
+    const {
+        chartData: weeklyRolesActivity,
+        isLoading: isWeeklyActivityLoading,
+        error: weeklyActivityError,
+    } = useGetWeeklyRolesActivity();
+
+    useEffect(() => {
+        if (!chartCanvasRef.current) return;
+
+        chartInstanceRef.current?.destroy();
+        chartInstanceRef.current = null;
+
+        const config: ChartConfiguration<"line"> = {
+            type: "line",
+            data: {
+                labels: weeklyRolesActivity.labels,
+                datasets: [
+                    {
+                        label: "Students",
+                        data: weeklyRolesActivity.students,
+                        borderColor: "#3b82f6",
+                        backgroundColor: "rgba(59,130,246,0.12)",
+                        tension: 0.35,
+                        pointRadius: 3,
+                        fill: false,
+                    },
+                    {
+                        label: "Teachers",
+                        data: weeklyRolesActivity.teachers,
+                        borderColor: "#22c55e",
+                        backgroundColor: "rgba(34,197,94,0.12)",
+                        tension: 0.35,
+                        pointRadius: 3,
+                        fill: false,
+                    },
+                    {
+                        label: "Admins",
+                        data: weeklyRolesActivity.admins,
+                        borderColor: "#f59e0b",
+                        backgroundColor: "rgba(245,158,11,0.12)",
+                        tension: 0.35,
+                        pointRadius: 3,
+                        fill: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: {
+                            usePointStyle: true,
+                            boxWidth: 8,
+                            boxHeight: 8,
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                        },
+                        grid: {
+                            color: "rgba(148,163,184,0.25)",
+                        },
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                        },
+                    },
+                },
+            },
+        };
+
+        chartInstanceRef.current = new Chart(chartCanvasRef.current, config);
+
+        return () => {
+            chartInstanceRef.current?.destroy();
+            chartInstanceRef.current = null;
+        };
+    }, [weeklyRolesActivity]);
 
     if (role !== "admin") {
         return (
@@ -133,28 +223,18 @@ export function AdminDashboard() {
                     <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                         <div className="mb-3 flex items-center justify-between">
                             <h3 className="text-3xl font-semibold text-slate-900">System Activity</h3>
-                            <button
-                                type="button"
-                                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50"
-                            >
-                                Recent logins
-                            </button>
+                            <span className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                                Last 7 days
+                            </span>
                         </div>
                         <div className="h-64 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                            <div className="mb-3 flex items-center gap-4 text-sm">
-                                <span className="inline-flex items-center gap-2 text-slate-600">
-                                    <span className="h-2.5 w-5 rounded bg-blue-500" />
-                                    Login
-                                </span>
-                                <span className="inline-flex items-center gap-2 text-slate-600">
-                                    <span className="h-2.5 w-5 rounded bg-cyan-300" />
-                                    Recent
-                                </span>
-                            </div>
-                            <svg viewBox="0 0 100 45" className="h-[200px] w-full">
-                                <path d="M3 38 L12 22 L20 30 L30 15 L42 24 L50 10 L60 31 L70 18 L80 26 L92 12" fill="none" stroke="#3b82f6" strokeWidth="1.6" />
-                                <path d="M3 40 L12 34 L20 36 L30 29 L42 33 L50 24 L60 37 L70 31 L80 35 L92 27" fill="none" stroke="#7dd3fc" strokeWidth="1.6" />
-                            </svg>
+                            {isWeeklyActivityLoading ? (
+                                <p className="text-sm text-slate-500">Loading weekly activity...</p>
+                            ) : weeklyActivityError ? (
+                                <p className="text-sm text-red-600">{weeklyActivityError}</p>
+                            ) : (
+                                <canvas ref={chartCanvasRef} />
+                            )}
                         </div>
                     </section>
 

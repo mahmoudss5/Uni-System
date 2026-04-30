@@ -19,4 +19,7 @@ public interface AuditLogService {
     AuditLogResponse createAuditLog(AuditLogRequest auditLogRequest);
 
     void deleteAuditLog(Long auditLogId);
+    List<AuditLogResponse> getLastWeekStudentsLogs();
+    List<AuditLogResponse> getLastWeekTeachersLogs();
+    List<AuditLogResponse> getLastWeekAdminsLogs();
 }
