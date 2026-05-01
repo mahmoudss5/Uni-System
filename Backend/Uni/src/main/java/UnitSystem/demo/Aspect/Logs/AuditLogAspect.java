@@ -27,8 +27,11 @@ public class AuditLogAspect {
 
         Long userId = getCurrentUserId();
         // Registration / other pre-auth flows: SecurityContext often has no SecurityUser yet.
-        if (userId == null && result instanceof AuthResponse authResponse && authResponse.getUserId() != null) {
-            userId = authResponse.getUserId();
+        if (userId == null && result instanceof AuthResponse) {
+            AuthResponse authResponse = (AuthResponse) result;
+            if (authResponse.getUserId() != null) {
+                userId = authResponse.getUserId();
+            }
         }
 
         AuditLogRequest auditLogRequest = AuditLogRequest.builder()
