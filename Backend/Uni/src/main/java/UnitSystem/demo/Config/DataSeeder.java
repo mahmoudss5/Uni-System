@@ -95,7 +95,7 @@ public class DataSeeder {
                 System.out.println("Ensured Admin role for: " + adminUser.getEmail());
             });
 
-            userRepository.findAll().forEach(user -> {
+          /*  userRepository.findAll().forEach(user -> {
                 Long userId = user.getId();
                 if (userId == null) {
                     return;
@@ -106,7 +106,7 @@ public class DataSeeder {
                 if (teacherRepository.existsById(userId)) {
                     userService.assignRoleToUser(userId, RoleType.Teacher);
                 }
-            });
+            });*/
         };
     }
 }
