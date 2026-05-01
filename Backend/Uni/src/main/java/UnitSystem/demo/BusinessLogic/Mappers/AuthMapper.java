@@ -39,6 +39,7 @@ public class AuthMapper {
         });
 
         return AuthResponse.builder()
+                .userId(user.getId())
                 .Username(user.getUserName())
                 .Token(jwtService.generateToken(new SecurityUser(user)))
                 .userPermissions(effectivePermissions)

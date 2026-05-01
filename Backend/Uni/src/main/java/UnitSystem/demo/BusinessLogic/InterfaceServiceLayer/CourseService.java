@@ -4,6 +4,8 @@ import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -21,4 +23,5 @@ public interface CourseService {
   List<String> findStudentEmailsByCourseId(Long courseId);
   List<Long> getCoursePrerequisites(Long courseId);
   List<String>getCoursesNamesByCourseIds(List<Long> courseIds);
+  List<String> findMissingPrerequisiteNames(Long targetCourseId, Long studentId);
 }

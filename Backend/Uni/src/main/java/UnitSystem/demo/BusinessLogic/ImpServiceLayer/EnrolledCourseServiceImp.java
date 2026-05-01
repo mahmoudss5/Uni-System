@@ -20,9 +20,9 @@ import UnitSystem.demo.DataAccessLayer.Repositories.EnrolledCourseRepository;
 import UnitSystem.demo.ExcHandler.Entites.MissingPrerequisitesException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,11 +35,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EnrolledCourseServiceImp implements EnrolledCourseService {
 
+    /** Popular course endpoints allow arbitrary {@code topN}; evict frequent values explicitly. */
+    private static final int[] POPULAR_COURSE_TOP_NS = {3, 4, 5, 10, 20, 50};
+
     private final EnrolledCourseRepository enrolledCourseRepository;
     private final UserService userService;
     private final CourseService courseService;
     private final EnrolledCoursesMapper mapper;
-
+    private final CacheManager cacheManager;
 
     @Override
     @Cacheable(value = "enrollmentsCache", key = "'allEnrollments'")
@@ -79,11 +82,6 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     @CheckStudentPermission(StudentPermissions.course_register)
     @AuditLog
     @PerformanceMonitor
-    @Caching(evict = {
-            @CacheEvict(value = "enrollmentsCache", allEntries = true),
-            @CacheEvict(value = "studentsCache", key = "'studentDetails:' + #enrolledCourseRequest.studentId"),
-            @CacheEvict(value = "coursesCache", allEntries = true)
-    })
     public EnrolledCourseResponse enrollStudentInCourse(EnrolledCourseRequest enrolledCourseRequest) {
         User student = userService.findUserById(enrolledCourseRequest.getStudentId());
 
@@ -92,30 +90,35 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
         if (enrolledCourseRepository.existsByStudentAndCourse(student, course)) {
             throw new RuntimeException("Student is already enrolled in this course");
         }
-         if(!checkCoursePrerequisites(enrolledCourseRequest.getCourseId(), enrolledCourseRequest.getStudentId())) {
-             throw new RuntimeException("Student does not meet the prerequisites for this course");
-         }
+        List<String>preNeed=courseService.findMissingPrerequisiteNames(enrolledCourseRequest.getCourseId(),enrolledCourseRequest.getStudentId());
+        if(!preNeed.isEmpty()){
+            throw new MissingPrerequisitesException("Student is missing prerequisites for this course: ",preNeed);
+        }
         EnrolledCourse enrolledCourse = mapper.mapToEnrolledCourse(enrolledCourseRequest);
         enrolledCourseRepository.save(Objects.requireNonNull(enrolledCourse));
+        evictAfterEnrollmentMutation(
+                enrolledCourseRequest.getStudentId(),
+                enrolledCourseRequest.getCourseId(),
+                enrolledCourse.getId(),
+                course
+        );
         return mapper.mapToEnrolledCourseResponse(enrolledCourse);
     }
 
     @Override
     @CheckTeacherPermission(TeacherPermissions.unenroll_student)
-    @Caching(evict = {
-            @CacheEvict(value = "enrollmentsCache", allEntries = true),
-            @CacheEvict(value = "studentsCache", allEntries = true),
-            @CacheEvict(value = "coursesCache", allEntries = true)
-    })
     @Transactional
     @AuditLog
     @PerformanceMonitor
     public void unenrollStudentFromCourse(Long enrolledCourseId) {
 
-        if (!enrolledCourseRepository.existsById(enrolledCourseId)) {
-            throw new RuntimeException("Enrolled course not found with ID: " + enrolledCourseId);
-        }
+        EnrolledCourse enrollment = enrolledCourseRepository.findById(enrolledCourseId)
+                .orElseThrow(() -> new RuntimeException("Enrolled course not found with ID: " + enrolledCourseId));
+        Long studentId = enrollment.getStudent().getId();
+        Long courseId = enrollment.getCourse().getId();
+        Course course = enrollment.getCourse();
         enrolledCourseRepository.deleteByIdDirect(enrolledCourseId);
+        evictAfterEnrollmentMutation(studentId, courseId, enrolledCourseId, course);
         log.info(" after the method end Attempting to unenroll student from course with enrollment ID: {}", enrolledCourseId);
     }
 
@@ -165,5 +168,53 @@ private List<String>getMissedPrerequisitesCoursesNames(List<Long> courseIds) {
             throw new MissingPrerequisitesException("Student is missing prerequisites for this course: ",getMissedPrerequisitesCoursesNames(preId));
         }
         return true;
+    }
+
+    private static void safeEvict(Cache cache, Object key) {
+        if (cache != null && key != null) {
+            cache.evict(key);
+        }
+    }
+
+    /**
+     * Invalidates caches that can become stale when a student enrolls or unenrolls.
+     * Avoids {@linkCacheEvict @CacheEvict}{@code allEntries}; clearing whole Redis-backed regions is slower.
+     */
+    private void evictAfterEnrollmentMutation(Long studentId, Long courseId, Long enrollmentId, Course course) {
+        Cache enrollmentsCache = cacheManager.getCache("enrollmentsCache");
+        safeEvict(enrollmentsCache, "allEnrollments");
+        safeEvict(enrollmentsCache, "enrollmentsByStudent:" + studentId);
+        safeEvict(enrollmentsCache, "enrollmentsByCourse:" + courseId);
+        if (enrollmentId != null) {
+            safeEvict(enrollmentsCache, "enrollmentById:" + enrollmentId);
+        }
+
+        Cache studentsCache = cacheManager.getCache("studentsCache");
+        safeEvict(studentsCache, "studentDetails:" + studentId);
+        safeEvict(studentsCache, "studentById:" + studentId);
+        safeEvict(studentsCache, "allStudents");
+
+        Cache coursesCache = cacheManager.getCache("coursesCache");
+        safeEvict(coursesCache, "allCourses");
+        safeEvict(coursesCache, "courseById:" + courseId);
+        for (int topN : POPULAR_COURSE_TOP_NS) {
+            safeEvict(coursesCache, "popularCourses_" + topN);
+        }
+        if (course != null) {
+            if (course.getDepartment() != null && course.getDepartment().getName() != null) {
+                safeEvict(coursesCache, "coursesByDepartment:" + course.getDepartment().getName());
+            }
+            if (course.getTeacher() != null) {
+                safeEvict(coursesCache, "coursesByTeacherId:" + course.getTeacher().getId());
+            }
+        }
+
+        Cache announcementsCache = cacheManager.getCache("announcementsCache");
+        safeEvict(announcementsCache, "allAnnouncements");
+        safeEvict(announcementsCache, "announcementsByCourse:" + courseId);
+        safeEvict(announcementsCache, "announcementsByStudent:" + studentId);
+        if (course != null && course.getTeacher() != null) {
+            safeEvict(announcementsCache, "announcementsByTeacher:" + course.getTeacher().getId());
+        }
     }
 }

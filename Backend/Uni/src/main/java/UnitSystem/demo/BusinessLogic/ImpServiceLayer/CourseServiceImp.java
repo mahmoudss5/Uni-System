@@ -152,4 +152,9 @@ public class CourseServiceImp implements CourseService {
        }
        return coursesNames;
     }
+
+    @Override
+    public List<String> findMissingPrerequisiteNames(Long targetCourseId, Long studentId) {
+        return courseRepository.findMissingPrerequisiteNames(targetCourseId, studentId);
+    }
 }

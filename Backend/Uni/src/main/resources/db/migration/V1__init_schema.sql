@@ -59,7 +59,6 @@ CREATE TABLE `courses` (
                            `capacity` INT NOT NULL,
                            PRIMARY KEY (`id`)
 );
-
 CREATE TABLE `course_prerequisites` (
                                         `course_id` BIGINT NOT NULL,
                                         `course_prerequisite` BIGINT NOT NULL,
@@ -74,14 +73,15 @@ CREATE TABLE `enrolled_courses` (
                                     PRIMARY KEY (`id`)
 );
 
+
 CREATE TABLE `audit_logs` (
-                              `id` BIGINT NOT NULL AUTO_INCREMENT,
-                              `user_id` BIGINT,
-                              `action` VARCHAR(255) NOT NULL,
-                              `details` TEXT,
-                              `ip_address` VARCHAR(50),
-                              `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                              PRIMARY KEY (`id`)
+                            `id` BIGINT NOT NULL AUTO_INCREMENT,
+                            `user_id` BIGINT,
+                            `action` VARCHAR(255) NOT NULL,
+                            `details` TEXT,
+                            `ip_address` VARCHAR(50),
+                            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            PRIMARY KEY (`id`)
 );
 
 -- 2. Foreign Key Constraints

@@ -95,16 +95,18 @@ public class DataSeeder {
                 System.out.println("Ensured Admin role for: " + adminUser.getEmail());
             });
 
-          /*  userRepository.findAll().forEach(user -> {
+       /*     userRepository.findAll().forEach(user -> {
                 Long userId = user.getId();
                 if (userId == null) {
                     return;
                 }
                 if (studentRepository.existsById(userId)) {
                     userService.assignRoleToUser(userId, RoleType.Student);
+                    System.out.println("inster !!!!!!!!   Student Role for: " + userId);
                 }
                 if (teacherRepository.existsById(userId)) {
                     userService.assignRoleToUser(userId, RoleType.Teacher);
+                    System.out.println("inster !!!!!!!!   Teacher Role for: " + userId);
                 }
             });*/
         };
