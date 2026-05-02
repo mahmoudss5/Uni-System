@@ -3,6 +3,14 @@
 -- Plain-text password for every generated user: test1234
 -- BCrypt hash below is compatible with Spring BCryptPasswordEncoder
 -- =============================================================
+INSERT IGNORE INTO permissions (name, description)
+VALUES ('unenroll_course', 'Allow student to unenroll from courses');
+
+INSERT IGNORE INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+         JOIN permissions p ON p.name = 'unenroll_course'
+WHERE r.name = 'Student';
 
 SET @mock_password_hash = '$2b$10$SwAc3v.7bnF.hbZkuKPNLONmvJ3wiZqT0t4xtYpUAl3OtdlVOFpT2';
 

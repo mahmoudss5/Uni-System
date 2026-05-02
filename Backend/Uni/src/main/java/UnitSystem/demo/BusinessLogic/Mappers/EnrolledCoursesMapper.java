@@ -16,9 +16,6 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class EnrolledCoursesMapper {
 
-    private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
-
     public EnrolledCourseResponse mapToEnrolledCourseResponse(EnrolledCourse enrolledCourse) {
         Course course = enrolledCourse.getCourse();
         return EnrolledCourseResponse.builder()
@@ -35,13 +32,7 @@ public class EnrolledCoursesMapper {
                 .enrollmentDate(enrolledCourse.getEnrollmentDate())
                 .build();
     }
-    public EnrolledCourse mapToEnrolledCourse(EnrolledCourseRequest enrolledCourseRequest) {
-        User student = userRepository.findById(enrolledCourseRequest.getStudentId())
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        Course course = courseRepository.findById(enrolledCourseRequest.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-
+    public EnrolledCourse mapToEnrolledCourse(User student ,Course course) {
         return EnrolledCourse.builder()
                 .student(student)
                 .course(course)

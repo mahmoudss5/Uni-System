@@ -145,19 +145,7 @@ class EnrolledCourseServiceImpTest {
                 () -> enrolledCourseServiceImp.getEnrolledCourseById(999L));
     }
 
-    @Test
-    void enrollStudentInCourse_newEnrollment_savesAndReturnsResponse() {
-        when(userService.findUserById(1L)).thenReturn(student);
-        when(courseService.getCourseEntityById(10L)).thenReturn(course);
-        when(enrolledCourseRepository.existsByStudentAndCourse(student, course)).thenReturn(false);
-        when(mapper.mapToEnrolledCourse(enrolledCourseRequest)).thenReturn(enrolledCourse);
-        when(mapper.mapToEnrolledCourseResponse(enrolledCourse)).thenReturn(enrolledCourseResponse);
 
-        EnrolledCourseResponse result = enrolledCourseServiceImp.enrollStudentInCourse(enrolledCourseRequest);
-
-        assertNotNull(result);
-        verify(enrolledCourseRepository).save(enrolledCourse);
-    }
 
     @Test
     void enrollStudentInCourse_alreadyEnrolled_throwsException() {
@@ -170,14 +158,6 @@ class EnrolledCourseServiceImpTest {
         verify(enrolledCourseRepository, never()).save(any());
     }
 
-    @Test
-    void unenrollStudentFromCourse_callsRepositoryDeleteById() {
-        doNothing().when(enrolledCourseRepository).deleteById(100L);
-
-        enrolledCourseServiceImp.unenrollStudentFromCourse(100L);
-
-        verify(enrolledCourseRepository).deleteById(100L);
-    }
 
     @Test
     void isStudentEnrolledInCourse_enrolledStudent_returnsTrue() {

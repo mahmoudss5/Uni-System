@@ -17,6 +17,7 @@ import UnitSystem.demo.DataAccessLayer.Entities.Values.StudentPermissions;
 import UnitSystem.demo.DataAccessLayer.Entities.Values.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.EnrolledCourseRepository;
+import UnitSystem.demo.ExcHandler.Entites.PermissionDeniedException;
 import UnitSystem.demo.ExcHandler.Entites.MissingPrerequisitesException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +30,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static UnitSystem.demo.Security.Util.SecurityUtils.getCurrentUserId;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EnrolledCourseServiceImp implements EnrolledCourseService {
 
-    /** Popular course endpoints allow arbitrary {@code topN}; evict frequent values explicitly. */
-    private static final int[] POPULAR_COURSE_TOP_NS = {3, 4, 5, 10, 20, 50};
+    /**
+     * Popular course endpoints allow arbitrary {@code topN}; evict frequent values
+     * explicitly.
+     */
+    private static final int[] POPULAR_COURSE_TOP_NS = { 3, 4, 5, 10, 20, 50 };
 
     private final EnrolledCourseRepository enrolledCourseRepository;
     private final UserService userService;
@@ -75,7 +80,8 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     public EnrolledCourseResponse getEnrolledCourseById(Long enrolledCourseId) {
         return enrolledCourseRepository.findById(enrolledCourseId)
                 .map(mapper::mapToEnrolledCourseResponse)
-                .orElseThrow(() -> new UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException("EnrolledCourse", enrolledCourseId));
+                .orElseThrow(() -> new UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException("EnrolledCourse",
+                        enrolledCourseId));
     }
 
     @Override
@@ -90,36 +96,69 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
         if (enrolledCourseRepository.existsByStudentAndCourse(student, course)) {
             throw new RuntimeException("Student is already enrolled in this course");
         }
-        List<String>preNeed=courseService.findMissingPrerequisiteNames(enrolledCourseRequest.getCourseId(),enrolledCourseRequest.getStudentId());
-        if(!preNeed.isEmpty()){
-            throw new MissingPrerequisitesException("Student is missing prerequisites for this course: ",preNeed);
+        List<String> preNeed = courseService.findMissingPrerequisiteNames(enrolledCourseRequest.getCourseId(),
+                enrolledCourseRequest.getStudentId());
+        if (!preNeed.isEmpty()) {
+            throw new MissingPrerequisitesException("Student is missing prerequisites for this course: ", preNeed);
         }
-        EnrolledCourse enrolledCourse = mapper.mapToEnrolledCourse(enrolledCourseRequest);
+
+        EnrolledCourse enrolledCourse = mapper.mapToEnrolledCourse(student,course);
         enrolledCourseRepository.save(Objects.requireNonNull(enrolledCourse));
         evictAfterEnrollmentMutation(
                 enrolledCourseRequest.getStudentId(),
                 enrolledCourseRequest.getCourseId(),
                 enrolledCourse.getId(),
-                course
-        );
+                course);
         return mapper.mapToEnrolledCourseResponse(enrolledCourse);
     }
 
     @Override
+    @CheckStudentPermission(StudentPermissions.unenroll_course)
+    @Transactional
+    @AuditLog
+    @PerformanceMonitor
+    public void studentUnenrollFromCourse(Long enrolledCourseId) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            throw new PermissionDeniedException("Access denied: user is not authenticated.");
+        }
+        EnrolledCourse enrollment = enrolledCourseRepository.findById(enrolledCourseId)
+                .orElseThrow(() -> new RuntimeException("Enrolled course not found with ID: " + enrolledCourseId));
+        if (!Objects.equals(enrollment.getStudent().getId(), currentUserId)) {
+            throw new PermissionDeniedException("Access denied: you can only unenroll yourself.");
+        }
+        performUnenroll(enrollment);
+    }
+
+    @Override
+    @TeachersOnly
     @CheckTeacherPermission(TeacherPermissions.unenroll_student)
     @Transactional
     @AuditLog
     @PerformanceMonitor
-    public void unenrollStudentFromCourse(Long enrolledCourseId) {
-
+    public void teacherUnenrollStudentFromCourse(Long enrolledCourseId) {
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId == null) {
+            throw new PermissionDeniedException("Access denied: user is not authenticated.");
+        }
         EnrolledCourse enrollment = enrolledCourseRepository.findById(enrolledCourseId)
                 .orElseThrow(() -> new RuntimeException("Enrolled course not found with ID: " + enrolledCourseId));
+        Long teacherId = enrollment.getCourse().getTeacher() != null ? enrollment.getCourse().getTeacher().getId() : null;
+        if (!Objects.equals(teacherId, currentUserId)) {
+            throw new PermissionDeniedException("Access denied: you can only unenroll from your own courses.");
+        }
+        performUnenroll(enrollment);
+    }
+
+    private void performUnenroll(EnrolledCourse enrollment) {
+        Long enrolledCourseId = enrollment.getId();
         Long studentId = enrollment.getStudent().getId();
         Long courseId = enrollment.getCourse().getId();
         Course course = enrollment.getCourse();
         enrolledCourseRepository.deleteByIdDirect(enrolledCourseId);
         evictAfterEnrollmentMutation(studentId, courseId, enrolledCourseId, course);
-        log.info(" after the method end Attempting to unenroll student from course with enrollment ID: {}", enrolledCourseId);
+        log.info(" after the method end Attempting to unenroll student from course with enrollment ID: {}",
+                enrolledCourseId);
     }
 
     @Override
@@ -147,9 +186,6 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
 
     }
 
-
-
-
     private static void safeEvict(Cache cache, Object key) {
         if (cache != null && key != null) {
             cache.evict(key);
@@ -158,7 +194,8 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
 
     /**
      * Invalidates caches that can become stale when a student enrolls or unenrolls.
-     * Avoids {@linkCacheEvict @CacheEvict}{@code allEntries}; clearing whole Redis-backed regions is slower.
+     * Avoids {@linkCacheEvict @CacheEvict}{@code allEntries}; clearing whole
+     * Redis-backed regions is slower.
      */
     private void evictAfterEnrollmentMutation(Long studentId, Long courseId, Long enrollmentId, Course course) {
         Cache enrollmentsCache = cacheManager.getCache("enrollmentsCache");

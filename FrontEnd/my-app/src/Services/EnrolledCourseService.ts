@@ -3,6 +3,7 @@ import { ApiUrl } from "./config";
 import { getAuthHeaders } from "./config";
 import type { EnrolledCourseRequest } from "../Interfaces/enrolledCourse";
 import { assertPermission } from "./authService";
+import { getRole } from "./userService";
 
 export async function getAllEnrolledCourses() {
     try {
@@ -110,9 +111,14 @@ export async function enrollStudentInCourse(enrolledCourseRequest: EnrolledCours
 export async function unenrollStudentFromCourse(id: number) {
 
     try {
-        assertPermission("unenroll_student");
+        const role = getRole();
+        const isTeacher = role === "teacher";
+        assertPermission(isTeacher ? "unenroll_student" : "unenroll_course");
+        const endpoint = isTeacher
+            ? `${ApiUrl}/api/enrolled-courses/teacher/${id}`
+            : `${ApiUrl}/api/enrolled-courses/student/${id}`;
         console.log("Unenrolling student from course:", id);
-        const response = await axios.delete(`${ApiUrl}/api/enrolled-courses/${id}`, {
+        const response = await axios.delete(endpoint, {
             headers: getAuthHeaders(),
         });
         return response.data;

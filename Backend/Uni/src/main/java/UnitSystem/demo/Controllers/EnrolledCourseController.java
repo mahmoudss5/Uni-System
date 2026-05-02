@@ -62,12 +62,20 @@ public class EnrolledCourseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(enrolledCourse);
     }
 
-    @Operation(summary = "Unenroll student from a course")
-    @DeleteMapping("/{id}")
+    @Operation(summary = "Student unenrolls from own course")
+    @DeleteMapping("/student/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<Void> unenrollStudentFromCourse(@PathVariable Long id) {
-        log.info(" from controller Attempting to unenroll student from course with enrollment ID: {}", id);
-        enrolledCourseService.unenrollStudentFromCourse(id);
+    public ResponseEntity<Void> studentUnenrollFromCourse(@PathVariable Long id) {
+        enrolledCourseService.studentUnenrollFromCourse(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Teacher unenrolls any student from own course")
+    @DeleteMapping("/teacher/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> teacherUnenrollStudentFromCourse(@PathVariable Long id) {
+        log.info("Teacher unenroll request for enrollment ID: {}", id);
+        enrolledCourseService.teacherUnenrollStudentFromCourse(id);
         return ResponseEntity.noContent().build();
     }
 }
