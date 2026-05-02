@@ -33,8 +33,10 @@ public class CheckPerformacneAspect {
                         .ipAddress(ip)
                         .details("Execution time: " + duration + " ms")
                         .build();
-                auditLogService.createAuditLog(logRequest);
+                auditLogService.saveAsyincAuditLog(logRequest);
                 log.warn("Performance Alert: " + methodName + " - " + duration + " ms");
+            }else if(duration <= 500) {
+                log.info("Performance: " + methodName + " - " + duration + " ms");
             }
         }
     }

@@ -22,4 +22,5 @@ public interface AuditLogService {
     List<AuditLogResponse> getLastWeekStudentsLogs();
     List<AuditLogResponse> getLastWeekTeachersLogs();
     List<AuditLogResponse> getLastWeekAdminsLogs();
+    void saveAsyincAuditLog(AuditLogRequest auditLogRequest);
 }

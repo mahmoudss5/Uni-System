@@ -18,7 +18,6 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
 public class Teacher extends User{
 
     @Column(name = "office_location", nullable = false)

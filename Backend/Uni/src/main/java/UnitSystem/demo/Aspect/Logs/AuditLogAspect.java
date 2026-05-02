@@ -40,6 +40,6 @@ public class AuditLogAspect {
                 .details(details)
                 .ipAddress(SecurityUtils.getInstance().getUserIp()) 
                 .build();
-        auditLogService.createAuditLog(auditLogRequest);
+        auditLogService.saveAsyincAuditLog(auditLogRequest);
     }
 }

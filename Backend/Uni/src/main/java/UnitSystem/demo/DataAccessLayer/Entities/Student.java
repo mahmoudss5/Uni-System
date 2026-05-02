@@ -17,7 +17,6 @@ import java.util.Set;
 @SuperBuilder
 @Table(name = "students")
 @ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
 
 public class Student extends User{
 

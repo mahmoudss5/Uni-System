@@ -9,6 +9,7 @@ import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Repositories.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -92,5 +93,12 @@ public class AuditLogServiceImp implements AuditLogService {
                 .filter(auditLog -> auditLog.getCreatedAt().isAfter(LocalDateTime.now().minusDays(7)))
                 .map(auditLogMapper::mapToAuditLogResponse)
                 .toList();
+    }
+
+    @Override
+    @Async("auditLogExecutor")
+    public void saveAsyincAuditLog(AuditLogRequest auditLogRequest) {
+         AuditLog auditLog = auditLogMapper.mapToAuditLog(auditLogRequest);
+         auditLogRepository.save(auditLog);
     }
 }
