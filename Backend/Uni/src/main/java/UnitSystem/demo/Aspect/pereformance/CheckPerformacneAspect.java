@@ -27,7 +27,7 @@ public class CheckPerformacneAspect {
             String ip= SecurityUtils.getInstance().getUserIp();
             long duration = System.currentTimeMillis() - startTime;
             String methodName = joinPoint.getSignature().toShortString();
-            if(duration > 1000) {
+            if(duration > 500) {
                 AuditLogRequest logRequest =AuditLogRequest.builder()
                         .action("Performance Alert: " + methodName)
                         .ipAddress(ip)

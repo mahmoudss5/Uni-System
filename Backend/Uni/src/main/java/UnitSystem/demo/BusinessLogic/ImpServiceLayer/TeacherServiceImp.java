@@ -14,7 +14,6 @@ import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
-import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.TeacherRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -90,8 +89,7 @@ public class TeacherServiceImp implements TeacherService {
         }
 
         @Override
-        public void saveUserASTeacher(User user) {
-                Teacher teacher = (Teacher) user;
+        public void saveUserASTeacher(Teacher teacher) {
                 teacherRepository.save(teacher);
         }
 

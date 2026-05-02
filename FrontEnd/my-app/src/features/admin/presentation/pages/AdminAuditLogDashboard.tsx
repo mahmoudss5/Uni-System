@@ -183,40 +183,25 @@ export default function AdminAuditLogDashboard() {
                     </table>
                 </div>
 
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-3">
                     <button
                         type="button"
                         onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                         disabled={safePage === 1 || isLoading}
-                        className="h-8 min-w-8 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {"<"}
+                        Prev
                     </button>
-                    {Array.from({ length: totalPages }).map((_, idx) => {
-                        const pageNumber = idx + 1;
-                        const active = pageNumber === safePage;
-                        return (
-                            <button
-                                key={pageNumber}
-                                type="button"
-                                onClick={() => setPage(pageNumber)}
-                                className={`h-8 min-w-8 rounded-md border px-2 text-sm transition ${
-                                    active
-                                        ? "border-blue-600 bg-blue-600 text-white"
-                                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                                }`}
-                            >
-                                {pageNumber}
-                            </button>
-                        );
-                    })}
+                    <span className="text-sm text-slate-600">
+                        Page {safePage} of {totalPages}
+                    </span>
                     <button
                         type="button"
                         onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
                         disabled={safePage === totalPages || isLoading}
-                        className="h-8 min-w-8 rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        {">"}
+                        Next
                     </button>
                 </div>
             </div>

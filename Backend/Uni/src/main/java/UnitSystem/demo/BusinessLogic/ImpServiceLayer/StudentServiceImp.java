@@ -11,7 +11,6 @@ import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.StudentDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
-import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,8 +91,7 @@ public class StudentServiceImp implements StudentService {
     }
 
     @Override
-    public void saveUserAsStudent(User user) {
-        Student student = (Student) user;
+    public void saveUserAsStudent(Student student) {
         studentRepository.save(student);
     }
 

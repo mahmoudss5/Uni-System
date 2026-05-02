@@ -5,7 +5,6 @@ import UnitSystem.demo.DataAccessLayer.Dto.Teacher.TeacherResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.TeacherDetailsResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.UserDetails.UserDetailsRequest;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
-import UnitSystem.demo.DataAccessLayer.Entities.User;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ public interface TeacherService {
 
     TeacherResponse updateTeacher(Long teacherId, TeacherRequest teacherRequest);
 
-    void saveUserASTeacher(User user);
+    void saveUserASTeacher(Teacher teacher);
 
     void deleteTeacher(Long teacherId);
 
