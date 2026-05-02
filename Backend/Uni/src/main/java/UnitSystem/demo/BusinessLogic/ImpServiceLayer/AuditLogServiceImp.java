@@ -5,7 +5,7 @@ import UnitSystem.demo.BusinessLogic.Mappers.AuditLogMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.AuditLog.AuditLogRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.AuditLog.AuditLogResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.AuditLog;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Repositories.AuditLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;

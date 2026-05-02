@@ -1,4 +1,4 @@
-package UnitSystem.demo.DataAccessLayer.Entities;
+package UnitSystem.demo.DataAccessLayer.Entities.Values;
 
 public enum EventType {
     HIGH_PRIORITY,

@@ -3,7 +3,7 @@ package UnitSystem.demo.Security.Oauth2;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.StudentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;

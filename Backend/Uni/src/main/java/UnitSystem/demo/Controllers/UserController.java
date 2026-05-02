@@ -3,7 +3,7 @@ package UnitSystem.demo.Controllers;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

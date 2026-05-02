@@ -1,6 +1,6 @@
 package UnitSystem.demo.Aspect.Security;
 
-import UnitSystem.demo.DataAccessLayer.Entities.StudentPermissions;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.StudentPermissions;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

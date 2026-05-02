@@ -21,7 +21,5 @@ public interface CourseService {
     Teacher findCourseTeacher(Long courseId);
     Course getCourseEntityById(Long courseId);
   List<String> findStudentEmailsByCourseId(Long courseId);
-  List<Long> getCoursePrerequisites(Long courseId);
-  List<String>getCoursesNamesByCourseIds(List<Long> courseIds);
   List<String> findMissingPrerequisiteNames(Long targetCourseId, Long studentId);
 }

@@ -1,7 +1,7 @@
 package UnitSystem.demo.DataAccessLayer.Repositories;
 
 import UnitSystem.demo.DataAccessLayer.Entities.Notification;
-import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

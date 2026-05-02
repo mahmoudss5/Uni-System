@@ -1,6 +1,6 @@
 package UnitSystem.demo.DataAccessLayer.Repositories;
 
-import UnitSystem.demo.DataAccessLayer.Entities.EventType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.EventType;
 import UnitSystem.demo.DataAccessLayer.Entities.UpcomingEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

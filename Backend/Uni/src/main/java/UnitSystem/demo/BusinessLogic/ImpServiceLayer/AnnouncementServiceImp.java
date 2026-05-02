@@ -7,15 +7,12 @@ import UnitSystem.demo.BusinessLogic.Mappers.AnnouncementMapper;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Announcement.AnnouncementResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.Course.NotificationCourseRequest;
-import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
-import UnitSystem.demo.DataAccessLayer.Dto.Student.StudentResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Announcement;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
-import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Repositories.AnnouncementRepository;
-import UnitSystem.demo.DataAccessLayer.Repositories.CourseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -25,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 

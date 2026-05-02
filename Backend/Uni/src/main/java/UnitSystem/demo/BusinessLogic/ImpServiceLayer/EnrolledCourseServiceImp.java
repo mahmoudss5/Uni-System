@@ -13,8 +13,8 @@ import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.EnrolledCourse.EnrolledCourseResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.EnrolledCourse;
-import UnitSystem.demo.DataAccessLayer.Entities.StudentPermissions;
-import UnitSystem.demo.DataAccessLayer.Entities.TeacherPermissions;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.StudentPermissions;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.EnrolledCourseRepository;
 import UnitSystem.demo.ExcHandler.Entites.MissingPrerequisitesException;
@@ -148,27 +148,7 @@ public class EnrolledCourseServiceImp implements EnrolledCourseService {
     }
 
 
-private List<String>getMissedPrerequisitesCoursesNames(List<Long> courseIds) {
-        List<String> missedPrerequisites = courseService.getCoursesNamesByCourseIds(courseIds);
-        return missedPrerequisites;
-}
-    private boolean checkCoursePrerequisites(Long courseId, Long studentId) {
-        List<Long> preId=courseService.getCoursePrerequisites(courseId);
-        if(preId==null||preId.isEmpty()){
-            return true;
-        }
-        List<Long> enrollmentsCoursesIds=enrolledCourseRepository.findAllIdByStudentId(studentId);
-        Set<Long>StudentEnrolledCoursesIds=new HashSet<>(enrollmentsCoursesIds);
-        for(Long id:preId){
-            if(StudentEnrolledCoursesIds.contains(id)){
-                preId.remove(id);
-            }
-        }
-        if(!preId.isEmpty()){
-            throw new MissingPrerequisitesException("Student is missing prerequisites for this course: ",getMissedPrerequisitesCoursesNames(preId));
-        }
-        return true;
-    }
+
 
     private static void safeEvict(Cache cache, Object key) {
         if (cache != null && key != null) {

@@ -5,7 +5,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Notification.Course.NotificationCours
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Notification;
-import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.NotificationRepository;
 import org.junit.jupiter.api.BeforeEach;

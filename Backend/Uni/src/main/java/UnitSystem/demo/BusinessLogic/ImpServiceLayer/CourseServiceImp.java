@@ -10,7 +10,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Course.CourseResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Course;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
-import UnitSystem.demo.DataAccessLayer.Entities.TeacherPermissions;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.TeacherPermissions;
 import UnitSystem.demo.DataAccessLayer.Repositories.CourseRepository;
 import UnitSystem.demo.ExcHandler.Entites.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
@@ -20,7 +20,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -133,25 +132,7 @@ public class CourseServiceImp implements CourseService {
         return courseRepository.findStudentEmailsByCourseId(courseId);
     }
 
-    @Override
-    public List<Long> getCoursePrerequisites(Long courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
-        List<Long> prerequisiteIds = courseRepository.findPrerequisiteIdsByCourseId(courseId).stream().toList();
-        log.info("Course ID: {}, Prerequisite IDs: {}", courseId, prerequisiteIds);
-        return prerequisiteIds;
-    }
 
-    @Override
-    public List<String> getCoursesNamesByCourseIds(List<Long> courseIds) {
-       List<String> coursesNames = new ArrayList<>();
-       for (Long courseId : courseIds) {
-        Course course = courseRepository.findById(courseId)
-        .orElseThrow(() -> new ResourceNotFoundException("Course", courseId));
-        coursesNames.add(course.getName());
-       }
-       return coursesNames;
-    }
 
     @Override
     public List<String> findMissingPrerequisiteNames(Long targetCourseId, Long studentId) {

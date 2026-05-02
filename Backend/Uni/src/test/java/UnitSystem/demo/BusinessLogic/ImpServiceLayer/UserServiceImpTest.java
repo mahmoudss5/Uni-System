@@ -6,7 +6,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Role.RoleResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;

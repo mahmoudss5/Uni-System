@@ -1,7 +1,7 @@
 package UnitSystem.demo.BusinessLogic.InterfaceServiceLayer;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserResponse;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 
 import java.util.List;

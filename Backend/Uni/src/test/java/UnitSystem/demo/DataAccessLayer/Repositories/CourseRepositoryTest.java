@@ -1,6 +1,7 @@
 package UnitSystem.demo.DataAccessLayer.Repositories;
 
 import UnitSystem.demo.DataAccessLayer.Entities.*;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.DepartmentsType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

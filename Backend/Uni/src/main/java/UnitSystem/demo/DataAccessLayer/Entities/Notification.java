@@ -1,5 +1,6 @@
 package UnitSystem.demo.DataAccessLayer.Entities;
 
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

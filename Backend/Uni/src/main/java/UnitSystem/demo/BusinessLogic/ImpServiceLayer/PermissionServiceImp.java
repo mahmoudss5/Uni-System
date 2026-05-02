@@ -8,6 +8,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Permission.PermissionResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.Permission.UserPermissionRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Permission.UserPermissionResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.*;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Repositories.PermissionRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserPermissions;

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 
 @Data
 @Builder

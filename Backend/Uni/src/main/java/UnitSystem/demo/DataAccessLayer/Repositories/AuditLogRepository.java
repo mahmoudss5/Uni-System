@@ -1,6 +1,5 @@
 package UnitSystem.demo.DataAccessLayer.Repositories;
 import UnitSystem.demo.DataAccessLayer.Entities.AuditLog;
-import UnitSystem.demo.DataAccessLayer.Entities.AuditLogType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

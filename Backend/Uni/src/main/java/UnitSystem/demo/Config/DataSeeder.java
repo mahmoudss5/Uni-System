@@ -3,10 +3,9 @@ package UnitSystem.demo.Config;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.DepartmentService;
 import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.UserService;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
-import UnitSystem.demo.DataAccessLayer.Entities.DepartmentsType;
-import UnitSystem.demo.DataAccessLayer.Entities.Permission;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.DepartmentsType;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.PermissionRepository;
 import UnitSystem.demo.DataAccessLayer.Repositories.RoleRepository;
@@ -21,10 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Configuration
 @AllArgsConstructor

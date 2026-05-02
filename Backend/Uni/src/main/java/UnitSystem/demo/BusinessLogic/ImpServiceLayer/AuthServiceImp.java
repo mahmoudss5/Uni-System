@@ -10,7 +10,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Auth.AuthResponse;
 import UnitSystem.demo.DataAccessLayer.Dto.User.UserRequest;
 import UnitSystem.demo.DataAccessLayer.Entities.Role;
-import UnitSystem.demo.DataAccessLayer.Entities.RoleType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.RoleType;
 import UnitSystem.demo.DataAccessLayer.Entities.Student;
 import UnitSystem.demo.DataAccessLayer.Entities.Teacher;
 import UnitSystem.demo.DataAccessLayer.Entities.User;

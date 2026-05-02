@@ -4,7 +4,7 @@ import UnitSystem.demo.BusinessLogic.InterfaceServiceLayer.NotificationService;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.Course.NotificationCourseRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationResponse;
-import UnitSystem.demo.DataAccessLayer.Entities.NotificationType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

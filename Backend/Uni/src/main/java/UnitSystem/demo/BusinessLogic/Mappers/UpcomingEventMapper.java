@@ -2,7 +2,7 @@ package UnitSystem.demo.BusinessLogic.Mappers;
 
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.UpcomingEvent.UpcomingEventResponse;
-import UnitSystem.demo.DataAccessLayer.Entities.EventType;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.EventType;
 import UnitSystem.demo.DataAccessLayer.Entities.UpcomingEvent;
 import UnitSystem.demo.DataAccessLayer.Entities.User;
 import UnitSystem.demo.DataAccessLayer.Repositories.UserRepository;

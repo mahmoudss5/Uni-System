@@ -6,6 +6,7 @@ import UnitSystem.demo.DataAccessLayer.Dto.Notification.Course.NotificationCours
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationRequest;
 import UnitSystem.demo.DataAccessLayer.Dto.Notification.User.NotificationResponse;
 import UnitSystem.demo.DataAccessLayer.Entities.*;
+import UnitSystem.demo.DataAccessLayer.Entities.Values.NotificationType;
 import UnitSystem.demo.DataAccessLayer.Repositories.NotificationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
